@@ -22,8 +22,12 @@ module Elasticity
       instrument("index_delete", args) { @client.indices.delete(args) }
     end
 
-    def recreate
+    def delete_if_defined
       delete if @client.indices.exists(index: @name)
+    end
+
+    def recreate
+      delete_if_defined
       create
     end
 
@@ -47,6 +51,13 @@ module Elasticity
     def search(type, body)
       args = { index: @name, type: type, body: body }
       instrument("search", args) { @client.search(args) }
+    end
+
+    def mapping(type = nil)
+      args = { index: @name, type: type }
+      instrument("mapping_get", args) { @client.indices.get_mapping(args) }
+    rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      nil
     end
 
     private

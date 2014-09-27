@@ -1,0 +1,183 @@
+# Logfile created on 2014-09-26 16:30:55 -0700 by logger.rb/44203
+D, [2014-09-26T16:40:23.916385 #64276] DEBUG -- : elasticity.index_create 42.30ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:40:23.917944 #64276] DEBUG -- : elasticity.mapping_get 1.43ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:40:23.931386 #64276] DEBUG -- : elasticity.index_delete 13.24ms {"index":"test_index_name"}
+D, [2014-09-26T16:41:12.410871 #64325] DEBUG -- : elasticity.index_create 25.07ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:41:12.412193 #64325] DEBUG -- : elasticity.mapping_get 1.20ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:41:12.450138 #64325] DEBUG -- : elasticity.index_delete 36.48ms {"index":"test_index_name"}
+D, [2014-09-26T16:41:38.589341 #64369] DEBUG -- : elasticity.index_create 29.31ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:41:38.590694 #64369] DEBUG -- : elasticity.mapping_get 1.23ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:41:38.605778 #64369] DEBUG -- : elasticity.index_delete 14.42ms {"index":"test_index_name"}
+D, [2014-09-26T16:41:53.548077 #64397] DEBUG -- : elasticity.index_create 28.44ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:41:53.549524 #64397] DEBUG -- : elasticity.mapping_get 1.30ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:41:53.563654 #64397] DEBUG -- : elasticity.index_delete 12.49ms {"index":"test_index_name"}
+D, [2014-09-26T16:41:53.583479 #64397] DEBUG -- : elasticity.index_create 19.64ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:41:53.584803 #64397] DEBUG -- : elasticity.mapping_get 1.22ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:41:53.599597 #64397] DEBUG -- : elasticity.index_delete 14.63ms {"index":"test_index_name"}
+D, [2014-09-26T16:41:53.601569 #64397] DEBUG -- : elasticity.mapping_get 1.79ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:41:53.602587 #64397] DEBUG -- : elasticity.index_delete 0.90ms {"index":"test_index_name","exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:27.803805 #64441] DEBUG -- : elasticity.index_create 24.52ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:27.805123 #64441] DEBUG -- : elasticity.mapping_get 1.17ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:27.816998 #64441] DEBUG -- : elasticity.index_delete 10.23ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:27.835392 #64441] DEBUG -- : elasticity.index_create 18.09ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:27.836680 #64441] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:27.847872 #64441] DEBUG -- : elasticity.index_delete 11.01ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:27.850155 #64441] DEBUG -- : elasticity.mapping_get 2.12ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:27.851687 #64441] DEBUG -- : elasticity.index_delete 1.25ms {"index":"test_index_name","exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:36.143250 #64470] DEBUG -- : elasticity.index_create 28.69ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:36.144548 #64470] DEBUG -- : elasticity.mapping_get 1.17ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:36.157425 #64470] DEBUG -- : elasticity.index_delete 11.09ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:36.176397 #64470] DEBUG -- : elasticity.index_create 18.79ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:36.177528 #64470] DEBUG -- : elasticity.mapping_get 1.03ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:36.192841 #64470] DEBUG -- : elasticity.index_delete 15.16ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:36.194590 #64470] DEBUG -- : elasticity.mapping_get 1.63ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:36.197633 #64470] DEBUG -- : elasticity.index_delete 1.33ms {"index":"test_index_name","exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:44.844863 #64497] DEBUG -- : elasticity.index_create 25.82ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:44.846278 #64497] DEBUG -- : elasticity.mapping_get 1.27ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:44.857371 #64497] DEBUG -- : elasticity.index_delete 9.19ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:44.875362 #64497] DEBUG -- : elasticity.index_create 17.83ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:42:44.876638 #64497] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:42:44.892891 #64497] DEBUG -- : elasticity.index_delete 16.10ms {"index":"test_index_name"}
+D, [2014-09-26T16:42:44.894817 #64497] DEBUG -- : elasticity.mapping_get 1.79ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:42:44.896908 #64497] DEBUG -- : elasticity.index_delete 1.23ms {"index":"test_index_name","exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:43:21.563760 #64530] DEBUG -- : elasticity.index_create 24.32ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:43:21.565246 #64530] DEBUG -- : elasticity.mapping_get 1.34ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:43:21.576781 #64530] DEBUG -- : elasticity.index_delete 9.94ms {"index":"test_index_name"}
+D, [2014-09-26T16:43:21.593727 #64530] DEBUG -- : elasticity.index_create 16.76ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:43:21.595039 #64530] DEBUG -- : elasticity.mapping_get 1.22ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:43:21.606539 #64530] DEBUG -- : elasticity.index_delete 11.33ms {"index":"test_index_name"}
+D, [2014-09-26T16:43:21.608563 #64530] DEBUG -- : elasticity.mapping_get 1.84ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:43:21.610266 #64530] DEBUG -- : elasticity.index_delete 0.98ms {"index":"test_index_name","exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:44:12.956084 #64580] DEBUG -- : elasticity.index_create 23.92ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:44:12.957407 #64580] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:44:12.973843 #64580] DEBUG -- : elasticity.index_delete 14.76ms {"index":"test_index_name"}
+D, [2014-09-26T16:44:12.993855 #64580] DEBUG -- : elasticity.index_create 19.78ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:44:12.995265 #64580] DEBUG -- : elasticity.mapping_get 1.29ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:44:13.007263 #64580] DEBUG -- : elasticity.index_delete 11.87ms {"index":"test_index_name"}
+D, [2014-09-26T16:44:13.009295 #64580] DEBUG -- : elasticity.mapping_get 1.80ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:44:16.204061 #64605] DEBUG -- : elasticity.index_create 23.95ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:44:16.205477 #64605] DEBUG -- : elasticity.mapping_get 1.27ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:44:16.219667 #64605] DEBUG -- : elasticity.index_delete 10.09ms {"index":"test_index_name"}
+D, [2014-09-26T16:44:16.236125 #64605] DEBUG -- : elasticity.index_create 16.26ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:44:16.237379 #64605] DEBUG -- : elasticity.mapping_get 1.16ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:44:16.248685 #64605] DEBUG -- : elasticity.index_delete 11.12ms {"index":"test_index_name"}
+D, [2014-09-26T16:44:16.250826 #64605] DEBUG -- : elasticity.mapping_get 1.99ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:45:47.444710 #64673] DEBUG -- : elasticity.index_create 24.49ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:45:47.446138 #64673] DEBUG -- : elasticity.mapping_get 1.27ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:45:47.457265 #64673] DEBUG -- : elasticity.index_delete 9.54ms {"index":"test_index_name"}
+D, [2014-09-26T16:45:47.475098 #64673] DEBUG -- : elasticity.index_create 17.67ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:45:47.476408 #64673] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:45:47.487520 #64673] DEBUG -- : elasticity.index_delete 10.98ms {"index":"test_index_name"}
+D, [2014-09-26T16:45:47.490105 #64673] DEBUG -- : elasticity.mapping_get 2.31ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:58:06.831946 #64819] DEBUG -- : elasticity.index_create 23.51ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:58:06.833239 #64819] DEBUG -- : elasticity.mapping_get 1.17ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:58:06.848054 #64819] DEBUG -- : elasticity.index_delete 13.21ms {"index":"test_index_name"}
+D, [2014-09-26T16:58:06.867894 #64819] DEBUG -- : elasticity.index_create 19.62ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:58:06.869285 #64819] DEBUG -- : elasticity.mapping_get 1.27ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:58:06.880944 #64819] DEBUG -- : elasticity.index_delete 11.49ms {"index":"test_index_name"}
+D, [2014-09-26T16:58:06.883061 #64819] DEBUG -- : elasticity.mapping_get 1.96ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T16:59:27.593223 #64891] DEBUG -- : elasticity.index_create 21.03ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:59:27.594544 #64891] DEBUG -- : elasticity.mapping_get 1.18ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:59:27.605780 #64891] DEBUG -- : elasticity.index_delete 9.72ms {"index":"test_index_name"}
+D, [2014-09-26T16:59:27.624805 #64891] DEBUG -- : elasticity.index_create 18.84ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T16:59:27.626307 #64891] DEBUG -- : elasticity.mapping_get 1.36ms {"index":"test_index_name","type":null}
+D, [2014-09-26T16:59:27.638130 #64891] DEBUG -- : elasticity.index_delete 11.62ms {"index":"test_index_name"}
+D, [2014-09-26T16:59:27.640155 #64891] DEBUG -- : elasticity.mapping_get 1.88ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:05:04.157732 #65132] DEBUG -- : elasticity.index_create 24.70ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:05:04.159096 #65132] DEBUG -- : elasticity.mapping_get 1.24ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:05:04.172986 #65132] DEBUG -- : elasticity.index_delete 12.28ms {"index":"test_index_name"}
+D, [2014-09-26T17:05:04.189684 #65132] DEBUG -- : elasticity.index_create 16.49ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:05:04.191284 #65132] DEBUG -- : elasticity.mapping_get 1.48ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:05:04.204871 #65132] DEBUG -- : elasticity.index_delete 13.38ms {"index":"test_index_name"}
+D, [2014-09-26T17:05:04.207094 #65132] DEBUG -- : elasticity.mapping_get 2.08ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:05:15.755809 #65162] DEBUG -- : elasticity.index_create 23.98ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:05:15.757378 #65162] DEBUG -- : elasticity.mapping_get 1.41ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:05:15.769776 #65162] DEBUG -- : elasticity.index_delete 10.40ms {"index":"test_index_name"}
+D, [2014-09-26T17:05:15.786764 #65162] DEBUG -- : elasticity.index_create 16.82ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:05:15.787969 #65162] DEBUG -- : elasticity.mapping_get 1.09ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:05:15.798880 #65162] DEBUG -- : elasticity.index_delete 10.74ms {"index":"test_index_name"}
+D, [2014-09-26T17:05:15.801142 #65162] DEBUG -- : elasticity.mapping_get 2.10ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:07:06.612909 #65216] DEBUG -- : elasticity.index_create 24.40ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:06.614285 #65216] DEBUG -- : elasticity.mapping_get 1.25ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:06.625573 #65216] DEBUG -- : elasticity.index_delete 9.66ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:06.645001 #65216] DEBUG -- : elasticity.index_create 19.26ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:06.646216 #65216] DEBUG -- : elasticity.mapping_get 1.09ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:06.657342 #65216] DEBUG -- : elasticity.index_delete 10.90ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:06.659243 #65216] DEBUG -- : elasticity.mapping_get 1.71ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:07:21.598454 #65249] DEBUG -- : elasticity.index_create 24.96ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:21.599861 #65249] DEBUG -- : elasticity.mapping_get 1.27ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:21.611354 #65249] DEBUG -- : elasticity.index_delete 9.79ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:21.629220 #65249] DEBUG -- : elasticity.index_create 17.64ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:21.630585 #65249] DEBUG -- : elasticity.mapping_get 1.24ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:21.641586 #65249] DEBUG -- : elasticity.index_delete 10.85ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:21.644237 #65249] DEBUG -- : elasticity.mapping_get 2.45ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:07:52.523260 #65285] DEBUG -- : elasticity.index_create 25.93ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:52.524990 #65285] DEBUG -- : elasticity.mapping_get 1.53ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:52.540359 #65285] DEBUG -- : elasticity.index_delete 13.33ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:52.557202 #65285] DEBUG -- : elasticity.index_create 16.62ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:07:52.558517 #65285] DEBUG -- : elasticity.mapping_get 1.22ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:07:52.572007 #65285] DEBUG -- : elasticity.index_delete 13.32ms {"index":"test_index_name"}
+D, [2014-09-26T17:07:52.573925 #65285] DEBUG -- : elasticity.mapping_get 1.78ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:36:22.769646 #65477] DEBUG -- : elasticity.index_create 24.78ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:22.771059 #65477] DEBUG -- : elasticity.mapping_get 1.25ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:22.786381 #65477] DEBUG -- : elasticity.index_delete 13.40ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:22.802789 #65477] DEBUG -- : elasticity.index_create 16.23ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:22.804091 #65477] DEBUG -- : elasticity.mapping_get 1.21ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:22.815335 #65477] DEBUG -- : elasticity.index_delete 11.06ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:22.817097 #65477] DEBUG -- : elasticity.mapping_get 1.59ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:36:27.371590 #65505] DEBUG -- : elasticity.index_create 24.21ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:27.373125 #65505] DEBUG -- : elasticity.mapping_get 1.36ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:27.384634 #65505] DEBUG -- : elasticity.index_delete 9.84ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:27.405636 #65505] DEBUG -- : elasticity.index_create 20.83ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:27.407270 #65505] DEBUG -- : elasticity.mapping_get 1.50ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:27.418209 #65505] DEBUG -- : elasticity.index_delete 10.75ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:27.420185 #65505] DEBUG -- : elasticity.mapping_get 1.82ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:36:45.806000 #65548] DEBUG -- : elasticity.index_create 24.22ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:45.807609 #65548] DEBUG -- : elasticity.mapping_get 1.41ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:45.819385 #65548] DEBUG -- : elasticity.index_delete 9.96ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:45.835653 #65548] DEBUG -- : elasticity.index_create 16.02ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:36:45.837054 #65548] DEBUG -- : elasticity.mapping_get 1.29ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:36:45.848003 #65548] DEBUG -- : elasticity.index_delete 10.73ms {"index":"test_index_name"}
+D, [2014-09-26T17:36:45.850242 #65548] DEBUG -- : elasticity.mapping_get 2.05ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:38:21.048687 #65620] DEBUG -- : elasticity.index_create 24.26ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:21.050467 #65620] DEBUG -- : elasticity.mapping_get 1.59ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:21.065516 #65620] DEBUG -- : elasticity.index_delete 10.21ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:21.081854 #65620] DEBUG -- : elasticity.index_create 16.14ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:21.083171 #65620] DEBUG -- : elasticity.mapping_get 1.21ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:21.094045 #65620] DEBUG -- : elasticity.index_delete 10.71ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:21.096276 #65620] DEBUG -- : elasticity.mapping_get 2.05ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:38:38.964316 #65651] DEBUG -- : elasticity.index_create 23.86ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:38.965646 #65651] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:38.977782 #65651] DEBUG -- : elasticity.index_delete 10.60ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:38.994216 #65651] DEBUG -- : elasticity.index_create 16.23ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:38.995659 #65651] DEBUG -- : elasticity.mapping_get 1.33ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:39.007072 #65651] DEBUG -- : elasticity.index_delete 11.28ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:39.008847 #65651] DEBUG -- : elasticity.mapping_get 1.65ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:38:50.058038 #65683] DEBUG -- : elasticity.index_create 23.83ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:50.059348 #65683] DEBUG -- : elasticity.mapping_get 1.19ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:50.070641 #65683] DEBUG -- : elasticity.index_delete 9.66ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:50.090163 #65683] DEBUG -- : elasticity.index_create 19.36ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:38:50.091479 #65683] DEBUG -- : elasticity.mapping_get 1.18ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:38:50.102427 #65683] DEBUG -- : elasticity.index_delete 10.79ms {"index":"test_index_name"}
+D, [2014-09-26T17:38:50.104370 #65683] DEBUG -- : elasticity.mapping_get 1.78ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:39:01.858739 #65716] DEBUG -- : elasticity.index_create 23.90ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:01.860274 #65716] DEBUG -- : elasticity.mapping_get 1.36ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:01.871228 #65716] DEBUG -- : elasticity.index_delete 9.32ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:01.888173 #65716] DEBUG -- : elasticity.index_create 16.77ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:01.889540 #65716] DEBUG -- : elasticity.mapping_get 1.24ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:01.900831 #65716] DEBUG -- : elasticity.index_delete 11.10ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:01.902676 #65716] DEBUG -- : elasticity.mapping_get 1.69ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:39:36.616982 #65768] DEBUG -- : elasticity.index_create 24.19ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:36.618482 #65768] DEBUG -- : elasticity.mapping_get 1.34ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:36.630709 #65768] DEBUG -- : elasticity.index_delete 10.40ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:36.647225 #65768] DEBUG -- : elasticity.index_create 16.32ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:36.648480 #65768] DEBUG -- : elasticity.mapping_get 1.14ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:36.659465 #65768] DEBUG -- : elasticity.index_delete 10.84ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:36.661294 #65768] DEBUG -- : elasticity.mapping_get 1.67ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+D, [2014-09-26T17:39:51.790404 #65799] DEBUG -- : elasticity.index_create 24.05ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:51.791929 #65799] DEBUG -- : elasticity.mapping_get 1.38ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:51.803635 #65799] DEBUG -- : elasticity.index_delete 10.17ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:51.821286 #65799] DEBUG -- : elasticity.index_create 17.48ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-26T17:39:51.822597 #65799] DEBUG -- : elasticity.mapping_get 1.18ms {"index":"test_index_name","type":null}
+D, [2014-09-26T17:39:51.833625 #65799] DEBUG -- : elasticity.index_delete 10.87ms {"index":"test_index_name"}
+D, [2014-09-26T17:39:51.835478 #65799] DEBUG -- : elasticity.mapping_get 1.71ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
