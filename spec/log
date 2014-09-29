@@ -181,3 +181,12 @@ D, [2014-09-26T17:39:51.821286 #65799] DEBUG -- : elasticity.index_create 17.48m
 D, [2014-09-26T17:39:51.822597 #65799] DEBUG -- : elasticity.mapping_get 1.18ms {"index":"test_index_name","type":null}
 D, [2014-09-26T17:39:51.833625 #65799] DEBUG -- : elasticity.index_delete 10.87ms {"index":"test_index_name"}
 D, [2014-09-26T17:39:51.835478 #65799] DEBUG -- : elasticity.mapping_get 1.71ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
+I, [2014-09-29T09:59:18.632912 #66610]  INFO -- : rspec.init Starting test suite execution
+I, [2014-09-29T09:59:18.633079 #66610]  INFO -- : rspec.spec Elasticity::Index allows creating, recreating and deleting an index
+D, [2014-09-29T09:59:18.671684 #66610] DEBUG -- : elasticity.index_create 36.88ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-29T09:59:18.672983 #66610] DEBUG -- : elasticity.mapping_get 1.18ms {"index":"test_index_name","type":null}
+D, [2014-09-29T09:59:18.684358 #66610] DEBUG -- : elasticity.index_delete 9.72ms {"index":"test_index_name"}
+D, [2014-09-29T09:59:18.700424 #66610] DEBUG -- : elasticity.index_create 15.92ms {"index":"test_index_name","body":{"mappings":{"document":{"properties":{"name":{"type":"string"}}}}}}
+D, [2014-09-29T09:59:18.701655 #66610] DEBUG -- : elasticity.mapping_get 1.13ms {"index":"test_index_name","type":null}
+D, [2014-09-29T09:59:18.712577 #66610] DEBUG -- : elasticity.index_delete 10.77ms {"index":"test_index_name"}
+D, [2014-09-29T09:59:18.714470 #66610] DEBUG -- : elasticity.mapping_get 1.75ms {"index":"test_index_name","type":null,"exception":["Elasticsearch::Transport::Transport::Errors::NotFound","[404] {\"error\":\"IndexMissingException[[test_index_name] missing]\",\"status\":404}"]}
