@@ -2,9 +2,9 @@ module Elasticity
   class Search
     include Enumerable
 
-    def initialize(index, doc_type, document_klass, body)
+    def initialize(index, document_type, document_klass, body)
       @index          = index
-      @document_type  = doc_type.freeze
+      @document_type  = document_type.freeze
       @document_klass = document_klass
       @body           = self.class.construct_body(body).freeze
     end
