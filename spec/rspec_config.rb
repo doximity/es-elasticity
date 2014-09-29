@@ -7,7 +7,7 @@ def elastic_search_client
   @elastic_search_client = Elasticsearch::Client.new host: "http://0.0.0.0:9200"
 end
 
-logger = Logger.new("spec/log", File::WRONLY | File::APPEND | File::CREAT)
+logger = Logger.new("spec/spec.log", File::WRONLY | File::APPEND | File::CREAT)
 
 RSpec.configure do |c|
   c.disable_monkey_patching!
