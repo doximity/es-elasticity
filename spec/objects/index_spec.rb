@@ -27,4 +27,26 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
     subject.delete
     expect(subject.mapping).to be nil
   end
+
+  it "allows adding, getting and removing documents from the index" do
+    subject.add_document("document", 1, name: "test")
+
+    doc = subject.get_document("document", 1)
+    expect(doc["_source"]["name"]).to eq("test")
+
+    subject.del_document("document", 1)
+    expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+  end
+
+  it "allows searching documents" do
+    subject.add_document("document", 1, name: "test")
+    subject.flush
+    results = subject.search("document", filter: { term: { name: "test" }})
+
+    expect(results["hits"]["total"]).to be 1
+
+    doc = results["hits"]["hits"][0]
+    expect(doc["_id"]).to eq "1"
+    expect(doc["_source"]).to eq({ "name" => "test" })
+  end
 end

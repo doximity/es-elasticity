@@ -60,6 +60,11 @@ module Elasticity
       nil
     end
 
+    def flush
+      args = { index: @name }
+      instrument("flush", args) { @client.indices.flush(args) }
+    end
+
     private
 
     def instrument(name, extra = {})
