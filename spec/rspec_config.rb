@@ -24,8 +24,9 @@ RSpec.configure do |c|
     end
 
     Elasticity.configure do |e|
-      e.logger = logger
-      e.client = client
+      e.logger    = logger
+      e.client    = client
+      e.namespace = "elasticity_test"
     end
   end
 end

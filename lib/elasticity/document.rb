@@ -44,13 +44,16 @@ module Elasticity
     private
 
     def self.scoped_index_name
-      "#{Rails.env}_#{index_name}"
+      Elasticity.config.namespace
+      "#{Elasticity.config.namespace}_#{index_name}"
     end
 
     def self._index_instance
       return @_index_instance if defined?(@_index_instance)
 
-      @index = Index.new(Elasticity.client, self.scoped_index_name, settings: ElasticSearchAnalysis, mappings: self.index_mapping)
+      namespaced_index_name = [Elasticity.config.namespace, index_name].compact.join("_")
+
+      @index = Index.new(Elasticity.config.client, namespaced_index_name, settings: Elasticity.config.settings, mappings: self.index_mapping)
       @index.create_if_undefined
       @index
     end

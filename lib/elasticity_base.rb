@@ -8,7 +8,19 @@ require "active_model"
 require "elasticsearch"
 
 module Elasticity
-  Config = Struct.new(:client, :logger)
+  class Config
+    class_attribute :logger
+    self.logger = Logger.new(STDOUT)
+
+    class_attribute :client
+    self.client = nil
+
+    class_attribute :settings
+    self.settings = {}
+
+    class_attribute :namespace
+    self.settings = nil
+  end
 
   def self.configure
     @config = Config.new
