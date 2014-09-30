@@ -1,57 +1,67 @@
 module Elasticity
   class Search
-    include Enumerable
+    class Result
+      include Enumerable
 
-    def initialize(index, document_type, document_klass, body)
-      @index          = index
-      @document_type  = document_type.freeze
-      @document_klass = document_klass
-      @body           = self.class.construct_body(body).freeze
-    end
+      def initialize(response, &mapper)
+        @response = response
+        @mapper   = mapper
+      end
 
-    # Allow getting the name for the index that will be searched
-    def index_name
-      @index.name
-    end
+      delegate :[], :each, :to_ary, :length, :size, to: :mapping
 
-    # Allow querying for the search document type
-    attr_reader :document_type
+      def total
+        @response["hits"]["total"]
+      end
 
-    # Allow querying for the document klass
-    attr_reader :document_klass
+      def empty?
+        total == 0
+      end
 
-    # Allow grabbing the underlying body of the query
-    attr_reader :body
+      def blank?
+        empty?
+      end
 
-    delegate :each, :to_ary, :total, :empty?, :blank?, :documents, to: :document_result_set
+      def hits
+        @response["hits"]["hits"]
+      end
 
-    # Takes a ActiveRecord::Relation and search elasticsearch grabbing all the IDs from
-    # matched records, then it augments the provided relation to only match on the specified IDs.
-    # The result is a collection of ActiveRecord models.
-    def database(relation)
-      @database_rs ||= document_result_set || ResultSet.new(@document_klass, execute(_source: ["id"]))
-      @database_rs.database(relation)
-    end
-
-    private
-
-    def self.construct_body(body)
-      case body
-      when Hash
-        body
-      when String
-        ActiveSupport::JSON.decode(body)
-      else
-        raise ArgumentError, "unsupported type for body: #{body.class}"
+      def mapping
+        return @mapping if defined?(@mapping)
+        @mapping = @mapper.(hits)
       end
     end
 
-    def execute(extra = {})
-      @index.search(@document_type, @body.deep_merge(extra))
+    def initialize(index, document_type, body, &mapper)
+      @index         = index
+      @document_type = document_type.freeze
+      @body          = body.freeze
+      @mapper        = mapper
     end
 
-    def document_result_set
-      @documents_rs ||= ResultSet.new(@document_klass, execute)
+    delegate :[], :each, :to_ary, :length, :size, :total, :empty?, :blank?, :hits, to: :documents
+
+    def database(relation)
+      return @database if defined?(@database)
+
+      @database = Result.new(@index.search(@document_type, @body.merge(_source: ["id"]))) do |hits|
+        ids = hits.map { |h| h["_source"]["id"] }
+
+        if ids.any?
+          id_col = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name("id")}"
+          relation.where(id: ids).order("FIELD(#{id_col},#{ids.join(',')})")
+        else
+          relation.none
+        end
+      end
+    end
+
+    def documents
+      return @documents if defined?(@documents)
+
+      @documents = Result.new(@index.search(@document_type, @body)) do |hits|
+        hits.map { |hit| @mapper.(hit) }
+      end
     end
   end
 end

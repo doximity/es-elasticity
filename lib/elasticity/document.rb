@@ -33,7 +33,7 @@ module Elasticity
     end
 
     def self.search(body)
-      Search.new(_index_instance, default_document_type, self, body)
+      Search.new(_index_instance, default_document_type, self.method(:from_document), body)
     end
 
     def self.from_document(doc)
