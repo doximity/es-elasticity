@@ -3,7 +3,7 @@ module Elasticity
     class Result
       include Enumerable
 
-      def initialize(response, &mapper)
+      def initialize(response, mapper)
         @response = response
         @mapper   = mapper
       end
@@ -28,40 +28,61 @@ module Elasticity
 
       def mapping
         return @mapping if defined?(@mapping)
-        @mapping = @mapper.(hits)
+        @mapping = @mapper.map(hits)
       end
     end
 
-    def initialize(index, document_type, body, &mapper)
-      @index         = index
-      @document_type = document_type.freeze
-      @body          = body.freeze
-      @mapper        = mapper
-    end
+    class DocumentMapper
+      def initialize(document_klass)
+        @document_klass = document_klass
+      end
 
-    delegate :[], :each, :to_ary, :length, :size, :total, :empty?, :blank?, :hits, to: :documents
-
-    def database(relation)
-      return @database if defined?(@database)
-
-      @database = Result.new(@index.search(@document_type, @body.merge(_source: ["id"]))) do |hits|
-        ids = hits.map { |h| h["_source"]["id"] }
-
-        if ids.any?
-          id_col = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name("id")}"
-          relation.where(id: ids).order("FIELD(#{id_col},#{ids.join(',')})")
-        else
-          relation.none
+      def map(hits)
+        hits.map do |hit|
+          @document_klass.new(hit["_source"])
         end
       end
     end
 
-    def documents
-      return @documents if defined?(@documents)
-
-      @documents = Result.new(@index.search(@document_type, @body)) do |hits|
-        hits.map { |hit| @mapper.(hit) }
+    class ActiveRecordMapper
+      def initialize(relation)
+        @relation = relation
       end
+
+      def map(hits)
+        ids = hits.map { |h| h["_source"]["id"] }
+
+        if ids.any?
+          id_col = "#{quote(@relation.table_name)}.#{quote(@relation.klass.primary_key)}"
+          @relation.where(id: ids).order("FIELD(#{id_col},#{ids.join(',')})")
+        else
+          @relation.none
+        end
+      end
+
+      private
+
+      def quote(identifier)
+        @relation.connection.quote_column_name(identifier)
+      end
+    end
+
+    def initialize(index, document_type, body)
+      @index          = index
+      @document_type  = document_type.freeze
+      @body           = body.freeze
+    end
+
+    def active_records(relation)
+      return @active_record if defined?(@active_record)
+      response = @index.search(@document_type, @body.merge(_source: ["id"]))
+      @active_record = Result.new(response, ActiveRecordMapper.new(relation))
+    end
+
+    def documents(document_klass)
+      return @documents if defined?(@documents)
+      response   = @index.search(@document_type, @body)
+      @documents = Result.new(response, DocumentMapper.new(document_klass))
     end
   end
 end
