@@ -23,7 +23,7 @@ RSpec.describe Elasticity::Search do
     ]}}
   end
 
-  it "searches the index and return document instances mapped using the mapper function" do
+  it "searches the index and return document models" do
     expect(index).to receive(:search).with(document_type, body).and_return(full_response)
 
     klass = Class.new do
@@ -38,7 +38,7 @@ RSpec.describe Elasticity::Search do
     expect(docs[1].name).to eq "bar"
   end
 
-  it "maps index results to a ActiveRecord relation" do
+  it "searches the index and return active record models" do
     expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(ids_response)
 
     relation = double(:relation,

@@ -9,17 +9,26 @@ require "elasticsearch"
 
 module Elasticity
   class Config
-    class_attribute :logger
-    self.logger = Logger.new(STDOUT)
+    attr_writer :logger, :client, :settings, :namespace
 
-    class_attribute :client
-    self.client = nil
+    def logger
+      return @logger if defined?(@logger)
+      @logger = Logger.new(STDOUT)
+    end
 
-    class_attribute :settings
-    self.settings = {}
+    def client
+      return @client if defined?(@client)
+      @client = Elasticsearch::Client.new
+    end
 
-    class_attribute :namespace
-    self.settings = nil
+    def settings
+      return @settings if defined?(@settings)
+      @settings = {}
+    end
+
+    def namespace
+      @namespace
+    end
   end
 
   def self.configure
@@ -28,13 +37,8 @@ module Elasticity
   end
 
   def self.config
-    @config
-  end
-
-  def self.client
-    if @config
-      @config.client
-    end
+    return @config if defined?(@config)
+    @config = Config.new
   end
 end
 
@@ -42,6 +46,11 @@ ActiveSupport::Notifications.subscribe(/^elasticity\./) do |name, start, finish,
   time = (finish - start)*1000
 
   if logger = Elasticity.config.logger
-    logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload, pretty: false)}"
+    logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload[:args], pretty: false)}"
+
+    exception, message = payload[:exception]
+    if exception
+      logger.error "#{name} #{exception}: #{message}"
+    end
   end
 end

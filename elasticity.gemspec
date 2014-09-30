@@ -27,4 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", "~> 4.1.6"
   spec.add_dependency "activemodel", "~> 4.1.6"
   spec.add_dependency "elasticsearch", "~> 1.0.5"
+  spec.add_dependency "pry"
 end

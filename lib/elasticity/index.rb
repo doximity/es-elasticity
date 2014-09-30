@@ -2,19 +2,18 @@ module Elasticity
   class Index
     attr_reader :name
 
-    def initialize(client, index_name, index_def)
+    def initialize(client, index_name)
       @client    = client
       @name      = index_name
-      @index_def = index_def
     end
 
-    def create
-      args = { index: @name, body: @index_def }
+    def create(index_def)
+      args = { index: @name, body: index_def }
       instrument("index_create", args) { @client.indices.create(args) }
     end
 
-    def create_if_undefined
-      create unless @client.indices.exists(index: @name)
+    def create_if_undefined(index_def)
+      create(index_def) unless @client.indices.exists(index: @name)
     end
 
     def delete
@@ -26,14 +25,13 @@ module Elasticity
       delete if @client.indices.exists(index: @name)
     end
 
-    def recreate
+    def recreate(index_def = nil)
+      index_def ||= { settings: settings, mappings: mappings }
       delete_if_defined
-      create
+      create(index_def)
     end
 
     def add_document(type, id, attributes)
-      create_if_undefined
-
       args = { index: @name, type: type, id: id, body: attributes }
       instrument("document_index", args) { @client.index(args) }
     end
@@ -53,9 +51,28 @@ module Elasticity
       instrument("search", args) { @client.search(args) }
     end
 
-    def mapping(type = nil)
-      args = { index: @name, type: type }
-      instrument("mapping_get", args) { @client.indices.get_mapping(args) }
+    def settings
+      args = { index: @name }
+      settings = instrument("settings", args) { @client.indices.get_settings(args) }
+
+      if settings[@name]
+        settings[@name]["settings"]
+      else
+        {}
+      end
+    rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      nil
+    end
+
+    def mappings
+      args = { index: @name }
+      mappings = instrument("mappings", args) { @client.indices.get_mapping(args) }
+
+      if mappings[@name]
+        mappings[@name]["mappings"]
+      else
+        {}
+      end
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
     end
@@ -68,7 +85,7 @@ module Elasticity
     private
 
     def instrument(name, extra = {})
-      ActiveSupport::Notifications.instrument("elasticity.#{name}", extra) do
+      ActiveSupport::Notifications.instrument("elasticity.#{name}", args: extra) do
         yield
       end
     end
