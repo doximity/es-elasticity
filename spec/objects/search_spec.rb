@@ -23,19 +23,36 @@ RSpec.describe Elasticity::Search do
     ]}}
   end
 
+  let :empty_response do
+    { "hits" => { "total" => 0, "hits" => [] }}
+  end
+
   it "searches the index and return document models" do
     expect(index).to receive(:search).with(document_type, body).and_return(full_response)
 
     klass = Class.new do
       include ActiveModel::Model
       attr_accessor :id, :name
+
+      def ==(other)
+        self.id == other.id && self.name == other.name
+      end
     end
 
     docs = subject.documents(klass)
+    expected = [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
 
-    expect(docs.size).to be 2
-    expect(docs[0].name).to eq "foo"
-    expect(docs[1].name).to eq "bar"
+    expect(docs.total).to eq 2
+    expect(docs.size).to eq expected.size
+
+    expect(docs).to_not be_empty
+    expect(docs).to_not be_blank
+
+    expect(docs[0].name).to eq expected[0].name
+    expect(docs[1].name).to eq expected[1].name
+
+    expect(docs.each.first).to eq expected[0]
+    expect(Array(docs)).to eq expected
   end
 
   it "searches the index and return active record models" do
@@ -50,6 +67,15 @@ RSpec.describe Elasticity::Search do
 
     expect(relation).to receive(:where).with(id: [1,2]).and_return(relation)
     expect(relation).to receive(:order).with("FIELD(table_name.id,1,2)").and_return(relation)
+
+    expect(subject.active_records(relation).mapping).to be relation
+  end
+
+  it "return relation.none from activerecord relation with no matches" do
+    expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(empty_response)
+
+    relation = double(:relation)
+    expect(relation).to receive(:none).and_return(relation)
 
     expect(subject.active_records(relation).mapping).to be relation
   end

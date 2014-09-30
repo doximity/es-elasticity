@@ -34,7 +34,7 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
 
   context "with existing index" do
     before do
-      subject.create(index_def)
+      subject.create_if_undefined(index_def)
     end
 
     it "allows adding, getting and removing documents from the index" do
@@ -58,5 +58,10 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
       expect(doc["_id"]).to eq "1"
       expect(doc["_source"]).to eq({ "name" => "test" })
     end
+  end
+
+  it "returns nil for mapping and settings when index does not exist" do
+    expect(subject.mappings).to be nil
+    expect(subject.settings).to be nil
   end
 end

@@ -54,12 +54,7 @@ module Elasticity
     def settings
       args = { index: @name }
       settings = instrument("settings", args) { @client.indices.get_settings(args) }
-
-      if settings[@name]
-        settings[@name]["settings"]
-      else
-        {}
-      end
+      settings[@name]["settings"] if settings[@name]
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
     end
@@ -67,12 +62,7 @@ module Elasticity
     def mappings
       args = { index: @name }
       mappings = instrument("mappings", args) { @client.indices.get_mapping(args) }
-
-      if mappings[@name]
-        mappings[@name]["mappings"]
-      else
-        {}
-      end
+      mappings[@name]["mappings"] if mappings[@name]
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
     end
