@@ -33,7 +33,7 @@ RSpec.describe Elasticity::Search do
 
     docs = subject.documents(klass)
 
-    expect(docs.length).to be 2
+    expect(docs.size).to be 2
     expect(docs[0].name).to eq "foo"
     expect(docs[1].name).to eq "bar"
   end

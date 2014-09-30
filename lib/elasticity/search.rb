@@ -64,7 +64,21 @@ module Elasticity
         @mapper   = mapper
       end
 
-      delegate :[], :each, :to_ary, :size, to: :mapping
+      def [](idx)
+        mapping[idx]
+      end
+
+      def each(&block)
+        mapping.each(&block)
+      end
+
+      def to_ary
+        mapping.to_ary
+      end
+
+      def size
+        mapping.size
+      end
 
       # The total number of entries as returned by ES
       def total
@@ -77,10 +91,6 @@ module Elasticity
 
       def blank?
         empty?
-      end
-
-      def length
-        size
       end
 
       def mapping
