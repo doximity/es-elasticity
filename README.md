@@ -18,6 +18,14 @@ Or install it yourself as:
 
     $ gem install elasticity
 
+## Roadmap
+
+[ ] Documents should be indexed through the model, not the class
+[ ] Bulk indexing
+[ ] Delete documents by query
+[ ] Good README documentation
+[ ] Better logging and debugging
+
 ## Usage
 
 TODO: Write usage instructions here
