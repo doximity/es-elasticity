@@ -25,6 +25,7 @@ Or install it yourself as:
 - [ ] Delete documents by query
 - [ ] Good README documentation
 - [ ] Better logging and debugging
+- [ ] Automatic attributes generation based on index mapping :question:
 
 ## Usage
 
