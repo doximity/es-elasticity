@@ -43,7 +43,7 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
       doc = subject.get_document("document", 1)
       expect(doc["_source"]["name"]).to eq("test")
 
-      subject.del_document("document", 1)
+      subject.remove_document("document", 1)
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
     end
 

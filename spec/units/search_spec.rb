@@ -1,13 +1,9 @@
 require "elasticity/search"
 
-RSpec.describe Elasticity::Search do
+RSpec.describe "Search" do
   let(:index)          { double(:index) }
   let(:document_type)  { "document" }
   let(:body)           { {} }
-
-  subject do
-    described_class.new(index, "document", body)
-  end
 
   let :full_response do
     { "hits" => { "total" => 2, "hits" => [
@@ -27,10 +23,8 @@ RSpec.describe Elasticity::Search do
     { "hits" => { "total" => 0, "hits" => [] }}
   end
 
-  it "searches the index and return document models" do
-    expect(index).to receive(:search).with(document_type, body).and_return(full_response)
-
-    klass = Class.new do
+  let :klass do
+    Class.new do
       include ActiveModel::Model
       attr_accessor :id, :name
 
@@ -38,45 +32,66 @@ RSpec.describe Elasticity::Search do
         self.id == other.id && self.name == other.name
       end
     end
-
-    docs = subject.documents(klass)
-    expected = [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
-
-    expect(docs.total).to eq 2
-    expect(docs.size).to eq expected.size
-
-    expect(docs).to_not be_empty
-    expect(docs).to_not be_blank
-
-    expect(docs[0].name).to eq expected[0].name
-    expect(docs[1].name).to eq expected[1].name
-
-    expect(docs.each.first).to eq expected[0]
-    expect(Array(docs)).to eq expected
   end
 
-  it "searches the index and return active record models" do
-    expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(ids_response)
+  describe Elasticity::Search do
+    subject do
+      described_class.new(index, document_type, body)
+    end
 
-    relation = double(:relation,
-      connection: double(:connection),
-      table_name: "table_name",
-      klass: double(:klass, primary_key: "id"),
-    )
-    allow(relation.connection).to receive(:quote_column_name) { |name| name }
+    it "searches the index and return document models" do
+      expect(index).to receive(:search).with(document_type, body).and_return(full_response)
 
-    expect(relation).to receive(:where).with(id: [1,2]).and_return(relation)
-    expect(relation).to receive(:order).with("FIELD(table_name.id,1,2)").and_return(relation)
+      docs = subject.documents(klass)
+      expected = [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
 
-    expect(subject.active_records(relation).mapping).to be relation
+      expect(docs.total).to eq 2
+      expect(docs.size).to eq expected.size
+
+      expect(docs).to_not be_empty
+      expect(docs).to_not be_blank
+
+      expect(docs[0].name).to eq expected[0].name
+      expect(docs[1].name).to eq expected[1].name
+
+      expect(docs.each.first).to eq expected[0]
+      expect(Array(docs)).to eq expected
+    end
+
+    it "searches the index and return active record models" do
+      expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(ids_response)
+
+      relation = double(:relation,
+        connection: double(:connection),
+        table_name: "table_name",
+        klass: double(:klass, primary_key: "id"),
+      )
+      allow(relation.connection).to receive(:quote_column_name) { |name| name }
+
+      expect(relation).to receive(:where).with(id: [1,2]).and_return(relation)
+      expect(relation).to receive(:order).with("FIELD(table_name.id,1,2)").and_return(relation)
+
+      expect(subject.active_records(relation).mapping).to be relation
+    end
+
+    it "return relation.none from activerecord relation with no matches" do
+      expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(empty_response)
+
+      relation = double(:relation)
+      expect(relation).to receive(:none).and_return(relation)
+
+      expect(subject.active_records(relation).mapping).to be relation
+    end
   end
 
-  it "return relation.none from activerecord relation with no matches" do
-    expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(empty_response)
+  describe Elasticity::DocumentSearch do
+    subject do
+      described_class.new(klass, index, "document", body)
+    end
 
-    relation = double(:relation)
-    expect(relation).to receive(:none).and_return(relation)
-
-    expect(subject.active_records(relation).mapping).to be relation
+    it "automatically maps the documents into the provided Document class" do
+      expect(index).to receive(:search).with(document_type, body).and_return(full_response)
+      expect(Array(subject.documents)).to eq [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
+    end
   end
 end

@@ -35,29 +35,52 @@ module Elasticity
       @mappings = mappings
     end
 
-    # Score is a common attribute for all results
-    attr_accessor :score
-
-    def self.to_document(object)
-      raise NoMethodError, "self.to_document needs to be defined on #{self}"
-    end
-
-    # def self.index(object)
-    #   if doc = self.to_document(object)
-    #     _index_instance.add_document(default_document_type, object.id, doc)
-    #   end
-    # end
-
-    def self.remove(id)
-      _index_instance.del_document(default_document_type, id)
-    end
-
-    def self.get(id)
-      from_document(_index_instance.get_document(default_document_type, id))
-    end
-
+    # Searches the index using the parameters provided in the body hash, following the same
+    # structure ElasticSearch expects.
+    # Returns a DocumentSearch object.
     def self.search(body)
-      Search.new(_index_instance, default_document_type, self.method(:from_document), body)
+      DocumentSearch.new(self, index, document_type, body)
+    end
+
+    # Fetches one specific document from the index by ID.
+    def self.get(id)
+      if doc = index.get_document(document_type, id)
+        new(doc["_source"])
+      end
+    end
+
+    # Removes one specific document from the index.
+    def self.remove(id)
+      index.remove_document(document_type, id)
+    end
+
+    # Define common attributes for all documents
+    attr_accessor :id
+
+    # Creates a new Document instance with the provided attributes.
+    def initialize(attributes = {})
+      super(attributes)
+    end
+
+    # Defines equality by comparing the ID and values of each instance variable.
+    def ==(other)
+      return false if id != other.id
+
+      instance_variables.all? do |ivar|
+        instance_variable_get(ivar) == other.instance_variable_get(ivar)
+      end
+    end
+
+    # IMPLEMENT
+    # Returns a hash with the attributes as they should be stored in the index.
+    # This will be stored as _source attributes on ElasticSearch.
+    def to_document
+      raise NotImplementedError, "to_document needs to be implemented for #{self.class}"
+    end
+
+    # Save this object on the index, creating or updating the document.
+    def save
+      self.class.index.add_document(self.class.document_type, id, to_document)
     end
   end
 end

@@ -135,4 +135,19 @@ module Elasticity
       end
     end
   end
+
+  class DocumentSearch
+    def initialize(document_klass, *args)
+      @search = Search.new(*args)
+      @document_klass = document_klass
+    end
+
+    def active_records(relation)
+      @search.active_records(relation)
+    end
+
+    def documents
+      @search.documents(@document_klass)
+    end
+  end
 end

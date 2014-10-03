@@ -36,7 +36,7 @@ module Elasticity
       instrument("document_index", args) { @client.index(args) }
     end
 
-    def del_document(type, id)
+    def remove_document(type, id)
       args = { index: @name, type: type, id: id }
       instrument("document_delete", args) { @client.delete(args) }
     end
