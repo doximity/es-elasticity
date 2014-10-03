@@ -21,6 +21,8 @@ RSpec.configure do |c|
 
     if example.metadata[:elasticsearch]
       client = elastic_search_client
+    else
+      client = double(:elasticsearch_client)
     end
 
     Elasticity.configure do |e|

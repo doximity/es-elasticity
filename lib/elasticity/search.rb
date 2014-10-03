@@ -6,6 +6,8 @@ module Elasticity
   #   search = Elasticity::Search.new("people", "person", {...})
   #   search.documents(Person)
   class Search
+    attr_reader :index, :document_type, :body
+
     # Creates a new Search definitions for the given index, document_type and criteria. The
     # search is not performend until methods are called, each method represents a different
     # way of fetching and mapping the data.

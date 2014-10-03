@@ -5,39 +5,42 @@ module Elasticity
       yield self if block_given?
     end
 
-    def add(name, search:, database: nil)
-      @searches << { name: name, search: search, database: database }
+    def add(name, search, documents: nil, active_records: nil)
+      mapper = case
+      when documents && active_records
+        raise ArgumentError, "you can only pass either :documents or :active_records as an option"
+      when documents
+        Search::DocumentMapper.new(documents)
+      when active_records
+        Search::ActiveRecordMapper.new(active_records)
+      else
+        raise ArgumentError, "you need to provide either :documents or :active_records as an option"
+      end
+
+      @searches << [name, search, mapper]
     end
 
-    def [](search_name)
-      results[search_name]
+    def [](name)
+      @results ||= fetch
+      @results[name]
     end
 
     private
 
-    def results
-      return @results if defined?(@results)
-
-      body = @searches.map do |search_def|
-        search = search_def[:search]
-        { index: search.index_name, type: search.document_type, search: search.body }
+    def fetch
+      multi_body = @searches.map do |name, search, _|
+        { index: search.index.name, type: search.document_type, body: search.body }
       end
 
-      multi_resp = Elasticity.client.msearch(body: body)
+      results = {}
 
-      @results = {}
-
-      @searches.each_with_index do |search_def, idx|
-        rs = ResultSet.new(search_def[:search].document_klass, multi_resp["responses"][idx])
-
-        if relation = search_def[:database]
-          @results[search_def[:name]] = rs.database(relation)
-        else
-          @results[search_def[:name]] = rs.documents
-        end
+      responses = Array(Elasticity.config.client.msearch(body: multi_body)["responses"])
+      responses.each_with_index do |resp, idx|
+        name, search, mapper = @searches[idx]
+        results[name] = Search::Result.new(resp, mapper)
       end
 
-      @results
+      results
     end
   end
 end
