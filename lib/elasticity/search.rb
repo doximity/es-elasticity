@@ -137,8 +137,8 @@ module Elasticity
   end
 
   class DocumentSearch
-    def initialize(document_klass, *args)
-      @search = Search.new(*args)
+    def initialize(search, document_klass)
+      @search         = search
       @document_klass = document_klass
     end
 

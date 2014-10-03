@@ -68,9 +68,12 @@ RSpec.describe Elasticity::Document do
     it "searches using DocumentSearch" do
       body   = double(:body)
       search = double(:search)
-      expect(Elasticity::DocumentSearch).to receive(:new).with(subject, index, "class_name", body).and_return(search)
+      expect(Elasticity::Search).to receive(:new).with(index, "class_name", body).and_return(search)
 
-      expect(subject.search(body)).to be search
+      doc_search = double(:doc_search)
+      expect(Elasticity::DocumentSearch).to receive(:new).with(search, subject).and_return(doc_search)
+
+      expect(subject.search(body)).to be doc_search
     end
 
     it "gets specific document from the index" do

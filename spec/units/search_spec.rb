@@ -85,13 +85,24 @@ RSpec.describe "Search" do
   end
 
   describe Elasticity::DocumentSearch do
+    let :search do
+      Elasticity::Search.new(index, "document", body)
+    end
+
     subject do
-      described_class.new(klass, index, "document", body)
+      described_class.new(search, klass)
     end
 
     it "automatically maps the documents into the provided Document class" do
       expect(index).to receive(:search).with(document_type, body).and_return(full_response)
       expect(Array(subject.documents)).to eq [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
+    end
+
+    it "delegates active_records for the underlying search" do
+      records = double(:records)
+      rel     = double(:relation)
+      expect(search).to receive(:active_records).with(rel).and_return(records)
+      expect(subject.active_records(rel)).to be records
     end
   end
 end

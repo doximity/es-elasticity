@@ -39,7 +39,7 @@ module Elasticity
     # structure ElasticSearch expects.
     # Returns a DocumentSearch object.
     def self.search(body)
-      DocumentSearch.new(self, index, document_type, body)
+      DocumentSearch.new(Search.new(index, document_type, body), self)
     end
 
     # Fetches one specific document from the index by ID.
