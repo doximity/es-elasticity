@@ -20,7 +20,9 @@ Or install it yourself as:
 
 ## Roadmap
 
-- [ ] Documents should be indexed through the model, not the class
+- [x] Documents should be indexed through the model, not the class
+- [ ] Multi search support
+- [ ] Better DocumentSearch implementation
 - [ ] Bulk indexing
 - [ ] Delete documents by query
 - [ ] Good README documentation
