@@ -71,7 +71,7 @@ RSpec.describe Elasticity::Document do
       expect(Elasticity::Search).to receive(:new).with(index, "class_name", body).and_return(search)
 
       doc_search = double(:doc_search)
-      expect(Elasticity::DocumentSearch).to receive(:new).with(search, subject).and_return(doc_search)
+      expect(Elasticity::DocumentSearchProxy).to receive(:new).with(search, subject).and_return(doc_search)
 
       expect(subject.search(body)).to be doc_search
     end

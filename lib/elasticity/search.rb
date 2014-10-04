@@ -138,7 +138,7 @@ module Elasticity
     end
   end
 
-  class DocumentSearch
+  class DocumentSearchProxy < BasicObject
     def initialize(search, document_klass)
       @search         = search
       @document_klass = document_klass
@@ -150,6 +150,10 @@ module Elasticity
 
     def documents
       @search.documents(@document_klass)
+    end
+
+    def method_missing(method_name, *args, &block)
+      documents.public_send(method_name, *args, &block)
     end
   end
 end

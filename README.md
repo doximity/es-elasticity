@@ -22,7 +22,7 @@ Or install it yourself as:
 
 - [x] Documents should be indexed through the model, not the class
 - [x] Multi search support
-- [ ] Better DocumentSearch implementation
+- [x] Better DocumentSearch implementation
 - [ ] Bulk indexing
 - [ ] Delete documents by query
 - [ ] Good README documentation
