@@ -54,6 +54,11 @@ module Elasticity
       index.delete_document(document_type, id)
     end
 
+    # Removes entries based on a search
+    def self.delete_by_search(search)
+      index.delete_by_query(document_type, search.body)
+    end
+
     # Define common attributes for all documents
     attr_accessor :id
 

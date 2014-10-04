@@ -33,22 +33,27 @@ module Elasticity
 
     def index_document(type, id, attributes)
       args = { index: @name, type: type, id: id, body: attributes }
-      instrument("document_index", args) { @client.index(args) }
+      instrument("index_document", args) { @client.index(args) }
     end
 
     def delete_document(type, id)
       args = { index: @name, type: type, id: id }
-      instrument("document_delete", args) { @client.delete(args) }
+      instrument("delete_document", args) { @client.delete(args) }
     end
 
     def get_document(type, id)
       args = { index: @name, type: type, id: id }
-      instrument("document_get", args) { @client.get(args) }
+      instrument("get_document", args) { @client.get(args) }
     end
 
     def search(type, body)
       args = { index: @name, type: type, body: body }
       instrument("search", args) { @client.search(args) }
+    end
+
+    def delete_by_query(type, body)
+      args = { index: @name, type: type, body: body }
+      instrument("delete_by_query", args) { @client.delete_by_query(args) }
     end
 
     def settings
