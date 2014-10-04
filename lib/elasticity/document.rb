@@ -50,8 +50,8 @@ module Elasticity
     end
 
     # Removes one specific document from the index.
-    def self.remove(id)
-      index.remove_document(document_type, id)
+    def self.delete(id)
+      index.delete_document(document_type, id)
     end
 
     # Define common attributes for all documents
@@ -80,7 +80,7 @@ module Elasticity
 
     # Save this object on the index, creating or updating the document.
     def save
-      self.class.index.add_document(self.class.document_type, id, to_document)
+      self.class.index.index_document(self.class.document_type, id, to_document)
     end
   end
 end

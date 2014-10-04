@@ -82,10 +82,10 @@ RSpec.describe Elasticity::Document do
       expect(subject.get(1)).to eq klass.new(id: 1, name: "Foo", items: [{ "name" => "Item1" }])
     end
 
-    it "removes specific document from index" do
+    it "deletes specific document from index" do
       index_ret = double(:index_return)
-      expect(index).to receive(:remove_document).with("class_name", 1).and_return(index_ret)
-      expect(subject.remove(1)).to eq index_ret
+      expect(index).to receive(:delete_document).with("class_name", 1).and_return(index_ret)
+      expect(subject.delete(1)).to eq index_ret
     end
   end
 
@@ -93,7 +93,7 @@ RSpec.describe Elasticity::Document do
     subject { klass.new id: 1, name: "Foo", items: [{ name: "Item1" }] }
 
     it "stores the document in the index" do
-      expect(index).to receive(:add_document).with("class_name", 1, {id: 1, name: "Foo", items: [{ name: "Item1" }]})
+      expect(index).to receive(:index_document).with("class_name", 1, {id: 1, name: "Foo", items: [{ name: "Item1" }]})
       subject.save
     end
   end

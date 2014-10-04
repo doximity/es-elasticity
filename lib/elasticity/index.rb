@@ -31,12 +31,12 @@ module Elasticity
       create(index_def)
     end
 
-    def add_document(type, id, attributes)
+    def index_document(type, id, attributes)
       args = { index: @name, type: type, id: id, body: attributes }
       instrument("document_index", args) { @client.index(args) }
     end
 
-    def remove_document(type, id)
+    def delete_document(type, id)
       args = { index: @name, type: type, id: id }
       instrument("document_delete", args) { @client.delete(args) }
     end
