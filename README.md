@@ -25,9 +25,8 @@ Or install it yourself as:
 - [x] Better DocumentSearch implementation
 - [x] Bulk indexing
 - [x] Delete documents by query
+- [x] Better logging and debugging
 - [ ] Good README documentation
-- [ ] Better logging and debugging
-- [ ] Automatic attributes generation based on index mapping :question:
 
 ## Usage
 

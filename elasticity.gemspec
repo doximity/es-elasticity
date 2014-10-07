@@ -23,9 +23,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.1.0"
   spec.add_development_dependency "simplecov", "~> 0.7.1"
+  spec.add_development_dependency "oj"
+  spec.add_development_dependency "pry"
 
   spec.add_dependency "activesupport", "~> 4.1.6"
   spec.add_dependency "activemodel", "~> 4.1.6"
   spec.add_dependency "elasticsearch", "~> 1.0.5"
-  spec.add_dependency "pry"
 end

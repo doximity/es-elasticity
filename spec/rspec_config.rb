@@ -1,5 +1,6 @@
 require "elasticity_base"
 require "simplecov"
+require "oj"
 require "elasticity"
 
 def elastic_search_client

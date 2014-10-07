@@ -9,7 +9,7 @@ require "elasticsearch"
 
 module Elasticity
   class Config
-    attr_writer :logger, :client, :settings, :namespace
+    attr_writer :logger, :client, :settings, :namespace, :pretty_json
 
     def logger
       return @logger if defined?(@logger)
@@ -29,6 +29,10 @@ module Elasticity
     def namespace
       @namespace
     end
+
+    def pretty_json
+      @pretty_json || false
+    end
   end
 
   def self.configure
@@ -46,7 +50,7 @@ ActiveSupport::Notifications.subscribe(/^elasticity\./) do |name, start, finish,
   time = (finish - start)*1000
 
   if logger = Elasticity.config.logger
-    logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload[:args], pretty: false)}"
+    logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload[:args], pretty: Elasticity.config.pretty_json)}"
 
     exception, message = payload[:exception]
     if exception
