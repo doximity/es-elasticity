@@ -27,8 +27,8 @@ RSpec.describe Elasticity::MultiSearch do
     subject.add(:second, Elasticity::Search.new(double(:index, name: "index_second"), "document_second", { search: :second }), documents: klass)
 
     expect(Elasticity.config.client).to receive(:msearch).with(body: [
-      { index: "index_first", type: "document_first", body: { search: :first } },
-      { index: "index_second", type: "document_second", body: { search: :second } },
+      { index: "index_first", type: "document_first", search: { search: :first } },
+      { index: "index_second", type: "document_second", search: { search: :second } },
     ]).and_return(response)
 
     expect(Array(subject[:first])). to eq [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
