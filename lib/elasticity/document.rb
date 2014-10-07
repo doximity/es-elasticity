@@ -10,7 +10,12 @@ module Elasticity
 
     # Creates the index for this document
     def self.create_index
-      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: @mappings)
+      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
+    end
+
+    # Re-creates the index for this document
+    def self.recreate_index
+      self.index.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
     end
 
     # The index name to be used for indexing and storing data for this document model.

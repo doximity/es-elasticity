@@ -7,13 +7,17 @@ module Elasticity
       @name      = index_name
     end
 
+    def exists?
+      @client.indices.exists(index: @name)
+    end
+
     def create(index_def)
       args = { index: @name, body: index_def }
       instrument("index_create", args) { @client.indices.create(args) }
     end
 
     def create_if_undefined(index_def)
-      create(index_def) unless @client.indices.exists(index: @name)
+      create(index_def) unless exists?
     end
 
     def delete
@@ -22,7 +26,7 @@ module Elasticity
     end
 
     def delete_if_defined
-      delete if @client.indices.exists(index: @name)
+      delete if exists?
     end
 
     def recreate(index_def = nil)

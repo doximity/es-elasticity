@@ -29,7 +29,7 @@ module Elasticity
 
     def fetch
       multi_body = @searches.map do |name, search, _|
-        { index: search.index.name, type: search.document_type, body: search.body }
+        { index: search.index.name, type: search.document_type, search: search.body }
       end
 
       results = {}

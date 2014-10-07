@@ -66,21 +66,7 @@ module Elasticity
         @mapper   = mapper
       end
 
-      def [](idx)
-        mapping[idx]
-      end
-
-      def each(&block)
-        mapping.each(&block)
-      end
-
-      def to_ary
-        mapping.to_ary
-      end
-
-      def size
-        mapping.size
-      end
+      delegate :[], :each, :to_ary, :size, :+, :-, to: :mapping
 
       # The total number of entries as returned by ES
       def total
@@ -142,6 +128,18 @@ module Elasticity
     def initialize(search, document_klass)
       @search         = search
       @document_klass = document_klass
+    end
+
+    def index
+      @search.index
+    end
+
+    def document_type
+      @search.document_type
+    end
+
+    def body
+      @search.body
     end
 
     def active_records(relation)
