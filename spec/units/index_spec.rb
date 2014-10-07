@@ -64,6 +64,8 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
       end
       expect(results_b).to include("errors"=>false, "items"=>[{"index"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "status"=>201}}, {"delete"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"1", "_version"=>2, "status"=>200, "found"=>true}}])
 
+      subject.flush
+
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
       expect(subject.get_document("document", 2)).to eq({"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "found"=>true, "_source"=>{"name"=>"bar"}})
     end
@@ -78,6 +80,18 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
       doc = results["hits"]["hits"][0]
       expect(doc["_id"]).to eq "1"
       expect(doc["_source"]).to eq({ "name" => "test" })
+    end
+
+    it "allows deleting by queryu" do
+      subject.index_document("document", 1, name: "foo")
+      subject.index_document("document", 2, name: "bar")
+
+      subject.delete_by_query("document", query: { term: { name: "foo" }})
+
+      expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      expect { subject.get_document("document", 2) }.to_not raise_error
+
+      subject.flush
     end
   end
 end
