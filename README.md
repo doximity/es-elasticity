@@ -23,8 +23,8 @@ Or install it yourself as:
 - [x] Documents should be indexed through the model, not the class
 - [x] Multi search support
 - [x] Better DocumentSearch implementation
-- [ ] Bulk indexing
-- [ ] Delete documents by query
+- [x] Bulk indexing
+- [x] Delete documents by query
 - [ ] Good README documentation
 - [ ] Better logging and debugging
 - [ ] Automatic attributes generation based on index mapping :question:
