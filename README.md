@@ -105,7 +105,11 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 
 ## Roadmap
 
-TBD
+- [ ] Write more detailed documentation section for:
+  - [ ] Model definition
+  - [ ] Indexing, Bulk Indexing and Delete By Query
+  - [ ] Search and Multi Search
+  - [ ] ActiveRecord integration
 
 ## Contributing
 
