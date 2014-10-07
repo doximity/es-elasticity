@@ -59,7 +59,7 @@ RSpec.describe "Search" do
     end
 
     it "searches the index and return active record models" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(ids_response)
+      expect(index).to receive(:search).with(document_type, body.merge(_source: [])).and_return(ids_response)
 
       relation = double(:relation,
         connection: double(:connection),
@@ -75,7 +75,7 @@ RSpec.describe "Search" do
     end
 
     it "return relation.none from activerecord relation with no matches" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: ["id"])).and_return(empty_response)
+      expect(index).to receive(:search).with(document_type, body.merge(_source: [])).and_return(empty_response)
 
       relation = double(:relation)
       expect(relation).to receive(:none).and_return(relation)

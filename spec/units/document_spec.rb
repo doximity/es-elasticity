@@ -60,7 +60,6 @@ RSpec.describe Elasticity::Document do
       Elasticity.config.client   = client
 
       expect(Elasticity::Index).to receive(:new).with(client, "elasticity_test_class_names").and_return(index)
-      expect(index).to receive(:create_if_undefined).with(settings: settings, mappings: mappings)
 
       expect(subject.index).to be index
     end

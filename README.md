@@ -110,6 +110,8 @@ adults.active_recors(Database::User) # => Array of Database::User instances
   - [ ] Indexing, Bulk Indexing and Delete By Query
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
+- [ ] Get rid of to_document, generate automatically based on attributes
+- [ ] Define from_active_record interface
 
 ## Contributing
 

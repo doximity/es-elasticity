@@ -4,28 +4,44 @@ module Elasticity
 
     # Returns the instance of Elasticity::Index associated with this document.
     def self.index
-      return @index if defined?(@index)
+      return @index if @index.present?
+      @index = Index.new(Elasticity.config.client, self.index_name)
+    end
 
-      index_name = self.name.underscore.pluralize
-
-      if namespace = Elasticity.config.namespace
-        index_name = "#{namespace}_#{index_name}"
-      end
-
-      @index = Index.new(Elasticity.config.client, index_name)
-      @index.create_if_undefined(settings: Elasticity.config.settings, mappings: @mappings)
-      @index
+    # Creates the index for this document
+    def self.create_index
+      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: @mappings)
     end
 
     # The index name to be used for indexing and storing data for this document model.
     # By default, it's the class name converted to underscore and plural.
     def self.index_name
-      self.index.name
+      return @index_name if defined?(@index_name)
+
+      @index_name = self.name.underscore.pluralize
+
+      if namespace = Elasticity.config.namespace
+        @index_name = "#{namespace}_#{index_name}"
+      end
+
+      @index_name
+    end
+
+    # Sets the index name to something else than the default
+    def self.index_name=(name)
+      @index_name = name
+      @index      = nil
     end
 
     # The document type to be used, it's inferred by the class name.
     def self.document_type
-      self.name.underscore
+      return @document_type if defined?(@document_type)
+      @document_type = self.name.demodulize.underscore
+    end
+
+    # Sets the document type to something different than the default
+    def self.document_type=(document_type)
+      @document_type = document_type
     end
 
     # Sets the mapping for this model, which will be used to create the associated index and
