@@ -5,7 +5,7 @@ module Elasticity
     # Returns the instance of Elasticity::Index associated with this document.
     def self.index
       return @index if @index.present?
-      @index = Index.new(Elasticity.config.client, self.index_name)
+      @index = Index.new(Elasticity.config.client, self.namespaced_index_name)
     end
 
     # Creates the index for this document
@@ -22,20 +22,24 @@ module Elasticity
     # By default, it's the class name converted to underscore and plural.
     def self.index_name
       return @index_name if defined?(@index_name)
-
       @index_name = self.name.underscore.pluralize
-
-      if namespace = Elasticity.config.namespace
-        @index_name = "#{namespace}_#{index_name}"
-      end
-
-      @index_name
     end
 
     # Sets the index name to something else than the default
     def self.index_name=(name)
       @index_name = name
-      @index      = nil
+      @index = nil
+    end
+
+    # Namespaced index name
+    def self.namespaced_index_name
+      name = self.index_name
+
+      if namespace = Elasticity.config.namespace
+        name = "#{namespace}_#{name}"
+      end
+
+      name
     end
 
     # The document type to be used, it's inferred by the class name.

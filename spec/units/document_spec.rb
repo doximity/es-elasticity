@@ -48,8 +48,10 @@ RSpec.describe Elasticity::Document do
     subject { klass }
 
     it "extracts index name and document type from the class name" do
-      expect(subject.index_name).to eq "elasticity_test_class_names"
+      expect(subject.index_name).to eq "class_names"
+      expect(subject.namespaced_index_name).to eq "elasticity_test_class_names"
       expect(subject.document_type).to eq "class_name"
+      expect(subject.index.name).to eq "elasticity_test_class_names"
     end
 
     it "have an associated Index instance" do
