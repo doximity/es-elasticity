@@ -59,6 +59,15 @@ module Elasticity
       index.delete_by_query(document_type, search.body)
     end
 
+    # Bulk index the provided documents
+    def self.bulk_index(documents)
+      index.bulk do |b|
+        documents.each do |doc|
+          b.index(self.document_type, doc.id, doc.to_document)
+        end
+      end
+    end
+
     # Define common attributes for all documents
     attr_accessor :id
 

@@ -56,6 +56,12 @@ module Elasticity
       instrument("delete_by_query", args) { @client.delete_by_query(args) }
     end
 
+    def bulk
+      b = Bulk.new(@client, @name)
+      yield b
+      b.execute
+    end
+
     def settings
       args = { index: @name }
       settings = instrument("settings", args) { @client.indices.get_settings(args) }
@@ -82,6 +88,26 @@ module Elasticity
     def instrument(name, extra = {})
       ActiveSupport::Notifications.instrument("elasticity.#{name}", args: extra) do
         yield
+      end
+    end
+
+    class Bulk
+      def initialize(client, name)
+        @client     = client
+        @name       = name
+        @operations = []
+      end
+
+      def index(type, id, attributes)
+        @operations << { index: { _index: @name, _type: type, _id: id, data: attributes }}
+      end
+
+      def delete(type, id)
+        @operations << { delete: { _index: @name, _type: type, _id: id }}
+      end
+
+      def execute
+        @client.bulk(body: @operations)
       end
     end
   end
