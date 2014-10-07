@@ -50,13 +50,13 @@ class Search::User < Elasticity::Document
     }
 
     # Creates a search object from the body and return it. The returned object is a
-    # lazy evaluated search that behaves like a collection, being automatically triggered
-    # when data is iterated over.
+    # lazy evaluated search that behaves like a collection, being automatically
+    # triggered when data is iterated over.
     self.search(body)
   end
 
-  # to_document is the only required method that needs to be implemented so an instance of
-  # this model can be indexed.
+  # to_document is the only required method that needs to be implemented so an
+  # instance of this model can be indexed.
   def to_document
     {
       name: self.name,
@@ -81,8 +81,8 @@ u.update
 Getting the results of a search is also pretty straightforward:
 
 ```ruby
-# Get the search object, which is an instance of `Elasticity::DocumentSearchProxy`. Search is not
-# performed until data is accessed.
+# Get the search object, which is an instance of `Elasticity::DocumentSearchProxy`.
+# Search is not performed until data is accessed.
 adults = User.adults
 
 # Iterating over the results will trigger the query
