@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'elasticity/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "elasticity"
+  spec.name          = "es-elasticity"
   spec.version       = Elasticity::VERSION
   spec.authors       = ["Rodrigo Kochenburger"]
-  spec.email         = ["rkochenburger@doximity.com"]
-  spec.summary       = %q{Object oriented library for working with ElasticSearch}
-  spec.description   = %q{Object oriented library for working with ElasticSearch}
+  spec.email         = ["rodrigo@doximity.com"]
+  spec.summary       = %q{ActiveModel-based library for working with ElasticSearch}
+  spec.description   = %q{Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem}
   spec.homepage      = ""
   spec.license       = "MIT"
 
