@@ -22,7 +22,7 @@ RSpec.describe Elasticity::Document do
         "ClassName"
       end
 
-      define_mappings(mappings)
+      self.mappings = mappings
 
       attr_accessor :name, :items
 
@@ -94,7 +94,7 @@ RSpec.describe Elasticity::Document do
 
     it "stores the document in the index" do
       expect(index).to receive(:index_document).with("class_name", 1, {id: 1, name: "Foo", items: [{ name: "Item1" }]})
-      subject.save
+      subject.update
     end
   end
 end

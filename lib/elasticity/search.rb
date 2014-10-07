@@ -24,7 +24,7 @@ module Elasticity
     # into ActiveRecord models using the provided relation.
     def active_records(relation)
       return @active_record if defined?(@active_record)
-      response = @index.search(@document_type, @body.merge(_source: ["id"]))
+      response = @index.search(@document_type, @body.merge(_source: []))
       @active_record = Result.new(response, ActiveRecordMapper.new(relation))
     end
 

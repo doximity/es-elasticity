@@ -30,7 +30,7 @@ module Elasticity
 
     # Sets the mapping for this model, which will be used to create the associated index and
     # generate accessor methods.
-    def self.define_mappings(mappings)
+    def self.mappings=(mappings)
       raise "Can't re-define mappings in runtime" if defined?(@mappings)
       @mappings = mappings
     end
@@ -92,8 +92,8 @@ module Elasticity
       raise NotImplementedError, "to_document needs to be implemented for #{self.class}"
     end
 
-    # Save this object on the index, creating or updating the document.
-    def save
+    # Update this object on the index, creating or updating the document.
+    def update
       self.class.index.index_document(self.class.document_type, id, to_document)
     end
   end
