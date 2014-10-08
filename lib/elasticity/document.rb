@@ -70,7 +70,7 @@ module Elasticity
     # Fetches one specific document from the index by ID.
     def self.get(id)
       if doc = index.get_document(document_type, id)
-        new(doc["_source"])
+        new(doc["_source"].merge(_id: doc['_id']))
       end
     end
 
@@ -88,13 +88,13 @@ module Elasticity
     def self.bulk_index(documents)
       index.bulk do |b|
         documents.each do |doc|
-          b.index(self.document_type, doc.id, doc.to_document)
+          b.index(self.document_type, doc._id, doc.to_document)
         end
       end
     end
 
     # Define common attributes for all documents
-    attr_accessor :id
+    attr_accessor :_id
 
     # Creates a new Document instance with the provided attributes.
     def initialize(attributes = {})
@@ -103,7 +103,7 @@ module Elasticity
 
     # Defines equality by comparing the ID and values of each instance variable.
     def ==(other)
-      return false if id != other.id
+      return false if _id != other._id
 
       instance_variables.all? do |ivar|
         instance_variable_get(ivar) == other.instance_variable_get(ivar)
@@ -119,7 +119,7 @@ module Elasticity
 
     # Update this object on the index, creating or updating the document.
     def update
-      self.class.index.index_document(self.class.document_type, id, to_document)
+      self.class.index.index_document(self.class.document_type, _id, to_document)
     end
   end
 end

@@ -24,7 +24,7 @@ module Elasticity
     # into ActiveRecord models using the provided relation.
     def active_records(relation)
       return @active_record if defined?(@active_record)
-      response = @index.search(@document_type, @body.merge(_source: []))
+      response = @index.search(@document_type, @body.merge(_source: false))
       @active_record = Result.new(response, ActiveRecordMapper.new(relation))
     end
 
@@ -95,7 +95,7 @@ module Elasticity
 
       def map(hits)
         hits.map do |hit|
-          @document_klass.new(hit["_source"])
+          @document_klass.new(hit["_source"].merge(_id: hit['_id']))
         end
       end
     end
@@ -106,7 +106,7 @@ module Elasticity
       end
 
       def map(hits)
-        ids = hits.map { |h| h["_source"]["id"] }
+        ids = hits.map { |h| h["_id"] }
 
         if ids.any?
           id_col = "#{quote(@relation.table_name)}.#{quote(@relation.klass.primary_key)}"

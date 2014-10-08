@@ -111,6 +111,7 @@ adults.active_recors(Database::User) # => Array of Database::User instances
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
 - [ ] Get rid of to_document, generate automatically based on attributes
+- [ ] Add some delegations on Document to Index
 - [ ] Define from_active_record interface
 
 ## Contributing

@@ -5,10 +5,10 @@ RSpec.describe Elasticity::MultiSearch do
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :id, :name
+      attr_accessor :_id, :name
 
       def ==(other)
-        self.id == other.id && self.name == other.name
+        self._id == other._id && self.name == other.name
       end
     end
   end
@@ -16,8 +16,8 @@ RSpec.describe Elasticity::MultiSearch do
   let :response do
     {
       "responses" => [
-        { "hits" => { "total" => 2, "hits" => [{"_source" => { "id" => 1, "name" => "foo" }}, {"_source" => { "id" => 2, "name" => "bar" }}]}},
-        { "hits" => { "total" => 1, "hits" => [{"_source" => { "id" => 3, "name" => "baz" }}]}},
+        { "hits" => { "total" => 2, "hits" => [{ "_id" => 1, "_source" => { "name" => "foo" }}, { "_id" => 2, "_source" => { "name" => "bar" }}]}},
+        { "hits" => { "total" => 1, "hits" => [{ "_id" => 3, "_source" => { "name" => "baz" }}]}},
       ]
     }
   end
@@ -31,7 +31,7 @@ RSpec.describe Elasticity::MultiSearch do
       { index: "index_second", type: "document_second", search: { search: :second } },
     ]).and_return(response)
 
-    expect(Array(subject[:first])). to eq [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
-    expect(Array(subject[:second])). to eq [klass.new(id: 3, name: "baz")]
+    expect(Array(subject[:first])). to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
+    expect(Array(subject[:second])). to eq [klass.new(_id: 3, name: "baz")]
   end
 end

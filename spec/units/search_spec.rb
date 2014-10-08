@@ -7,15 +7,15 @@ RSpec.describe "Search" do
 
   let :full_response do
     { "hits" => { "total" => 2, "hits" => [
-      {"_source" => { "id" => 1, "name" => "foo" }},
-      {"_source" => { "id" => 2, "name" => "bar" }},
+      { "_id" => 1, "_source" => { "name" => "foo" } },
+      { "_id" => 2, "_source" => { "name" => "bar" } },
     ]}}
   end
 
   let :ids_response do
     { "hits" => { "total" => 2, "hits" => [
-      {"_source" => { "id" => 1, "name" => "foo" }},
-      {"_source" => { "id" => 2, "name" => "bar" }},
+      { "_id" => 1 },
+      { "_id" => 2 },
     ]}}
   end
 
@@ -26,10 +26,10 @@ RSpec.describe "Search" do
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :id, :name
+      attr_accessor :_id, :name
 
       def ==(other)
-        self.id == other.id && self.name == other.name
+        self._id == other._id && self.name == other.name
       end
     end
   end
@@ -43,7 +43,7 @@ RSpec.describe "Search" do
       expect(index).to receive(:search).with(document_type, body).and_return(full_response)
 
       docs = subject.documents(klass)
-      expected = [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
+      expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
 
       expect(docs.total).to eq 2
       expect(docs.size).to eq expected.size
@@ -59,7 +59,7 @@ RSpec.describe "Search" do
     end
 
     it "searches the index and return active record models" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: [])).and_return(ids_response)
+      expect(index).to receive(:search).with(document_type, body.merge(_source: false)).and_return(ids_response)
 
       relation = double(:relation,
         connection: double(:connection),
@@ -75,7 +75,7 @@ RSpec.describe "Search" do
     end
 
     it "return relation.none from activerecord relation with no matches" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: [])).and_return(empty_response)
+      expect(index).to receive(:search).with(document_type, body.merge(_source: false)).and_return(empty_response)
 
       relation = double(:relation)
       expect(relation).to receive(:none).and_return(relation)
@@ -95,7 +95,7 @@ RSpec.describe "Search" do
 
     it "automatically maps the documents into the provided Document class" do
       expect(index).to receive(:search).with(document_type, body).and_return(full_response)
-      expect(Array(subject)).to eq [klass.new(id: 1, name: "foo"), klass.new(id: 2, name: "bar")]
+      expect(Array(subject)).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
     end
 
     it "delegates active_records for the underlying search" do

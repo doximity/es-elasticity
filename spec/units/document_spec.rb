@@ -3,7 +3,6 @@ require "elasticity/search"
 RSpec.describe Elasticity::Document do
   mappings = {
     properties: {
-      id: { type: "integer" },
       name: { type: "string" },
 
       items: {
@@ -27,7 +26,7 @@ RSpec.describe Elasticity::Document do
       attr_accessor :name, :items
 
       def to_document
-        { id: id, name: name, items: items}
+        { name: name, items: items }
       end
     end
   end
@@ -78,9 +77,9 @@ RSpec.describe Elasticity::Document do
     end
 
     it "gets specific document from the index" do
-      doc = { "_source" => { "id" => 1, "name" => "Foo", "items" => [{ "name" => "Item1" }]}}
+      doc = { "_id" => 1, "_source" => { "name" => "Foo", "items" => [{ "name" => "Item1" }]}}
       expect(index).to receive(:get_document).with("class_name", 1).and_return(doc)
-      expect(subject.get(1)).to eq klass.new(id: 1, name: "Foo", items: [{ "name" => "Item1" }])
+      expect(subject.get(1)).to eq klass.new(_id: 1, name: "Foo", items: [{ "name" => "Item1" }])
     end
 
     it "deletes specific document from index" do
@@ -91,10 +90,10 @@ RSpec.describe Elasticity::Document do
   end
 
   context "instance" do
-    subject { klass.new id: 1, name: "Foo", items: [{ name: "Item1" }] }
+    subject { klass.new _id: 1, name: "Foo", items: [{ name: "Item1" }] }
 
     it "stores the document in the index" do
-      expect(index).to receive(:index_document).with("class_name", 1, {id: 1, name: "Foo", items: [{ name: "Item1" }]})
+      expect(index).to receive(:index_document).with("class_name", 1, { name: "Foo", items: [{ name: "Item1" }] })
       subject.update
     end
   end
