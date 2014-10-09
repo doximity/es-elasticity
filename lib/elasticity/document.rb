@@ -18,6 +18,11 @@ module Elasticity
       self.index.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
     end
 
+    # Deletes the index
+    def self.delete_index
+      self.index.delete
+    end
+
     # The index name to be used for indexing and storing data for this document model.
     # By default, it's the class name converted to underscore and plural.
     def self.index_name

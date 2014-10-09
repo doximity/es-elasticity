@@ -81,6 +81,10 @@ module Elasticity
         empty?
       end
 
+      def suggestions
+        @response["suggest"] || {}
+      end
+
       def mapping
         return @mapping if defined?(@mapping)
         hits = Array(@response["hits"]["hits"])
