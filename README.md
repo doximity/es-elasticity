@@ -105,6 +105,9 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 
 ## Roadmap
 
+- [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
+- [ ] Better automatic index name and document type
+- [ ] Support for multiple document types
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
   - [ ] Indexing, Bulk Indexing and Delete By Query

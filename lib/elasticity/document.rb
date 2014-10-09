@@ -101,6 +101,12 @@ module Elasticity
       super(attributes)
     end
 
+    def attributes=(attributes)
+      attributes.each do |attr, value|
+        self.public_send("#{attr}=", value)
+      end
+    end
+
     # Defines equality by comparing the ID and values of each instance variable.
     def ==(other)
       return false if _id != other._id
