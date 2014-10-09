@@ -1,5 +1,5 @@
 module Elasticity
-  # Search provides a simple interface for defining a search against an ElasticSearch
+  # Search provides a simple interface for defining a search against an Elasticsearch
   # index and fetching the results in different ways and mappings.
   #
   # Example:
@@ -12,7 +12,7 @@ module Elasticity
     # search is not performend until methods are called, each method represents a different
     # way of fetching and mapping the data.
     #
-    # The body parameter is a hash following the exact same syntax as ElasticSearch's JSON
+    # The body parameter is a hash following the exact same syntax as Elasticsearch's JSON
     # query language.
     def initialize(index, document_type, body)
       @index          = index
@@ -20,7 +20,7 @@ module Elasticity
       @body           = body.freeze
     end
 
-    # Execute the search, fetching only ids from ElasticSearch and then mapping the results
+    # Execute the search, fetching only ids from Elasticsearch and then mapping the results
     # into ActiveRecord models using the provided relation.
     def active_records(relation)
       return @active_record if defined?(@active_record)

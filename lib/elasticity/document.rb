@@ -66,7 +66,7 @@ module Elasticity
     end
 
     # Searches the index using the parameters provided in the body hash, following the same
-    # structure ElasticSearch expects.
+    # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
     def self.search(body)
       DocumentSearchProxy.new(Search.new(index, document_type, body), self)
@@ -123,7 +123,7 @@ module Elasticity
 
     # IMPLEMENT
     # Returns a hash with the attributes as they should be stored in the index.
-    # This will be stored as _source attributes on ElasticSearch.
+    # This will be stored as _source attributes on Elasticsearch.
     def to_document
       raise NotImplementedError, "to_document needs to be implemented for #{self.class}"
     end

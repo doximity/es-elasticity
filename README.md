@@ -2,7 +2,7 @@
 
 Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem.
 
-Mainly, it provides a model-oriented approach to ElasticSearch, similar to what [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) provides to relational databases. It leverages [ActiveModel](https://github.com/rails/rails/tree/master/activemodel) to provide a familiar format for Rails developers.
+Mainly, it provides a model-oriented approach to Elasticsearch, similar to what [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) provides to relational databases. It leverages [ActiveModel](https://github.com/rails/rails/tree/master/activemodel) to provide a familiar format for Rails developers.
 
 ## Installation
 
@@ -97,11 +97,11 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 
 ## Design Goals
 
-- Provide model specific for ElasticSearch documents instead of an ActiveRecord mixin;
+- Provide model specific for Elasticsearch documents instead of an ActiveRecord mixin;
 - proper separation of concerns and de-coupling;
 - lazy search evaluation and easy composition of multi-searches;
 - easy of debug;
-- higher level API that resembles ElasticSearch API;
+- higher level API that resembles Elasticsearch API;
 
 ## Roadmap
 

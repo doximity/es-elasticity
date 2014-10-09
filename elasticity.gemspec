@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Elasticity::VERSION
   spec.authors       = ["Rodrigo Kochenburger"]
   spec.email         = ["rodrigo@doximity.com"]
-  spec.summary       = %q{ActiveModel-based library for working with ElasticSearch}
+  spec.summary       = %q{ActiveModel-based library for working with Elasticsearch}
   spec.description   = %q{Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem}
   spec.homepage      = ""
   spec.license       = "MIT"
