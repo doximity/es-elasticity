@@ -102,7 +102,17 @@ module Elasticity
           attrs = hit["_source"].merge(_id: hit['_id'])
 
           if hit["highlight"]
-            highlighted = @document_klass.new(attrs.merge(hit["highlight"]))
+            highlighted_attrs = attrs.dup
+            attrs_set = Set.new
+
+            hit["highlight"].each do |name, v|
+              name = name.gsub(/\..*\z/, '')
+              next if attrs_set.include?(name)
+              highlighted_attrs[name] = v
+              attrs_set << name
+            end
+
+            highlighted = @document_klass.new(highlighted_attrs)
           end
 
           @document_klass.new(attrs.merge(highlighted: highlighted))
