@@ -23,13 +23,6 @@ module Elasticity
       self.index.delete
     end
 
-    # The index name to be used for indexing and storing data for this document model.
-    # By default, it's the class name converted to underscore and plural.
-    def self.index_name
-      return @index_name if defined?(@index_name)
-      @index_name = self.name.underscore.pluralize
-    end
-
     # Sets the index name to something else than the default
     def self.index_name=(name)
       @index_name = name
@@ -38,7 +31,7 @@ module Elasticity
 
     # Namespaced index name
     def self.namespaced_index_name
-      name = self.index_name
+      name = self.name.underscore.pluralize
 
       if namespace = Elasticity.config.namespace
         name = "#{namespace}_#{name}"
