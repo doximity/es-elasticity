@@ -5,7 +5,7 @@ RSpec.describe Elasticity::MultiSearch do
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :_id, :name
+      attr_accessor :_id, :name, :highlighted
 
       def ==(other)
         self._id == other._id && self.name == other.name

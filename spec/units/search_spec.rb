@@ -23,10 +23,16 @@ RSpec.describe "Search" do
     { "hits" => { "total" => 0, "hits" => [] }}
   end
 
+  let :highlight_response do
+    { "hits" => { "total" => 1, "hits" => [
+      { "_id" => 1, "_source" => { "name" => "foo", "age" => 21 }, "highlight" => { "name" => "<em>foo</em>" } },
+    ]}}
+  end
+
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :_id, :name
+      attr_accessor :_id, :name, :age, :highlighted
 
       def ==(other)
         self._id == other._id && self.name == other.name
@@ -81,6 +87,14 @@ RSpec.describe "Search" do
       expect(relation).to receive(:none).and_return(relation)
 
       expect(subject.active_records(relation).mapping).to be relation
+    end
+
+    it "creates highlighted object for documents" do
+      expect(index).to receive(:search).with(document_type, body).and_return(highlight_response)
+      doc = subject.documents(klass).first
+
+      expect(doc).to_not be_nil
+      expect(doc.highlighted).to eq klass.new(_id: 1, name: "<em>foo</em>", age: 21)
     end
   end
 

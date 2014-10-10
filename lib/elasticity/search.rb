@@ -99,7 +99,13 @@ module Elasticity
 
       def map(hits)
         hits.map do |hit|
-          @document_klass.new(hit["_source"].merge(_id: hit['_id']))
+          attrs = hit["_source"].merge(_id: hit['_id'])
+
+          if hit["highlight"]
+            highlighted = @document_klass.new(attrs.merge(hit["highlight"]))
+          end
+
+          @document_klass.new(attrs.merge(highlighted: highlighted))
         end
       end
     end

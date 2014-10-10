@@ -31,7 +31,7 @@ module Elasticity
 
     # Namespaced index name
     def self.namespaced_index_name
-      name = self.name.underscore.pluralize
+      name = @index_name || self.name.underscore.pluralize
 
       if namespace = Elasticity.config.namespace
         name = "#{namespace}_#{name}"
@@ -92,7 +92,7 @@ module Elasticity
     end
 
     # Define common attributes for all documents
-    attr_accessor :_id
+    attr_accessor :_id, :highlighted
 
     # Creates a new Document instance with the provided attributes.
     def initialize(attributes = {})
@@ -107,6 +107,7 @@ module Elasticity
 
     # Defines equality by comparing the ID and values of each instance variable.
     def ==(other)
+      return false if other.nil?
       return false if _id != other._id
 
       instance_variables.all? do |ivar|
