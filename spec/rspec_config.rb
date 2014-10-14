@@ -1,6 +1,10 @@
 require "elasticity_base"
+require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
+
+CodeClimate::TestReporter.start
+
 require "elasticity"
 
 def elastic_search_client
