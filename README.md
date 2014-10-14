@@ -107,6 +107,8 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 
 ## Roadmap
 
+- [ ] Index aliasing support
+  - [ ] Index hot swapping support
 - [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
 - [ ] Better automatic index name and document type
 - [ ] Support for multiple document types
