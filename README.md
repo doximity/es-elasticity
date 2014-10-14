@@ -1,6 +1,6 @@
 # Elasticity
 
-[![Build Status](https://travis-ci.org/doximity/es-elasticity.svg)](https://travis-ci.org/doximity/es-elasticity) [![Dependency Status](https://gemnasium.com/doximity/es-elasticity.svg)](https://gemnasium.com/doximity/es-elasticity) [![Code Climate](https://codeclimate.com/github/doximity/es-elasticity/badges/gpa.svg)](https://codeclimate.com/github/doximity/es-elasticity)
+[![Build Status](https://travis-ci.org/doximity/es-elasticity.svg)](https://travis-ci.org/doximity/es-elasticity) [![Test Coverage](https://codeclimate.com/github/doximity/es-elasticity/badges/coverage.svg)](https://codeclimate.com/github/doximity/es-elasticity) [![Code Climate](https://codeclimate.com/github/doximity/es-elasticity/badges/gpa.svg)](https://codeclimate.com/github/doximity/es-elasticity) [![Dependency Status](https://gemnasium.com/doximity/es-elasticity.svg)](https://gemnasium.com/doximity/es-elasticity)
 
 Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem.
 
