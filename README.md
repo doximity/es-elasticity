@@ -1,5 +1,7 @@
 # Elasticity
 
+[![Build Status](https://travis-ci.org/doximity/es-elasticity.svg)](https://travis-ci.org/doximity/es-elasticity)
+
 Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem.
 
 Mainly, it provides a model-oriented approach to ElasticSearch, similar to what [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) provides to relational databases. It leverages [ActiveModel](https://github.com/rails/rails/tree/master/activemodel) to provide a familiar format for Rails developers.
