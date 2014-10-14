@@ -110,16 +110,16 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 - [ ] Index aliasing support
   - [ ] Index hot swapping support
 - [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
-- [ ] Better automatic index name and document type
-- [ ] Support for multiple document types
+- [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
   - [ ] Indexing, Bulk Indexing and Delete By Query
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
+- [ ] Better automatic index name and document type
+- [ ] Support for multiple document types
 - [ ] Get rid of to_document, generate automatically based on attributes
 - [ ] Add some delegations on Document to Index
-- [ ] Define from_active_record interface
 
 ## Contributing
 
