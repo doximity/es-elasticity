@@ -7,13 +7,22 @@ require "active_support/core_ext"
 require "active_model"
 require "elasticsearch"
 
+if defined?(Rails)
+  require "elasticity/railtie"
+end
+
 module Elasticity
   class Config
     attr_writer :logger, :client, :settings, :namespace, :pretty_json
 
     def logger
       return @logger if defined?(@logger)
-      @logger = Logger.new(STDOUT)
+
+      if defined?(Rails)
+        @logger = Rails.logger
+      else
+        @logger = Logger.new(STDOUT)
+      end
     end
 
     def client
@@ -43,18 +52,5 @@ module Elasticity
   def self.config
     return @config if defined?(@config)
     @config = Config.new
-  end
-end
-
-ActiveSupport::Notifications.subscribe(/^elasticity\./) do |name, start, finish, id, payload|
-  time = (finish - start)*1000
-
-  if logger = Elasticity.config.logger
-    logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload[:args], pretty: Elasticity.config.pretty_json)}"
-
-    exception, message = payload[:exception]
-    if exception
-      logger.error "#{name} #{exception}: #{message}"
-    end
   end
 end

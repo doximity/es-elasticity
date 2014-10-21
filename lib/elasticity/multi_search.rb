@@ -32,10 +32,12 @@ module Elasticity
         { index: search.index.name, type: search.document_type, search: search.body }
       end
 
-      results = {}
+      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: multi_body }) do
+        Elasticity.config.client.msearch(body: multi_body)
+      end
 
-      responses = Array(Elasticity.config.client.msearch(body: multi_body)["responses"])
-      responses.each_with_index do |resp, idx|
+      results = {}
+      Array(response["responses"]).each_with_index do |resp, idx|
         name, search, mapper = @searches[idx]
         results[name] = Search::Result.new(resp, mapper)
       end
