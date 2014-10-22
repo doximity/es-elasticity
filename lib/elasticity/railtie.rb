@@ -9,7 +9,7 @@ module Elasticity
 
           if payload[:backtrace].present?
             bt = Rails.backtrace_cleaner.clean(payload[:backtrace])
-            logger.debug bt[:backtrace][0,4].join("\n")
+            logger.debug bt[0,4].join("\n")
           end
 
           exception, message = payload[:exception]
