@@ -5,12 +5,11 @@ module Elasticity
         time = (finish - start)*1000
 
         if logger = Elasticity.config.logger
-          pp payload
           logger.debug "#{name} #{"%.2f" % time}ms #{MultiJson.dump(payload[:args], pretty: Elasticity.config.pretty_json)}"
 
           if payload[:backtrace].present?
             bt = Rails.backtrace_cleaner.clean(payload[:backtrace])
-            logger.debug payload[:backtrace][0,10].join("\n")
+            logger.debug bt[:backtrace][0,4].join("\n")
           end
 
           exception, message = payload[:exception]
