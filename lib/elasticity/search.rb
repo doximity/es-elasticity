@@ -121,8 +121,28 @@ module Elasticity
     end
 
     class ActiveRecordMapper
+      class Relation < ActiveSupport::ProxyObject
+        def initialize(relation)
+          @relation = relation
+        end
+
+        def method_missing(name, *args, &block)
+          @relation.public_send(name, *args, &block)
+        end
+
+        def pretty_print(pp)
+          pp.object_group(self) do
+            pp.text " #{@relation.to_sql}"
+          end
+        end
+
+        def inspect
+          "#<#{self.class}: #{@relation.to_sql}>"
+        end
+      end
+
       def initialize(relation)
-        @relation = relation
+        @relation = Relation.new(relation)
       end
 
       def map(hits)

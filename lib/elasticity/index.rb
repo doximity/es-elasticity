@@ -90,7 +90,7 @@ module Elasticity
     private
 
     def instrument(name, extra = {})
-      ActiveSupport::Notifications.instrument("#{name}.elasticity", args: extra) do
+      ActiveSupport::Notifications.instrument("#{name}.elasticity", args: extra, backtrace: caller(1)) do
         yield
       end
     end

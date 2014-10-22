@@ -1,7 +1,8 @@
 module Elasticity
   class MultiSearch
     def initialize
-      @searches = []
+      @searches = {}
+      @mappers  = {}
       yield self if block_given?
     end
 
@@ -17,7 +18,9 @@ module Elasticity
         raise ArgumentError, "you need to provide either :documents or :active_records as an option"
       end
 
-      @searches << [name, search, mapper]
+      @searches[name] = { index: search.index.name, type: search.document_type, search: search.body }
+      @mappers[name]  = mapper
+      name
     end
 
     def [](name)
@@ -28,17 +31,17 @@ module Elasticity
     private
 
     def fetch
-      multi_body = @searches.map do |name, search, _|
-        { index: search.index.name, type: search.document_type, search: search.body }
-      end
+      bodies = @searches.values.map(&:dup)
 
-      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: multi_body }) do
-        Elasticity.config.client.msearch(body: multi_body)
+      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: @searches.values }) do
+        Elasticity.config.client.msearch(body: bodies)
       end
 
       results = {}
-      Array(response["responses"]).each_with_index do |resp, idx|
-        name, search, mapper = @searches[idx]
+
+      @searches.keys.each_with_index do |name, idx|
+        resp          = response["responses"][idx]
+        mapper        = @mappers[name]
         results[name] = Search::Result.new(resp, mapper)
       end
 
