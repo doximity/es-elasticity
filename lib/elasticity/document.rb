@@ -2,27 +2,6 @@ module Elasticity
   class Document
     include ::ActiveModel::Model
 
-    # Returns the instance of Elasticity::Index associated with this document.
-    def self.index
-      return @index if @index.present?
-      @index = Index.new(Elasticity.config.client, self.namespaced_index_name)
-    end
-
-    # Creates the index for this document
-    def self.create_index
-      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
-    end
-
-    # Re-creates the index for this document
-    def self.recreate_index
-      self.index.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
-    end
-
-    # Deletes the index
-    def self.delete_index
-      self.index.delete
-    end
-
     # Sets the index name to something else than the default
     def self.index_name=(name)
       @index_name = name
@@ -56,6 +35,32 @@ module Elasticity
     def self.mappings=(mappings)
       raise "Can't re-define mappings in runtime" if defined?(@mappings)
       @mappings = mappings
+    end
+
+    # Returns the instance of Elasticity::Index associated with this document.
+    def self.index
+      return @index if @index.present?
+      @index = Index.new(Elasticity.config.client, self.namespaced_index_name)
+    end
+
+    # Creates the index for this document
+    def self.create_index
+      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
+    end
+
+    # Re-creates the index for this document
+    def self.recreate_index
+      self.index.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
+    end
+
+    # Deletes the index
+    def self.delete_index
+      self.index.delete
+    end
+
+    # Flushes the index, forcing any writes
+    def self.flush_index
+      self.index.flush
     end
 
     # Searches the index using the parameters provided in the body hash, following the same
@@ -124,7 +129,24 @@ module Elasticity
 
     # Update this object on the index, creating or updating the document.
     def update
-      self.class.index.index_document(self.class.document_type, _id, to_document)
+      res = self.class.index.index_document(self.class.document_type, _id, to_document)
+      
+      if id = res["_id"]
+        self._id = id
+        @created = res["created"]
+        true
+      else
+        false
+      end
+    end
+
+    def delete
+      res = self.class.delete(self._id)
+      res["found"] || false
+    end
+
+    def created?
+      @created || false
     end
   end
 end
