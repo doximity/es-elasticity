@@ -6,6 +6,7 @@ require "oj"
 CodeClimate::TestReporter.start
 
 require "elasticity"
+require "elasticity/log_subscriber"
 
 def elastic_search_client
   return @elastic_search_client if defined?(@elastic_search_client)
@@ -13,16 +14,21 @@ def elastic_search_client
 end
 
 logger = Logger.new("spec/spec.log", File::WRONLY | File::APPEND | File::CREAT)
+# logger = Logger.new(STDOUT)
+logger.level = Logger::DEBUG
+
+ActiveSupport::LogSubscriber.logger = logger
+Elasticity::LogSubscriber.attach_to(:elasticity)
 
 RSpec.configure do |c|
   c.disable_monkey_patching!
 
   c.before(:suite) do
-    logger.info "rspec.init Starting test suite execution"
+    logger.info "init.rspec Starting test suite execution"
   end
 
   c.before(:each) do |example|
-    logger.info "rspec.spec #{example.full_description}"
+    logger.info "spec.rspec #{example.full_description}"
 
     if example.metadata[:elasticsearch]
       client = elastic_search_client
@@ -31,7 +37,6 @@ RSpec.configure do |c|
     end
 
     Elasticity.configure do |e|
-      e.logger    = logger
       e.client    = client
       e.namespace = "elasticity_test"
     end

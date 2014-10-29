@@ -13,17 +13,7 @@ end
 
 module Elasticity
   class Config
-    attr_writer :logger, :client, :settings, :namespace, :pretty_json
-
-    def logger
-      return @logger if defined?(@logger)
-
-      if defined?(Rails)
-        @logger = Rails.logger
-      else
-        @logger = Logger.new(STDOUT)
-      end
-    end
+    attr_writer :client, :settings, :namespace, :pretty_json
 
     def client
       return @client if defined?(@client)
