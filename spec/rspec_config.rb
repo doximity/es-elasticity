@@ -2,10 +2,12 @@ require "elasticity_base"
 require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
+require "redis"
 
 CodeClimate::TestReporter.start
 
 require "elasticity"
+require "elasticity/live_remap"
 require "elasticity/log_subscriber"
 
 def elastic_search_client
