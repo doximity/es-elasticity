@@ -63,6 +63,11 @@ module Elasticity
       self.index.flush
     end
 
+    # Runs a live remap of the index by creating a new index with the new mapping, adjusting aliases,
+    # re-indexing data and switching aliases. It's zero downtime remap and reindex.
+    def self.remap!
+    end
+
     # Searches the index using the parameters provided in the body hash, following the same
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
@@ -130,7 +135,7 @@ module Elasticity
     # Update this object on the index, creating or updating the document.
     def update
       res = self.class.index.index_document(self.class.document_type, _id, to_document)
-      
+
       if id = res["_id"]
         self._id = id
         @created = res["created"]

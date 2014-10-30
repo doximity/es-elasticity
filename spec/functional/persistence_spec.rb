@@ -3,7 +3,7 @@ RSpec.describe "Persistence", elasticsearch: true do
     Class.new(Elasticity::Document) do
       self.index_name    = "users"
       self.document_type = "user"
-      
+
       attr_accessor :name, :birthdate
 
       self.mappings = {
@@ -11,7 +11,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           name: { type: "string" },
           birthdate: { type: "date" },
         },
-      }      
+      }
 
       def to_document
         { name: name, birthdate: birthdate }
@@ -56,21 +56,6 @@ RSpec.describe "Persistence", elasticsearch: true do
   end
 
   describe "live remap" do
-    before do
-      subject.class_eval do
-        include Elasticity::LiveRemap
-        self.redis = Redis.new
-      end
-    end
-
-    before do
-      subject.abort_remap!
-    end
-
-    after do
-      subject.abort_remap!
-    end
-
     it "remaps to a different index transparently" do
       john = subject.new(name: "John", birthdate: "1985-10-31")
       mari = subject.new(name: "Mari", birthdate: "1986-09-24")
@@ -89,7 +74,6 @@ RSpec.describe "Persistence", elasticsearch: true do
       mari.delete
 
       subject.flush_index
-      expect(subject).to_not be_remapping
 
       results = subject.search(sort: :name)
       expect(results.total).to eq 1
@@ -102,12 +86,12 @@ RSpec.describe "Persistence", elasticsearch: true do
         subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
-      subject.remap!
+      t = Thread.new { subject.remap! }
 
       docs.sample(50).each(&:update)
       docs.sample(50).each(&:delete)
 
-      # sleep 0.1 while subject.remapping?
+      t.join
 
       subject.flush_index
       results = subject.search(sort: :name, size: docs.length)

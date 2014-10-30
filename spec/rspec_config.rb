@@ -2,12 +2,10 @@ require "elasticity_base"
 require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
-require "redis"
 
 CodeClimate::TestReporter.start
 
 require "elasticity"
-require "elasticity/live_remap"
 require "elasticity/log_subscriber"
 
 def elastic_search_client
@@ -15,7 +13,7 @@ def elastic_search_client
   @elastic_search_client = Elasticsearch::Client.new host: "http://0.0.0.0:9200"
 end
 
-logger = Logger.new("spec/spec.log", File::WRONLY | File::APPEND | File::CREAT)
+logger = Logger.new("spec/spec.log")
 # logger = Logger.new(STDOUT)
 logger.level = Logger::DEBUG
 
