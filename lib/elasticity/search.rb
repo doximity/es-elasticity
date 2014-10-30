@@ -6,7 +6,7 @@ module Elasticity
   #   search = Elasticity::Search.new("people", "person", {...})
   #   search.documents(Person)
   class Search
-    attr_reader :index, :document_type, :body
+    attr_reader :index_name, :document_type, :body
 
     # Creates a new Search definitions for the given index, document_type and criteria. The
     # search is not performend until methods are called, each method represents a different
@@ -14,8 +14,9 @@ module Elasticity
     #
     # The body parameter is a hash following the exact same syntax as Elasticsearch's JSON
     # query language.
-    def initialize(index, document_type, body)
-      @index          = index
+    def initialize(client, index_name, document_type, body)
+      @client         = client
+      @index_name     = index_name
       @document_type  = document_type.freeze
       @body           = body.freeze
     end
@@ -24,7 +25,7 @@ module Elasticity
     # into ActiveRecord models using the provided relation.
     def active_records(relation)
       return @active_record if defined?(@active_record)
-      response = @index.search(@document_type, @body.merge(_source: false))
+      response = @client.search(index: @index_name, type: @document_type, body: @body.merge(_source: false))
       @active_record = Result.new(response, ActiveRecordMapper.new(relation))
     end
 
@@ -33,7 +34,7 @@ module Elasticity
     # are the stored attributes.
     def documents(document_klass)
       return @documents if defined?(@documents)
-      response = @index.search(@document_type, @body)
+      response = @client.search(index: @index_name, type: @document_type, body: @body)
       @documents = Result.new(response, DocumentMapper.new(document_klass))
     end
 

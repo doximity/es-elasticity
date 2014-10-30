@@ -1,4 +1,3 @@
-require "elasticity_base"
 require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
@@ -6,7 +5,6 @@ require "oj"
 CodeClimate::TestReporter.start
 
 require "elasticity"
-require "elasticity/log_subscriber"
 
 def elastic_search_client
   return @elastic_search_client if defined?(@elastic_search_client)
@@ -14,7 +12,6 @@ def elastic_search_client
 end
 
 logger = Logger.new("spec/spec.log")
-# logger = Logger.new(STDOUT)
 logger.level = Logger::DEBUG
 
 ActiveSupport::LogSubscriber.logger = logger

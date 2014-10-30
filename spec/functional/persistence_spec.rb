@@ -1,17 +1,14 @@
 RSpec.describe "Persistence", elasticsearch: true do
   subject do
     Class.new(Elasticity::Document) do
-      self.index_name    = "users"
-      self.document_type = "user"
-
-      attr_accessor :name, :birthdate
-
-      self.mappings = {
+      configure index_base_name: "users", document_type: "user", mapping: {
         properties: {
           name: { type: "string" },
           birthdate: { type: "date" },
         },
       }
+
+      attr_accessor :name, :birthdate
 
       def to_document
         { name: name, birthdate: birthdate }

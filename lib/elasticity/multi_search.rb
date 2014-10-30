@@ -18,7 +18,7 @@ module Elasticity
         raise ArgumentError, "you need to provide either :documents or :active_records as an option"
       end
 
-      @searches[name] = { index: search.index.name, type: search.document_type, search: search.body }
+      @searches[name] = { index: search.index_name, type: search.document_type, search: search.body }
       @mappers[name]  = mapper
       name
     end

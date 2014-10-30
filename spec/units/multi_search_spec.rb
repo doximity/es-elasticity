@@ -2,6 +2,10 @@ require "elasticity/search"
 require "elasticity/multi_search"
 
 RSpec.describe Elasticity::MultiSearch do
+  let :client do
+    double(:client)
+  end
+
   let :klass do
     Class.new do
       include ActiveModel::Model
@@ -23,8 +27,8 @@ RSpec.describe Elasticity::MultiSearch do
   end
 
   it "performs multi search" do
-    subject.add(:first, Elasticity::Search.new(double(:index, name: "index_first"), "document_first", { search: :first }), documents: klass)
-    subject.add(:second, Elasticity::Search.new(double(:index, name: "index_second"), "document_second", { search: :second }), documents: klass)
+    subject.add(:first, Elasticity::Search.new(client, "index_first", "document_first", { search: :first }), documents: klass)
+    subject.add(:second, Elasticity::Search.new(client, "index_second", "document_second", { search: :second }), documents: klass)
 
     expect(Elasticity.config.client).to receive(:msearch).with(body: [
       { index: "index_first", type: "document_first", search: { search: :first } },

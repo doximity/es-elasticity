@@ -1,7 +1,8 @@
 require "elasticity/search"
 
 RSpec.describe "Search" do
-  let(:index)          { double(:index) }
+  let(:client)         { double(:client) }
+  let(:index_name)     { "index_name" }
   let(:document_type)  { "document" }
   let(:body)           { {} }
 
@@ -42,11 +43,11 @@ RSpec.describe "Search" do
 
   describe Elasticity::Search do
     subject do
-      described_class.new(index, document_type, body)
+      described_class.new(client, index_name, document_type, body)
     end
 
     it "searches the index and return document models" do
-      expect(index).to receive(:search).with(document_type, body).and_return(full_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
 
       docs = subject.documents(klass)
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
@@ -65,7 +66,7 @@ RSpec.describe "Search" do
     end
 
     it "searches the index and return active record models" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: false)).and_return(ids_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body.merge(_source: false)).and_return(ids_response)
 
       relation = double(:relation,
         connection: double(:connection),
@@ -81,7 +82,7 @@ RSpec.describe "Search" do
     end
 
     it "return relation.none from activerecord relation with no matches" do
-      expect(index).to receive(:search).with(document_type, body.merge(_source: false)).and_return(empty_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body.merge(_source: false)).and_return(empty_response)
 
       relation = double(:relation)
       expect(relation).to receive(:none).and_return(relation)
@@ -90,7 +91,7 @@ RSpec.describe "Search" do
     end
 
     it "creates highlighted object for documents" do
-      expect(index).to receive(:search).with(document_type, body).and_return(highlight_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(highlight_response)
       doc = subject.documents(klass).first
 
       expect(doc).to_not be_nil
@@ -100,7 +101,7 @@ RSpec.describe "Search" do
 
   describe Elasticity::DocumentSearchProxy do
     let :search do
-      Elasticity::Search.new(index, "document", body)
+      Elasticity::Search.new(client, index_name, "document", body)
     end
 
     subject do
@@ -108,7 +109,7 @@ RSpec.describe "Search" do
     end
 
     it "automatically maps the documents into the provided Document class" do
-      expect(index).to receive(:search).with(document_type, body).and_return(full_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
       expect(Array(subject)).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
     end
 

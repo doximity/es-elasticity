@@ -16,12 +16,7 @@ RSpec.describe Elasticity::Document do
 
   let :klass do
     Class.new(described_class) do
-      # Override the name since this is an anonymous class
-      def self.name
-        "ClassName"
-      end
-
-      self.mappings = mappings
+      configure index_base_name: "class_names", document_type: "class_name", mapping: mappings
 
       attr_accessor :name, :items
 
@@ -31,12 +26,12 @@ RSpec.describe Elasticity::Document do
     end
   end
 
-  let :index do
-    double(:index, create_if_undefined: nil, name: "elasticity_test_class_names")
+  let :strategy do
+    double(:strategy)
   end
 
   before :each do
-    allow(Elasticity::Index).to receive(:new).and_return(index)
+    allow(Elasticity::Strategies::SingleIndex).to receive(:new).and_return(strategy)
   end
 
   it "requires subclasses to define to_document method" do
@@ -46,28 +41,11 @@ RSpec.describe Elasticity::Document do
   context "class" do
     subject { klass }
 
-    it "extracts index name and document type from the class name" do
-      expect(subject.namespaced_index_name).to eq "elasticity_test_class_names"
-      expect(subject.document_type).to eq "class_name"
-      expect(subject.index.name).to eq "elasticity_test_class_names"
-    end
-
-    it "have an associated Index instance" do
-      client   = double(:client)
-      settings = double(:settings)
-
-      Elasticity.config.settings = settings
-      Elasticity.config.client   = client
-
-      expect(Elasticity::Index).to receive(:new).with(client, "elasticity_test_class_names").and_return(index)
-
-      expect(subject.index).to be index
-    end
-
     it "searches using DocumentSearch" do
       body   = double(:body)
       search = double(:search)
-      expect(Elasticity::Search).to receive(:new).with(index, "class_name", body).and_return(search)
+
+      expect(strategy).to receive(:search).with("class_name", body).and_return(search)
 
       doc_search = double(:doc_search)
       expect(Elasticity::DocumentSearchProxy).to receive(:new).with(search, subject).and_return(doc_search)
@@ -75,24 +53,24 @@ RSpec.describe Elasticity::Document do
       expect(subject.search(body)).to be doc_search
     end
 
-    it "gets specific document from the index" do
+    it "gets specific document from the strategy" do
       doc = { "_id" => 1, "_source" => { "name" => "Foo", "items" => [{ "name" => "Item1" }]}}
-      expect(index).to receive(:get_document).with("class_name", 1).and_return(doc)
+      expect(strategy).to receive(:get_document).with("class_name", 1).and_return(doc)
       expect(subject.get(1)).to eq klass.new(_id: 1, name: "Foo", items: [{ "name" => "Item1" }])
     end
 
-    it "deletes specific document from index" do
-      index_ret = double(:index_return)
-      expect(index).to receive(:delete_document).with("class_name", 1).and_return(index_ret)
-      expect(subject.delete(1)).to eq index_ret
+    it "deletes specific document from strategy" do
+      strategy_ret = double(:strategy_return)
+      expect(strategy).to receive(:delete_document).with("class_name", 1).and_return(strategy_ret)
+      expect(subject.delete(1)).to eq strategy_ret
     end
   end
 
   context "instance" do
     subject { klass.new _id: 1, name: "Foo", items: [{ name: "Item1" }] }
 
-    it "stores the document in the index" do
-      expect(index).to receive(:index_document).with("class_name", 1, { name: "Foo", items: [{ name: "Item1" }] }).and_return("_id" => "1", "created" => true)
+    it "stores the document in the strategy" do
+      expect(strategy).to receive(:index_document).with("class_name", 1, { name: "Foo", items: [{ name: "Item1" }] }).and_return("_id" => "1", "created" => true)
       subject.update
     end
   end

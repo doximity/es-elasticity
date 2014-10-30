@@ -2,99 +2,91 @@ module Elasticity
   class Document
     include ::ActiveModel::Model
 
-    # Sets the index name to something else than the default
-    def self.index_name=(name)
-      @index_name = name
-      @index = nil
-    end
+    class NotConfigured < StandardError; end
 
-    # Namespaced index name
-    def self.namespaced_index_name
-      name = @index_name || self.name.underscore.pluralize
-
+    # Configure the given klass, changing default parameters and resetting
+    # some of the internal state.
+    def self.configure(index_base_name:, document_type:, mapping: )
       if namespace = Elasticity.config.namespace
-        name = "#{namespace}_#{name}"
+        index_base_name = "#{namespace}_#{index_base_name}"
       end
 
-      name
-    end
-
-    # The document type to be used, it's inferred by the class name.
-    def self.document_type
-      return @document_type if defined?(@document_type)
-      @document_type = self.name.demodulize.underscore
-    end
-
-    # Sets the document type to something different than the default
-    def self.document_type=(document_type)
       @document_type = document_type
+      @mapping       = mapping
+      @strategy      = Strategies::SingleIndex.new(Elasticity.config.client, index_base_name)
     end
 
-    # Sets the mapping for this model, which will be used to create the associated index and
-    # generate accessor methods.
-    def self.mappings=(mappings)
-      raise "Can't re-define mappings in runtime" if defined?(@mappings)
-      @mappings = mappings
+    # Returns the stategy class being used.
+    # Check Elasticity::Strategies for more information.
+    def self.strategy
+      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @strategy.nil?
+      @strategy
     end
 
-    # Returns the instance of Elasticity::Index associated with this document.
-    def self.index
-      return @index if @index.present?
-      @index = Index.new(Elasticity.config.client, self.namespaced_index_name)
+    # Document type
+    def self.document_type
+      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @document_type.nil?
+      @document_type
+    end
+
+    # Document type
+    def self.mapping
+      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @mapping.nil?
+      @mapping
     end
 
     # Creates the index for this document
     def self.create_index
-      self.index.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
+      self.strategy.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
     end
 
     # Re-creates the index for this document
     def self.recreate_index
-      self.index.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mappings })
+      self.strategy.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
     end
 
     # Deletes the index
     def self.delete_index
-      self.index.delete
+      self.strategy.delete
+    end
+
+    # Remap
+    def self.remap!
     end
 
     # Flushes the index, forcing any writes
     def self.flush_index
-      self.index.flush
-    end
-
-    # Runs a live remap of the index by creating a new index with the new mapping, adjusting aliases,
-    # re-indexing data and switching aliases. It's zero downtime remap and reindex.
-    def self.remap!
+      self.strategy.flush
     end
 
     # Searches the index using the parameters provided in the body hash, following the same
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
     def self.search(body)
-      DocumentSearchProxy.new(Search.new(index, document_type, body), self)
+      search = self.strategy.search(self.document_type, body)
+      DocumentSearchProxy.new(search, self)
     end
 
     # Fetches one specific document from the index by ID.
     def self.get(id)
-      if doc = index.get_document(document_type, id)
+      if doc = self.strategy.get_document(document_type, id)
         new(doc["_source"].merge(_id: doc['_id']))
       end
     end
 
     # Removes one specific document from the index.
     def self.delete(id)
-      index.delete_document(document_type, id)
+      self.strategy.delete_document(document_type, id)
     end
 
     # Removes entries based on a search
     def self.delete_by_search(search)
-      index.delete_by_query(document_type, search.body)
+      self.strategy.delete_by_query(document_type, search.body)
     end
 
     # Bulk index the provided documents
     def self.bulk_index(documents)
-      index.bulk do |b|
+      self.strategy.bulk do |b|
         documents.each do |doc|
           b.index(self.document_type, doc._id, doc.to_document)
         end
@@ -134,7 +126,7 @@ module Elasticity
 
     # Update this object on the index, creating or updating the document.
     def update
-      res = self.class.index.index_document(self.class.document_type, _id, to_document)
+      res = self.class.strategy.index_document(self.class.document_type, _id, to_document)
 
       if id = res["_id"]
         self._id = id

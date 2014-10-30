@@ -1,6 +1,4 @@
-require "elasticity/index"
-
-RSpec.describe Elasticity::Index, elasticsearch: true do
+RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
   subject do
     described_class.new(Elasticity.config.client, "test_index_name")
   end
@@ -25,7 +23,7 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
     subject.create(index_def)
     expect(subject.mappings).to eq({"document"=>{"properties"=>{"name"=>{"type"=>"string"}}}})
 
-    subject.recreate
+    subject.recreate(index_def)
     expect(subject.mappings).to eq({"document"=>{"properties"=>{"name"=>{"type"=>"string"}}}})
 
     subject.delete
@@ -62,6 +60,7 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
         b.index  "document", 2, name: "bar"
         b.delete "document", 1
       end
+
       expect(results_b).to include("errors"=>false, "items"=>[{"index"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "status"=>201}}, {"delete"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"1", "_version"=>2, "status"=>200, "found"=>true}}])
 
       subject.flush
@@ -73,13 +72,12 @@ RSpec.describe Elasticity::Index, elasticsearch: true do
     it "allows searching documents" do
       subject.index_document("document", 1, name: "test")
       subject.flush
-      results = subject.search("document", filter: { term: { name: "test" }})
 
-      expect(results["hits"]["total"]).to be 1
-
-      doc = results["hits"]["hits"][0]
-      expect(doc["_id"]).to eq "1"
-      expect(doc["_source"]).to eq({ "name" => "test" })
+      search = subject.search("document", filter: { term: { name: "test" }})
+      expect(search).to be_a(Elasticity::Search)
+      expect(search.index_name).to eq "test_index_name"
+      expect(search.document_type).to eq "document"
+      expect(search.body).to eq filter: { term: { name: "test" } }
     end
 
     it "allows deleting by queryu" do
