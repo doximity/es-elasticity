@@ -6,14 +6,14 @@ module Elasticity
 
     # Configure the given klass, changing default parameters and resetting
     # some of the internal state.
-    def self.configure(index_base_name:, document_type:, mapping: )
+    def self.configure(index_base_name:, document_type:, mapping:, strategy: Strategies::SingleIndex)
       if namespace = Elasticity.config.namespace
         index_base_name = "#{namespace}_#{index_base_name}"
       end
 
       @document_type = document_type
       @mapping       = mapping
-      @strategy      = Strategies::SingleIndex.new(Elasticity.config.client, index_base_name)
+      @strategy      = strategy.new(Elasticity.config.client, index_base_name)
     end
 
     # Returns the stategy class being used.
@@ -52,6 +52,7 @@ module Elasticity
 
     # Remap
     def self.remap!
+      self.strategy.remap(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
     end
 
     # Flushes the index, forcing any writes
@@ -126,20 +127,11 @@ module Elasticity
 
     # Update this object on the index, creating or updating the document.
     def update
-      res = self.class.strategy.index_document(self.class.document_type, _id, to_document)
-
-      if id = res["_id"]
-        self._id = id
-        @created = res["created"]
-        true
-      else
-        false
-      end
+      self._id, @created = self.class.strategy.index_document(self.class.document_type, _id, to_document)
     end
 
     def delete
-      res = self.class.delete(self._id)
-      res["found"] || false
+      self.class.delete(self._id)
     end
 
     def created?

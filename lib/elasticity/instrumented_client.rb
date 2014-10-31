@@ -5,7 +5,7 @@ module Elasticity
     end
 
     # Generate wrapper methods for @client.indices
-    %w(exists create delete get_settings get_mapping flush).each do |method_name|
+    %w(exists create delete get_settings get_mapping flush get_alias get_aliases put_alias delete_alias exists_alias update_aliases).each do |method_name|
       full_name = "index_#{method_name}"
 
       define_method(full_name) do |*args, &block|
@@ -16,7 +16,7 @@ module Elasticity
     end
 
     # Generate wrapper methods for @client
-    %w(index delete get search delete_by_query bulk).each do |method_name|
+    %w(index delete get search scroll delete_by_query bulk).each do |method_name|
       define_method(method_name) do |*args, &block|
         instrument(method_name, args) do
           @client.public_send(method_name, *args, &block)

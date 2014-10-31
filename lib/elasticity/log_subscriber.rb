@@ -5,44 +5,16 @@ module Elasticity
   GRAY = "\e[90m"
 
   class LogSubscriber < ::ActiveSupport::LogSubscriber
-    def index_create(event)
-      log_event(event)
+    %w(exists create delete get_settings get_mapping flush get_alias get_aliases put_alias delete_alias exists_alias update_aliases).each do |method_name|
+      define_method("index_#{method_name}") do |event|
+        log_event(event)
+      end
     end
 
-    def index_delete(event)
-      log_event(event)
-    end
-
-    def index_document(event)
-      log_event(event)
-    end
-
-    def delete_document(event)
-      log_event(event)
-    end
-
-    def get_document(event)
-      log_event(event)
-    end
-
-    def search(event)
-      log_event(event)
-    end
-
-    def delete_by_query(event)
-      log_event(event)
-    end
-
-    def settings(event)
-      log_event(event)
-    end
-
-    def mappings(event)
-      log_event(event)
-    end
-
-    def flush(event)
-      log_event(event)
+    %w(index delete get search scroll delete_by_query bulk).each do |method_name|
+      define_method(method_name) do |event|
+        log_event(event)
+      end
     end
 
     def multi_search(event)

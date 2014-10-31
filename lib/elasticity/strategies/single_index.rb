@@ -1,20 +1,15 @@
 module Elasticity
   module Strategies
-    class IndexError < StandardError
-      attr_reader :index_name
-
-      def initialize(index_name, message)
-        @index_name = index_name
-        super("#{index_name}: #{message}")
-      end
-    end
-
     class SingleIndex
       STATUSES = [:missing, :ok]
 
       def initialize(client, index_name)
         @client     = client
         @index_name = index_name
+      end
+
+      def remap!
+        raise NotImplementedError
       end
 
       def missing?
@@ -47,7 +42,13 @@ module Elasticity
       end
 
       def index_document(type, id, attributes)
-        @client.index(index: @index_name, type: type, id: id, body: attributes)
+        res = @client.index(index: @index_name, type: type, id: id, body: attributes)
+
+        if id = res["_id"]
+          [id, res["created"]]
+        else
+          raise IndexError.new(@update_alias, "failed to index document")
+        end
       end
 
       def delete_document(type, id)

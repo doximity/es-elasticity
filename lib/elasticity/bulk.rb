@@ -31,5 +31,23 @@ module Elasticity
         super(@index_name, type, id)
       end
     end
+
+    class Alias < Bulk
+      def initialize(client, update_alias, delete_indexes)
+        super(client)
+        @update_alias   = update_alias
+        @delete_indexes = delete_indexes
+      end
+
+      def index(type, id, attributes)
+        super(@update_alias, type, id, attributes)
+      end
+
+      def delete(type, id)
+        @delete_indexes.each do |index|
+          super(index, type, id)
+        end
+      end
+    end
   end
 end

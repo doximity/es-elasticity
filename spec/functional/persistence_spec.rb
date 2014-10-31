@@ -1,30 +1,30 @@
 RSpec.describe "Persistence", elasticsearch: true do
-  subject do
-    Class.new(Elasticity::Document) do
-      configure index_base_name: "users", document_type: "user", mapping: {
-        properties: {
-          name: { type: "string" },
-          birthdate: { type: "date" },
-        },
-      }
+  describe "single index strategy" do
+    subject do
+      Class.new(Elasticity::Document) do
+        configure index_base_name: "users", document_type: "user", strategy: Elasticity::Strategies::SingleIndex, mapping: {
+          properties: {
+            name: { type: "string" },
+            birthdate: { type: "date" },
+          },
+        }
 
-      attr_accessor :name, :birthdate
+        attr_accessor :name, :birthdate
 
-      def to_document
-        { name: name, birthdate: birthdate }
+        def to_document
+          { name: name, birthdate: birthdate }
+        end
       end
     end
-  end
 
-  before do
-    subject.recreate_index
-  end
+    before do
+      subject.recreate_index
+    end
 
-  after do
-    subject.delete_index
-  end
+    after do
+      subject.delete_index
+    end
 
-  describe "simple, one-index" do
     it "successfully index, update, search and delete" do
       john = subject.new(name: "John", birthdate: "1985-10-31")
       mari = subject.new(name: "Mari", birthdate: "1986-09-24")
@@ -52,7 +52,32 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
   end
 
-  describe "live remap" do
+  describe "alias index strategy" do
+    subject do
+      Class.new(Elasticity::Document) do
+        configure index_base_name: "users", document_type: "user", strategy: Elasticity::Strategies::AliasIndex, mapping: {
+          properties: {
+            name: { type: "string" },
+            birthdate: { type: "date" },
+          },
+        }
+
+        attr_accessor :name, :birthdate
+
+        def to_document
+          { name: name, birthdate: birthdate }
+        end
+      end
+    end
+
+    before do
+      subject.recreate_index
+    end
+
+    after do
+      subject.delete_index
+    end
+
     it "remaps to a different index transparently" do
       john = subject.new(name: "John", birthdate: "1985-10-31")
       mari = subject.new(name: "Mari", birthdate: "1986-09-24")
@@ -79,20 +104,20 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "handles in between state while remapping" do
-      docs = 500.times.map do |i|
+      docs = 1000.times.map do |i|
         subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
 
-      docs.sample(50).each(&:update)
-      docs.sample(50).each(&:delete)
+      docs.sample(100).each(&:update)
+      docs.sample(100).each(&:delete)
 
       t.join
 
       subject.flush_index
       results = subject.search(sort: :name, size: docs.length)
-      expect(results.total).to eq(docs.length - 50)
+      expect(results.total).to eq(docs.length - 100)
     end
   end
 end
