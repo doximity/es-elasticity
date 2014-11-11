@@ -126,5 +126,30 @@ RSpec.describe "Persistence", elasticsearch: true do
       results = subject.search(sort: :name)
       expect(results.total).to eq(2010)
     end
+
+    it "recover from remap interrupts" do
+      docs = 2000.times.map do |i|
+        subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      end
+
+      t = Thread.new { subject.remap! }
+
+      to_update = docs.sample(10)
+      to_delete = (docs - to_update).sample(10)
+
+      to_update.each(&:update)
+      to_delete.each(&:delete)
+
+      20.times.map do |i|
+        subject.new(name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      end
+
+      t.raise("Test Interrupt")
+      expect { t.join }.to raise_error("Test Interrupt")
+
+      subject.flush_index
+      results = subject.search(sort: :name)
+      expect(results.total).to eq(2010)
+    end
   end
 end

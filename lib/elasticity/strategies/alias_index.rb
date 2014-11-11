@@ -6,9 +6,11 @@ module Elasticity
       def initialize(client, index_base_name)
         @client       = client
         @main_alias   = index_base_name
-        @update_alias = "#{@index_base_name}_update"
+        @update_alias = "#{index_base_name}_update"
       end
 
+      # This is really complex but it works and handles race-conditions properly. Probably should be refactored into
+      # it's own class.
       def remap(index_def)
         main_indexes   = self.main_indexes
         update_indexes = self.update_indexes
@@ -20,49 +22,86 @@ module Elasticity
         new_index      = create_index(index_def)
         original_index = main_indexes[0]
 
-        @client.index_update_aliases(body: {
-          actions: [
-            { remove: { index: original_index, alias: @update_alias } },
-            { add:    { index: new_index, alias: @update_alias } },
-            { add:    { index: new_index, alias: @main_alias }},
-          ]
-        })
+        begin
+          # Configure aliases so that search includes the old index and the new index, and writes are made to
+          # the new index.
+          @client.index_update_aliases(body: {
+            actions: [
+              { remove: { index: original_index, alias: @update_alias } },
+              { add:    { index: new_index, alias: @update_alias } },
+              { add:    { index: new_index, alias: @main_alias }},
+            ]
+          })
 
-        @client.index_flush(index: original_index)
-        cursor = @client.search index: original_index, search_type: 'scan', scroll: '1m', _source: false, size: 100
-        loop do
-          cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
-          hits   = cursor['hits']['hits']
-          break if hits.empty?
+          @client.index_flush(index: original_index)
+          cursor = @client.search index: original_index, search_type: 'scan', scroll: '1m', _source: false, size: 100
+          loop do
+            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
+            hits   = cursor['hits']['hits']
+            break if hits.empty?
 
-          # Fetch documents based on the ids that existed when the migration started, to make sure we only migrate
-          # documents that haven't been deleted.
-          id_docs = hits.map do |hit|
-            { _index: original_index, _type: hit["_type"], _id: hit["_id"] }
-          end
-
-          docs = @client.mget(body: { docs: id_docs }, refresh: true)["docs"]
-          break if docs.empty?
-
-          ops = []
-          docs.each do |doc|
-            ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } } if doc["found"]
-          end
-
-          @client.bulk(body: ops)
-
-          ops = []
-          @client.mget(body: { docs: id_docs }, refresh: true)["docs"].each_with_index do |new_doc, idx|
-            if docs[idx]["found"] && !new_doc["found"]
-              ops << { delete: { _index: new_index, _type: new_doc["_type"], _id: new_doc["_id"] } }
+            # Fetch documents based on the ids that existed when the migration started, to make sure we only migrate
+            # documents that haven't been deleted.
+            id_docs = hits.map do |hit|
+              { _index: original_index, _type: hit["_type"], _id: hit["_id"] }
             end
+
+            docs = @client.mget(body: { docs: id_docs }, refresh: true)["docs"]
+            break if docs.empty?
+
+            # Move only documents that still exists on the old index, into the new index.
+            ops = []
+            docs.each do |doc|
+              ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } } if doc["found"]
+            end
+
+            @client.bulk(body: ops)
+
+            # Deal with race conditions by removing from the new index any document that doesn't exist in the old index anymore.
+            ops = []
+            @client.mget(body: { docs: id_docs }, refresh: true)["docs"].each_with_index do |new_doc, idx|
+              if docs[idx]["found"] && !new_doc["found"]
+                ops << { delete: { _index: new_index, _type: new_doc["_type"], _id: new_doc["_id"] } }
+              end
+            end
+
+            @client.bulk(body: ops) unless ops.empty?
           end
 
-          @client.bulk(body: ops) unless ops.empty?
-        end
+          # Update aliases to only point to the new index.
+          @client.index_delete_alias(index: original_index, name: @main_alias)
+          @client.index_delete(index: original_index)
 
-        @client.index_delete_alias(index: original_index, name: @main_alias)
-        @client.index_delete(index: original_index)
+        rescue
+          @client.index_update_aliases(body: {
+            actions: [
+              { add:    { index: original_index, alias: @update_alias } },
+              { remove: { index: new_index, alias: @update_alias } },
+            ]
+          })
+
+          @client.index_flush(index: new_index)
+          cursor = @client.search index: new_index, search_type: 'scan', scroll: '1m', size: 100
+          loop do
+            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
+            hits   = cursor['hits']['hits']
+            break if hits.empty?
+
+            # Move all the documents that exists on the new index back to the old index
+            ops = []
+            hits.each do |doc|
+              ops << { index: { _index: original_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } }
+            end
+
+            @client.bulk(body: ops)
+          end
+
+          @client.index_flush(index: original_index)
+          @client.index_delete_alias(index: new_index, name: @main_alias)
+          @client.index_delete(index: new_index)
+
+          raise
+        end
       end
 
       def status
