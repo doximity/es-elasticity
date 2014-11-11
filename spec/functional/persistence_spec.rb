@@ -104,20 +104,27 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "handles in between state while remapping" do
-      docs = 5000.times.map do |i|
+      docs = 2000.times.map do |i|
         subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
 
-      docs.sample(400).each(&:update)
-      docs.sample(200).each(&:delete)
+      to_update = docs.sample(10)
+      to_delete = (docs - to_update).sample(10)
+
+      to_update.each(&:update)
+      to_delete.each(&:delete)
+
+      20.times.map do |i|
+        subject.new(name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      end
 
       t.join
 
       subject.flush_index
-      results = subject.search(sort: :name, size: docs.length)
-      expect(results.total).to eq(docs.length - 200)
+      results = subject.search(sort: :name)
+      expect(results.total).to eq(2010)
     end
   end
 end

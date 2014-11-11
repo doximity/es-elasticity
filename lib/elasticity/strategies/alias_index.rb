@@ -17,35 +17,52 @@ module Elasticity
           raise "Index can't be remapped right now, check if another remapping is already happening"
         end
 
-        new_update_index = create_index(index_def)
-        old_update_index = update_indexes[0]
-        old_main_index   = main_indexes[0]
+        new_index      = create_index(index_def)
+        original_index = main_indexes[0]
 
         @client.index_update_aliases(body: {
           actions: [
-            { remove: { index: old_update_index, alias: @update_alias } },
-            { add:    { index: new_update_index, alias: @update_alias } },
-            { add:    { index: new_update_index, alias: @main_alias }},
+            { remove: { index: original_index, alias: @update_alias } },
+            { add:    { index: new_index, alias: @update_alias } },
+            { add:    { index: new_index, alias: @main_alias }},
           ]
         })
 
-        @client.index_flush(index: old_main_index)
-
-        r = @client.search index: old_main_index, search_type: 'scan', scroll: '1m', size: 100
+        @client.index_flush(index: original_index)
+        cursor = @client.search index: original_index, search_type: 'scan', scroll: '1m', _source: false, size: 100
         loop do
-          r    = @client.scroll(scroll_id: r['_scroll_id'], scroll: '1m')
-          hits = r['hits']['hits']
+          cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
+          hits   = cursor['hits']['hits']
           break if hits.empty?
 
-          b = Bulk::Alias.new(@client, new_update_index, [old_main_index])
-          hits.each do |hit|
-            b.index(hit["_type"], hit["_id"], hit["_source"])
+          # Fetch documents based on the ids that existed when the migration started, to make sure we only migrate
+          # documents that haven't been deleted.
+          id_docs = hits.map do |hit|
+            { _index: original_index, _type: hit["_type"], _id: hit["_id"] }
           end
-          b.execute
+
+          docs = @client.mget(body: { docs: id_docs }, refresh: true)["docs"]
+          break if docs.empty?
+
+          ops = []
+          docs.each do |doc|
+            ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } } if doc["found"]
+          end
+
+          @client.bulk(body: ops)
+
+          ops = []
+          @client.mget(body: { docs: id_docs }, refresh: true)["docs"].each_with_index do |new_doc, idx|
+            if docs[idx]["found"] && !new_doc["found"]
+              ops << { delete: { _index: new_index, _type: new_doc["_type"], _id: new_doc["_id"] } }
+            end
+          end
+
+          @client.bulk(body: ops) unless ops.empty?
         end
 
-        @client.index_delete_alias(index: old_main_index, name: @main_alias)
-        @client.index_delete(index: old_main_index)
+        @client.index_delete_alias(index: original_index, name: @main_alias)
+        @client.index_delete(index: original_index)
       end
 
       def status
@@ -116,25 +133,11 @@ module Elasticity
       end
 
       def delete_document(type, id)
-        deleted = false
-
-        main_indexes.each do |index|
-          begin
-            @client.delete(index: index, type: type, id: id)
-            deleted = true
-          rescue Elasticsearch::Transport::Transport::Errors::NotFound
-          end
+        ops = (main_indexes | update_indexes).map do |index|
+          { delete: { _index: index, _type: type, _id: id } }
         end
 
-        update_indexes.each do |index|
-          begin
-            @client.delete(index: index, type: type, id: id)
-            deleted = true
-          rescue Elasticsearch::Transport::Transport::Errors::NotFound
-          end
-        end
-
-        deleted
+        @client.bulk(body: ops)
       end
 
       def get_document(type, id)
