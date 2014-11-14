@@ -1,5 +1,8 @@
 module Elasticity
   module Strategies
+    # This strategy keeps two aliases that might be mapped to the same index or different index, allowing
+    # runtime changes by simply atomically updating the aliases. For example, look at the remap method
+    # implementation.
     class AliasIndex
       STATUSES = [:missing, :ok]
 
@@ -9,8 +12,18 @@ module Elasticity
         @update_alias = "#{index_base_name}_update"
       end
 
-      # This is really complex but it works and handles race-conditions properly. Probably should be refactored into
-      # it's own class.
+      # Remap allows zero-downtime/zero-dataloss remap of elasticsearch indexes. Here is the overview
+      # of how it works:
+      #
+      # 1. Creates a new index with the new mapping
+      # 2. Update the aliases so that any write goes to the new index and reads goes to both indexes.
+      # 3. Use scan and scroll to iterate over all the documents in the old index, moving them to the
+      #    new index.
+      # 4. Update the aliases so that all operations goes to the new index.
+      # 5. Deletes the old index.
+      #
+      # It does a little bit more to ensure consistency and to handle race-conditions. For more details
+      # look at the implementation.
       def remap(index_def)
         main_indexes   = self.main_indexes
         update_indexes = self.update_indexes

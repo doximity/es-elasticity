@@ -4,45 +4,58 @@ module Elasticity
 
     class NotConfigured < StandardError; end
 
+    Config = Struct.new(:index_base_name, :document_type, :mapping, :strategy)
+
     # Configure the given klass, changing default parameters and resetting
     # some of the internal state.
-    def self.configure(index_base_name:, document_type:, mapping:, strategy: Strategies::SingleIndex)
-      if namespace = Elasticity.config.namespace
-        index_base_name = "#{namespace}_#{index_base_name}"
-      end
-
-      @document_type = document_type
-      @mapping       = mapping
-      @strategy      = strategy.new(Elasticity.config.client, index_base_name)
+    def self.configure
+      @config = Config.new
+      @config.strategy = Strategies::SingleIndex
+      yield(@config)
     end
 
     # Returns the stategy class being used.
     # Check Elasticity::Strategies for more information.
     def self.strategy
-      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @strategy.nil?
-      @strategy
+      if @config.nil? || @config.strategy.nil?
+        raise NotConfigured, "#{self} has not been configured, make sure you call the configure method"
+      end
+
+      return @strategy if defined?(@strategy)
+
+      if namespace = Elasticity.config.namespace
+        index_base_name = "#{namespace}_#{@config.index_base_name}"
+      end
+
+      @strategy = @config.strategy.new(Elasticity.config.client, index_base_name)
     end
 
     # Document type
     def self.document_type
-      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @document_type.nil?
-      @document_type
+      if @config.nil? || @config.document_type.blank?
+        raise NotConfigured, "#{self} has not been configured, make sure you call the configure method"
+      end
+
+      @config.document_type
     end
 
     # Document type
     def self.mapping
-      raise NotConfigured, "#{self} has not been configured, make sure you call the configure method" if @mapping.nil?
-      @mapping
+      if @config.nil? || @config.mapping.blank?
+        raise NotConfigured, "#{self} has not been configured, make sure you call the configure method"
+      end
+
+      @config.mapping
     end
 
     # Creates the index for this document
     def self.create_index
-      self.strategy.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
+      self.strategy.create_if_undefined(settings: Elasticity.config.settings, mappings: { document_type => mapping })
     end
 
     # Re-creates the index for this document
     def self.recreate_index
-      self.strategy.recreate(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
+      self.strategy.recreate(settings: Elasticity.config.settings, mappings: { document_type => mapping })
     end
 
     # Deletes the index
@@ -52,7 +65,7 @@ module Elasticity
 
     # Remap
     def self.remap!
-      self.strategy.remap(settings: Elasticity.config.settings, mappings: { document_type => @mapping })
+      self.strategy.remap(settings: Elasticity.config.settings, mappings: { document_type => mapping })
     end
 
     # Flushes the index, forcing any writes

@@ -16,7 +16,11 @@ RSpec.describe Elasticity::Document do
 
   let :klass do
     Class.new(described_class) do
-      configure index_base_name: "class_names", document_type: "class_name", mapping: mappings
+      configure do |c|
+        c.index_base_name = "class_names"
+        c.document_type   = "class_name"
+        c.mapping         = mappings
+      end
 
       attr_accessor :name, :items
 

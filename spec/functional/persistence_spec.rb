@@ -2,12 +2,18 @@ RSpec.describe "Persistence", elasticsearch: true do
   describe "single index strategy" do
     subject do
       Class.new(Elasticity::Document) do
-        configure index_base_name: "users", document_type: "user", strategy: Elasticity::Strategies::SingleIndex, mapping: {
-          properties: {
-            name: { type: "string" },
-            birthdate: { type: "date" },
-          },
-        }
+        configure do |c|
+          c.index_base_name = "users"
+          c.document_type   = "user"
+          c.strategy        = Elasticity::Strategies::SingleIndex
+
+          c.mapping = {
+            properties: {
+              name: { type: "string" },
+              birthdate: { type: "date" },
+            },
+          }
+        end
 
         attr_accessor :name, :birthdate
 
@@ -55,12 +61,18 @@ RSpec.describe "Persistence", elasticsearch: true do
   describe "alias index strategy" do
     subject do
       Class.new(Elasticity::Document) do
-        configure index_base_name: "users", document_type: "user", strategy: Elasticity::Strategies::AliasIndex, mapping: {
-          properties: {
-            name: { type: "string" },
-            birthdate: { type: "date" },
-          },
-        }
+        configure do |c|
+          c.index_base_name = "users"
+          c.document_type   = "user"
+          c.strategy        =  Elasticity::Strategies::AliasIndex
+
+          c.mapping = {
+            properties: {
+              name: { type: "string" },
+              birthdate: { type: "date" },
+            },
+          }
+        end
 
         attr_accessor :name, :birthdate
 
