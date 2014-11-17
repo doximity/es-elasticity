@@ -118,8 +118,6 @@ module Elasticity
     class ScanCursor
       include Enumerable
 
-      delegate :each, to: :enumerator
-
       def initialize(client, search_definition, document_klass, size: 100, scroll: "1m")
         @client            = client
         @search_definition = search_definition
@@ -140,6 +138,18 @@ module Elasticity
         search["hits"]["total"]
       end
 
+      def each_batch
+        enumerator.each do |group|
+          yield(group)
+        end
+      end
+
+      def each
+        enumerator.each do |group|
+          group.each { |doc| yield(doc) }
+        end
+      end
+
       private
 
       def enumerator
@@ -151,9 +161,7 @@ module Elasticity
             hits     = response["hits"]["hits"]
             break if hits.empty?
 
-            hits.each do |hit|
-              y << @document_klass.from_hit(hit)
-            end
+            y << hits.map { |hit| @document_klass.from_hit(hit) }
           end
         end
       end
