@@ -55,8 +55,8 @@ module Elasticity
       # as fast as possible. The sort option will be discarded.
       #
       # More info: http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/scan-scroll.html
-      def scan_documents(document_klass)
-        ScanCursor.new(@client, @search_definition, document_klass)
+      def scan_documents(document_klass, **options)
+        ScanCursor.new(@client, @search_definition, document_klass, **options)
       end
 
       # Performs the search only fetching document ids using it to load ActiveRecord objects from the provided
@@ -120,13 +120,12 @@ module Elasticity
 
       delegate :each, to: :enumerator
 
-      def initialize(client, search_definition, document_klass, size: 100, time: "1m", **options)
+      def initialize(client, search_definition, document_klass, size: 100, scroll: "1m")
         @client            = client
         @search_definition = search_definition
         @document_klass    = document_klass
         @size              = size
-        @time              = time
-        @options           = options
+        @scroll            = scroll
       end
 
       def empty?
@@ -148,7 +147,7 @@ module Elasticity
           response = search
 
           loop do
-            response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @time)
+            response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @scroll)
             hits     = response["hits"]["hits"]
             break if hits.empty?
 
@@ -162,7 +161,7 @@ module Elasticity
       def search
         return @search if defined?(@search)
         args    = @search_definition.to_search_args
-        args    = args.merge(search_type: 'scan', size: @size, scroll: @time, **@options)
+        args    = args.merge(search_type: 'scan', size: @size, scroll: @scroll)
         @search = @client.search(args)
       end
     end
@@ -245,8 +244,8 @@ module Elasticity
         @search.documents(@document_klass)
       end
 
-      def scan_documents
-        @search.scan_documents(@document_klass)
+      def scan_documents(**options)
+        @search.scan_documents(@document_klass, **options)
       end
 
       def method_missing(method_name, *args, &block)
