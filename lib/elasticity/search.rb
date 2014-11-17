@@ -1,77 +1,82 @@
 module Elasticity
-  # Search provides a simple interface for defining a search against an Elasticsearch
-  # index and fetching the results in different ways and mappings.
-  #
-  # Example:
-  #   search = Elasticity::Search.new("people", "person", {...})
-  #   search.documents(Person)
-  class Search
-    attr_reader :index_name, :document_type, :body
+  module Search
+    # Elasticity::Search::Definition is a struct that encapsulates all the data specific to one
+    # ElasticSearch search.
+    class Definition
+      attr_accessor :index_name, :document_type, :body
 
-    # Creates a new Search definitions for the given index, document_type and criteria. The
-    # search is not performend until methods are called, each method represents a different
-    # way of fetching and mapping the data.
-    #
-    # The body parameter is a hash following the exact same syntax as Elasticsearch's JSON
-    # query language.
-    def initialize(client, index_name, document_type, body)
-      @client         = client
-      @index_name     = index_name
-      @document_type  = document_type.freeze
-      @body           = body.freeze
-    end
-
-    # Execute the search, fetching only ids from Elasticsearch and then mapping the results
-    # into ActiveRecord models using the provided relation.
-    def active_records(relation)
-      return @active_record if defined?(@active_record)
-      response = @client.search(index: @index_name, type: @document_type, body: @body.merge(_source: false))
-      @active_record = Result.new(response, ActiveRecordMapper.new(relation))
-    end
-
-    # Execute the search, fetching all documents from the index and mapping the stored attributes
-    # into instances of the provided class. It will call document_klass.new(attrs), where attrs
-    # are the stored attributes.
-    def documents(document_klass)
-      return @documents if defined?(@documents)
-      response = @client.search(index: @index_name, type: @document_type, body: @body)
-      @documents = Result.new(response, DocumentMapper.new(document_klass))
-    end
-
-    # Result is a collection representing the response from a search against an index. It's what gets
-    # returned by any of the Elasticity::Search methods and it provides a lazily-evaluated and
-    # lazily-mapped – using the provided mapper class.
-    #
-    # Example:
-    #
-    #   response = {"took"=>0, "timed_out"=>false, "_shards"=>{"total"=>5, "successful"=>5, "failed"=>0}, "hits"=>{"total"=>2, "max_score"=>1.0, "hits"=>[
-    #     {"_index"=>"my_index", "_type"=>"my_type", "_id"=>"1", "_score"=>1.0, "_source"=> { "id" => 1, "name" => "Foo" },
-    #     {"_index"=>"my_index", "_type"=>"my_type", "_id"=>"2", "_score"=>1.0, "_source"=> { "id" => 2, "name" => "Bar" },
-    #   ]}}
-    #
-    #   class AttributesMapper
-    #     def map(hits)
-    #       hits.map { |h| h["_source"] }
-    #     end
-    #   end
-    #
-    #   r = Result.new(response, AttributesMapper.new)
-    #   r.total # => 2
-    #   r[0]    # => { "id" => 1, "name" => "Foo" }
-    #
-    class Result
-      include Enumerable
-
-      def initialize(response, mapper)
-        @response = response
-        @mapper   = mapper
+      def initialize(index_name, document_type, body)
+        @index_name    = index_name
+        @document_type = document_type
+        @body          = body
       end
 
-      delegate :[], :each, :to_ary, :size, :+, :-, to: :mapping
+      def update(body_changes)
+        self.class.new(@index_name, @document_type, @body.deep_merge(body_changes))
+      end
 
-      # The total number of entries as returned by ES
-      def total
-        @response["hits"]["total"]
+      def to_search_args
+        { index: @index_name, type: @document_type, body: @body }
+      end
+
+      def to_msearch_args
+        { index: @index_name, type: @document_type, search: @body }
+      end
+    end
+
+    # Elasticity::Search::Facade provides a simple interface for defining a search and provides
+    # different ways of executing it against Elasticsearch. This is usually the main entry point
+    # for search.
+    class Facade
+      attr_accessor :search_definition
+
+      # Creates a new facade for the given search definition, providing a set of helper methods
+      # to trigger different type of searches and results interpretation.
+      def initialize(client, search_definition)
+        @client            = client
+        @search_definition = search_definition
+      end
+
+      # Performs the search using the default search type and returning an iterator that will yield
+      # hash representations of the documents.
+      def document_hashes
+        LazySearch.new(@client, @search_definition)
+      end
+
+      # Performs the search using the default search type and returning an iterator that will yield
+      # each document, converted to the provided document_klass.
+      def documents(document_klass)
+        LazySearch.new(@client, @search_definition) do |hit|
+          document_klass.from_hit(hit)
+        end
+      end
+
+      # Performs the search using the scan search type and the scoll api to iterate over all the documents
+      # as fast as possible. The sort option will be discarded.
+      #
+      # More info: http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/scan-scroll.html
+      def scan_documents(document_klass)
+        ScanCursor.new(@client, @search_definition, document_klass)
+      end
+
+      # Performs the search only fetching document ids using it to load ActiveRecord objects from the provided
+      # relation. It returns the relation matching the objects found on ElasticSearch.
+      def active_records(relation)
+        ActiveRecordProxy.new(@client, @search_definition, relation)
+      end
+    end
+
+    class LazySearch
+      include Enumerable
+
+      delegate :each, :size, :length, :[], :+, :-, :&, :|, to: :search_results
+
+      attr_accessor :search_definition
+
+      def initialize(client, search_definition, &mapper)
+        @client            = client
+        @search_definition = search_definition
+        @mapper            = mapper
       end
 
       def empty?
@@ -82,46 +87,98 @@ module Elasticity
         empty?
       end
 
+      def total
+        response["hits"]["total"]
+      end
+
       def suggestions
-        @response["suggest"] || {}
+        response["hits"]["suggest"] ||= {}
       end
 
-      def mapping
-        return @mapping if defined?(@mapping)
-        hits = Array(@response["hits"]["hits"])
-        @mapping = @mapper.map(hits)
-      end
-    end
+      def search_results
+        return @search_results if defined?(@search_results)
 
-    class DocumentMapper
-      def initialize(document_klass)
-        @document_klass = document_klass
-      end
+        hits = response["hits"]["hits"]
 
-      def map(hits)
-        hits.map do |hit|
-          attrs = hit["_source"].merge(_id: hit['_id'])
-
-          if hit["highlight"]
-            highlighted_attrs = attrs.dup
-            attrs_set = Set.new
-
-            hit["highlight"].each do |name, v|
-              name = name.gsub(/\..*\z/, '')
-              next if attrs_set.include?(name)
-              highlighted_attrs[name] = v
-              attrs_set << name
-            end
-
-            highlighted = @document_klass.new(highlighted_attrs)
-          end
-
-          @document_klass.new(attrs.merge(highlighted: highlighted))
+        @search_results = if @mapper.nil?
+          hits
+        else
+          hits.map { |hit| @mapper.(hit) }
         end
       end
+
+      private
+
+      def response
+        return @response if defined?(@response)
+        @response = @client.search(@search_definition.to_search_args)
+      end
     end
 
-    class ActiveRecordMapper
+    class ScanCursor
+      include Enumerable
+
+      delegate :each, to: :enumerator
+
+      def initialize(client, search_definition, document_klass, size: 100, time: "1m", **options)
+        @client            = client
+        @search_definition = search_definition
+        @document_klass    = document_klass
+        @size              = size
+        @time              = time
+        @options           = options
+      end
+
+      def empty?
+        total == 0
+      end
+
+      def blank?
+        empty?
+      end
+
+      def total
+        search["hits"]["total"]
+      end
+
+      private
+
+      def enumerator
+        Enumerator.new do |y|
+          response = search
+
+          loop do
+            response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @time)
+            hits     = response["hits"]["hits"]
+            break if hits.empty?
+
+            hits.each do |hit|
+              y << @document_klass.from_hit(hit)
+            end
+          end
+        end
+      end
+
+      def search
+        return @search if defined?(@search)
+        args    = @search_definition.to_search_args
+        args    = args.merge(search_type: 'scan', size: @size, scroll: @time, **@options)
+        @search = @client.search(args)
+      end
+    end
+
+    class ActiveRecordProxy
+      def self.from_hits(relation, hits)
+        ids = hits.map { |hit| hit["_id"] }
+
+        if ids.any?
+          id_col = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
+          relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col},#{ids.join(',')})")
+        else
+          relation.none
+        end
+      end
+
       class Relation < ActiveSupport::ProxyObject
         def initialize(relation)
           @relation = relation
@@ -142,57 +199,59 @@ module Elasticity
         end
       end
 
-      def initialize(relation)
-        @relation = Relation.new(relation)
+      def initialize(client, search_definition, relation)
+        @client            = client
+        @search_definition = search_definition.update(_source: false)
+        @relation          = Relation.new(relation)
       end
 
-      def map(hits)
-        ids = hits.map { |h| h["_id"] }
+      def metadata
+        @metadata ||= { total: response["hits"]["total"], suggestions: response["hits"]["suggest"] || {} }
+      end
 
-        if ids.any?
-          id_col = "#{quote(@relation.table_name)}.#{quote(@relation.klass.primary_key)}"
-          @relation.where(id: ids).order("FIELD(#{id_col},#{ids.join(',')})")
-        else
-          @relation.none
-        end
+      def total
+        metadata[:total]
+      end
+
+      def suggestions
+        metadata[:suggestions]
+      end
+
+      def method_missing(name, *args, **options, &block)
+        filtered_relation.public_send(name, *args, **options, &block)
       end
 
       private
 
-      def quote(identifier)
-        @relation.connection.quote_column_name(identifier)
+      def response
+        @response ||= @client.search(@search_definition.to_search_args)
+      end
+
+      def filtered_relation
+        return @filtered_relation if defined?(@filtered_relation)
+        @filtered_relation = ActiveRecordProxy.from_hits(@relation, response["hits"]["hits"])
       end
     end
-  end
 
-  class DocumentSearchProxy < BasicObject
-    def initialize(search, document_klass)
-      @search         = search
-      @document_klass = document_klass
-    end
+    class DocumentProxy < BasicObject
+      def initialize(search, document_klass)
+        @search         = search
+        @document_klass = document_klass
+      end
 
-    def index
-      @search.index
-    end
+      delegate :search_definition, :active_records, to: :@search
 
-    def document_type
-      @search.document_type
-    end
+      def documents
+        @search.documents(@document_klass)
+      end
 
-    def body
-      @search.body
-    end
+      def scan_documents
+        @search.scan_documents(@document_klass)
+      end
 
-    def active_records(relation)
-      @search.active_records(relation)
-    end
-
-    def documents
-      @search.documents(@document_klass)
-    end
-
-    def method_missing(method_name, *args, &block)
-      documents.public_send(method_name, *args, &block)
+      def method_missing(method_name, *args, &block)
+        documents.public_send(method_name, *args, &block)
+      end
     end
   end
 end

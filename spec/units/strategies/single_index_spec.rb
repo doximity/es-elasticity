@@ -74,10 +74,9 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       subject.flush
 
       search = subject.search("document", filter: { term: { name: "test" }})
-      expect(search).to be_a(Elasticity::Search)
-      expect(search.index_name).to eq "test_index_name"
-      expect(search.document_type).to eq "document"
-      expect(search.body).to eq filter: { term: { name: "test" } }
+      hashes = search.document_hashes
+      expect(hashes.size).to be 1
+      expect(hashes[0]).to eq("_id" => "1", "_index" => "test_index_name", "_type" => "document", "_score" => 1.0, "_source" => { "name" => "test" })
     end
 
     it "allows deleting by queryu" do

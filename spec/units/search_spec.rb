@@ -24,16 +24,25 @@ RSpec.describe "Search" do
     { "hits" => { "total" => 0, "hits" => [] }}
   end
 
-  let :highlight_response do
-    { "hits" => { "total" => 1, "hits" => [
-      { "_id" => 1, "_source" => { "name" => "foo", "age" => 21 }, "highlight" => { "name" => "<em>foo</em>" } },
+  let :scan_response do
+    { "_scroll_id" => "abc123", "hits" => { "total" => 2 } }
+  end
+
+  let :scroll_response do
+    { "_scroll_id" => "abc456", "hits" => { "total" => 2, "hits" => [
+      { "_id" => 1, "_source" => { "name" => "foo" } },
+      { "_id" => 2, "_source" => { "name" => "bar" } },
     ]}}
   end
 
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :_id, :name, :age, :highlighted
+      attr_accessor :_id, :name, :age
+
+      def self.from_hit(hit)
+        new(_id: hit["_id"], name: hit["_source"]["name"], age: hit["_source"]["age"])
+      end
 
       def ==(other)
         self._id == other._id && self.name == other.name
@@ -41,9 +50,9 @@ RSpec.describe "Search" do
     end
   end
 
-  describe Elasticity::Search do
+  describe Elasticity::Search::Facade do
     subject do
-      described_class.new(client, index_name, document_type, body)
+      described_class.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
     end
 
     it "searches the index and return document models" do
@@ -65,6 +74,22 @@ RSpec.describe "Search" do
       expect(Array(docs)).to eq expected
     end
 
+    it "searches using scan&scroll" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body, search_type: "scan", size: 100, scroll: "1m").and_return(scan_response)
+      expect(client).to receive(:scroll).with(scroll_id: "abc123", scroll: "1m").and_return(scroll_response)
+      expect(client).to receive(:scroll).with(scroll_id: "abc456", scroll: "1m").and_return(empty_response)
+
+      docs = subject.scan_documents(klass)
+      expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
+
+      expect(docs.total).to eq 2
+
+      expect(docs).to_not be_empty
+      expect(docs).to_not be_blank
+
+      expect(Array(docs)).to eq expected
+    end
+
     it "searches the index and return active record models" do
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body.merge(_source: false)).and_return(ids_response)
 
@@ -72,36 +97,20 @@ RSpec.describe "Search" do
         connection: double(:connection),
         table_name: "table_name",
         klass: double(:klass, primary_key: "id"),
+        to_sql: "SELECT * FROM table_name WHERE id IN (1)"
       )
       allow(relation.connection).to receive(:quote_column_name) { |name| name }
 
-      expect(relation).to receive(:where).with(id: [1,2]).and_return(relation)
+      expect(relation).to receive(:where).with("table_name.id IN (?)", [1, 2]).and_return(relation)
       expect(relation).to receive(:order).with("FIELD(table_name.id,1,2)").and_return(relation)
 
-      expect(subject.active_records(relation).mapping).to be relation
-    end
-
-    it "return relation.none from activerecord relation with no matches" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body.merge(_source: false)).and_return(empty_response)
-
-      relation = double(:relation)
-      expect(relation).to receive(:none).and_return(relation)
-
-      expect(subject.active_records(relation).mapping).to be relation
-    end
-
-    it "creates highlighted object for documents" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(highlight_response)
-      doc = subject.documents(klass).first
-
-      expect(doc).to_not be_nil
-      expect(doc.highlighted).to eq klass.new(_id: 1, name: "<em>foo</em>", age: 21)
+      expect(subject.active_records(relation).to_sql).to eq "SELECT * FROM table_name WHERE id IN (1)"
     end
   end
 
-  describe Elasticity::DocumentSearchProxy do
+  describe Elasticity::Search::DocumentProxy do
     let :search do
-      Elasticity::Search.new(client, index_name, "document", body)
+      Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, "document", body))
     end
 
     subject do

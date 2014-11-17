@@ -45,6 +45,15 @@ RSpec.describe Elasticity::Document do
   context "class" do
     subject { klass }
 
+    it "properly instantiate from search hit" do
+      hit = { "_id" => 1, "_source" => { "name" => "foo", "items" => [{ name: "bar" }] }, "highlight" => { "name" => "<em>foo</em>" } }
+      doc = subject.from_hit(hit)
+      expect(doc.name).to eq "foo"
+      expect(doc.items).to eq [{ name: "bar" }]
+      expect(doc.highlighted.name).to eq "<em>foo</em>"
+      expect(doc.highlighted.items).to eq [{ name: "bar" }]
+    end
+
     it "searches using DocumentSearch" do
       body   = double(:body)
       search = double(:search)
@@ -52,7 +61,7 @@ RSpec.describe Elasticity::Document do
       expect(strategy).to receive(:search).with("class_name", body).and_return(search)
 
       doc_search = double(:doc_search)
-      expect(Elasticity::DocumentSearchProxy).to receive(:new).with(search, subject).and_return(doc_search)
+      expect(Elasticity::Search::DocumentProxy).to receive(:new).with(search, subject).and_return(doc_search)
 
       expect(subject.search(body)).to be doc_search
     end

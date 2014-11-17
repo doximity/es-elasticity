@@ -9,7 +9,11 @@ RSpec.describe Elasticity::MultiSearch do
   let :klass do
     Class.new do
       include ActiveModel::Model
-      attr_accessor :_id, :name, :highlighted
+      attr_accessor :_id, :name
+
+      def self.from_hit(hit)
+        new(_id: hit["_id"], name: hit["_source"]["name"])
+      end
 
       def ==(other)
         self._id == other._id && self.name == other.name
@@ -27,8 +31,8 @@ RSpec.describe Elasticity::MultiSearch do
   end
 
   it "performs multi search" do
-    subject.add(:first, Elasticity::Search.new(client, "index_first", "document_first", { search: :first }), documents: klass)
-    subject.add(:second, Elasticity::Search.new(client, "index_second", "document_second", { search: :second }), documents: klass)
+    subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first })), documents: klass)
+    subject.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
 
     expect(Elasticity.config.client).to receive(:msearch).with(body: [
       { index: "index_first", type: "document_first", search: { search: :first } },

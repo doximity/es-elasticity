@@ -7,19 +7,18 @@ module Elasticity
     end
 
     def add(name, search, documents: nil, active_records: nil)
-      mapper = case
-      when documents && active_records
+      if documents && active_records
         raise ArgumentError, "you can only pass either :documents or :active_records as an option"
-      when documents
-        Search::DocumentMapper.new(documents)
-      when active_records
-        Search::ActiveRecordMapper.new(active_records)
-      else
+      elsif documents.blank? && active_records.blank?
         raise ArgumentError, "you need to provide either :documents or :active_records as an option"
       end
 
-      @searches[name] = { index: search.index_name, type: search.document_type, search: search.body }
-      @mappers[name]  = mapper
+      @searches[name] = {
+        search_definition: search.search_definition,
+        documents: documents,
+        active_records: active_records
+      }
+
       name
     end
 
@@ -31,18 +30,26 @@ module Elasticity
     private
 
     def fetch
-      bodies = @searches.values.map(&:dup)
+      bodies = @searches.values.map do |hsh|
+        hsh[:search_definition].to_msearch_args
+      end
 
-      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: @searches.values }) do
-        Elasticity.config.client.msearch(body: bodies)
+      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
+        Elasticity.config.client.msearch(body: bodies.map(&:dup))
       end
 
       results = {}
 
       @searches.keys.each_with_index do |name, idx|
-        resp          = response["responses"][idx]
-        mapper        = @mappers[name]
-        results[name] = Search::Result.new(resp, mapper)
+        resp = response["responses"][idx]
+        search = @searches[name]
+
+        results[name] = case
+        when search[:documents]
+          resp["hits"]["hits"].map { |hit| search[:documents].from_hit(hit) }
+        when search[:active_records]
+          results[name] = Search::Result.new(response["responses"][idx], mapper)
+        end
       end
 
       results

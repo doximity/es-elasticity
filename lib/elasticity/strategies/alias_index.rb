@@ -197,7 +197,7 @@ module Elasticity
       end
 
       def search(type, body)
-        Search.new(@client, @main_alias, type, body)
+        Search::Facade.new(@client, Search::Definition.new(@main_alias, type, body))
       end
 
       def delete_by_query(type, body)

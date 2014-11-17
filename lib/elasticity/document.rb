@@ -73,12 +73,33 @@ module Elasticity
       self.strategy.flush
     end
 
+    # Creates a instance of a document from a ElasticSearch hit data.
+    def self.from_hit(hit_data)
+      attrs = hit_data["_source"].merge(_id: hit_data['_id'])
+
+      if hit_data["highlight"]
+        highlighted_attrs = attrs.dup
+        attrs_set = Set.new
+
+        hit_data["highlight"].each do |name, v|
+          name = name.gsub(/\..*\z/, '')
+          next if attrs_set.include?(name)
+          highlighted_attrs[name] = v
+          attrs_set << name
+        end
+
+        highlighted = new(highlighted_attrs)
+      end
+
+      new(attrs.merge(highlighted: highlighted))
+    end
+
     # Searches the index using the parameters provided in the body hash, following the same
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
     def self.search(body)
       search = self.strategy.search(self.document_type, body)
-      DocumentSearchProxy.new(search, self)
+      Search::DocumentProxy.new(search, self)
     end
 
     # Fetches one specific document from the index by ID.
