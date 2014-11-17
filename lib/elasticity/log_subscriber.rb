@@ -42,7 +42,7 @@ module Elasticity
 
       exception, message = event.payload[:exception]
       if exception
-        error("{event.transaction_id} #{event.name} ERROR #{exception}: #{message}")
+        error("#{event.transaction_id} #{event.name} ERROR #{exception}: #{message}")
       end
     end
   end
