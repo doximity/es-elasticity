@@ -7,9 +7,9 @@ module Elasticity
     end
 
     def add(name, search, documents: nil, active_records: nil)
-      if documents && active_records
+      if !documents.nil? && !active_records.nil?
         raise ArgumentError, "you can only pass either :documents or :active_records as an option"
-      elsif documents.blank? && active_records.blank?
+      elsif documents.nil? && active_records.nil?
         raise ArgumentError, "you need to provide either :documents or :active_records as an option"
       end
 
