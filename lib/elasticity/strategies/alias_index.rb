@@ -82,7 +82,11 @@ module Elasticity
           end
 
           # Update aliases to only point to the new index.
-          @client.index_delete_alias(index: original_index, name: @main_alias)
+          @client.index_update_aliases(body: {
+            actions: [
+              { remove: { index: original_index, alias: @main_alias } },
+            ]
+          })
           @client.index_delete(index: original_index)
 
         rescue
@@ -110,7 +114,11 @@ module Elasticity
           end
 
           @client.index_flush(index: original_index)
-          @client.index_delete_alias(index: new_index, name: @main_alias)
+          @client.index_update_aliases(body: {
+            actions: [
+              { remove: { index: new_index, alias: @main_alias } },
+            ]
+          })
           @client.index_delete(index: new_index)
 
           raise
@@ -150,8 +158,12 @@ module Elasticity
       def create(index_def)
         if missing?
           index_name = create_index(index_def)
-          @client.index_put_alias(index: index_name, name: @main_alias)
-          @client.index_put_alias(index: index_name, name: @update_alias)
+          @client.index_update_aliases(body: {
+            actions: [
+              { add: { index: index_name, alias: @main_alias } },
+              { add: { index: index_name, alias: @update_alias } },
+            ]
+          })
         else
           raise IndexError.new(@main_alias, "index already exists")
         end
