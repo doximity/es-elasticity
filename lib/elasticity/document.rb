@@ -63,6 +63,11 @@ module Elasticity
       self.strategy.delete
     end
 
+    # Does the index exist?
+    def self.index_exists?
+      !self.strategy.missing?
+    end
+
     # Remap
     def self.remap!
       self.strategy.remap(settings: Elasticity.config.settings, mappings: { document_type => mapping })
