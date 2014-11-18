@@ -48,7 +48,7 @@ module Elasticity
         when search[:documents]
           resp["hits"]["hits"].map { |hit| search[:documents].from_hit(hit) }
         when search[:active_records]
-          results[name] = Search::Result.new(response["responses"][idx], mapper)
+          Search::ActiveRecordProxy.from_hits(search[:active_records], resp["hits"]["hits"])
         end
       end
 
