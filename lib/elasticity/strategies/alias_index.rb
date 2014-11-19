@@ -12,6 +12,10 @@ module Elasticity
         @update_alias = "#{index_base_name}_update"
       end
 
+      def ref_index_name
+        @main_alias
+      end
+
       # Remap allows zero-downtime/zero-dataloss remap of elasticsearch indexes. Here is the overview
       # of how it works:
       #

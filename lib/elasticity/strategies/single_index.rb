@@ -8,6 +8,10 @@ module Elasticity
         @index_name = index_name
       end
 
+      def ref_index_name
+        @index_name
+      end
+
       def remap!
         raise NotImplementedError
       end

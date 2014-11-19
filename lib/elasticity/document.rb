@@ -68,6 +68,12 @@ module Elasticity
       !self.strategy.missing?
     end
 
+    # Gets the index name to be used when you need to reference the index somewhere.
+    # This depends on the strategy being used, but it always refers to the search index.
+    def self.ref_index_name
+      self.strategy.ref_index_name
+    end
+
     # Remap
     def self.remap!
       self.strategy.remap(settings: Elasticity.config.settings, mappings: { document_type => mapping })
