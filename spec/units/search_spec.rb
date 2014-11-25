@@ -100,9 +100,10 @@ RSpec.describe "Search" do
         to_sql: "SELECT * FROM table_name WHERE id IN (1)"
       )
       allow(relation.connection).to receive(:quote_column_name) { |name| name }
+      allow(relation.connection).to receive(:quote) { |name| name }
 
       expect(relation).to receive(:where).with("table_name.id IN (?)", [1, 2]).and_return(relation)
-      expect(relation).to receive(:order).with("FIELD(table_name.id,1,2)").and_return(relation)
+      expect(relation).to receive(:order).with("FIELD(table_name.id, 1,2)").and_return(relation)
 
       expect(subject.active_records(relation).to_sql).to eq "SELECT * FROM table_name WHERE id IN (1)"
     end
