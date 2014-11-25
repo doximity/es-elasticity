@@ -179,8 +179,9 @@ module Elasticity
         ids = hits.map { |hit| hit["_id"] }
 
         if ids.any?
-          id_col = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
-          relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col},#{ids.join(',')})")
+          id_col  = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
+          id_vals = ids.map { |id| relation.connection.quote(id) }
+          relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})")
         else
           relation.none
         end
@@ -224,8 +225,8 @@ module Elasticity
         metadata[:suggestions]
       end
 
-      def method_missing(name, *args, **options, &block)
-        filtered_relation.public_send(name, *args, **options, &block)
+      def method_missing(name, *args, &block)
+        filtered_relation.public_send(name, *args, &block)
       end
 
       private
