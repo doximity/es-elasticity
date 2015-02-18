@@ -107,8 +107,8 @@ adults.active_recors(Database::User) # => Array of Database::User instances
 
 ## Roadmap
 
-- [ ] Index aliasing support
-  - [ ] Index hot swapping support
+- [x] Index aliasing support
+  - [x] Index hot swapping support
 - [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
 - [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
