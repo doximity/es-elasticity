@@ -51,7 +51,7 @@ module Elasticity
           })
 
           @client.index_flush(index: original_index)
-          cursor = @client.search index: original_index, search_type: 'scan', scroll: '1m', _source: false, size: 100
+          cursor = @client.search index: original_index, search_type: 'scan', scroll: '10m', _source: false, size: 100
           loop do
             cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
             hits   = cursor['hits']['hits']
