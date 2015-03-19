@@ -77,6 +77,12 @@ RSpec.describe Elasticity::Document do
       expect(strategy).to receive(:delete_document).with("class_name", 1).and_return(strategy_ret)
       expect(subject.delete(1)).to eq strategy_ret
     end
+
+    it "properly instantiates from search hit when no source is given" do
+      hit = { "_id" => 1, "_type" => "foo" }
+      doc = subject.from_hit(hit)
+      expect(doc._id).to eq(1)
+    end
   end
 
   context "instance" do
