@@ -86,9 +86,8 @@ module Elasticity
 
     # Creates a instance of a document from a ElasticSearch hit data.
     def self.from_hit(hit_data)
-      attrs = {}
+      attrs = { _id: hit_data["_id"] }
       attrs.merge!(hit_data["_source"]) if hit_data["_source"]
-      attrs.merge!({ _id: hit_data["_id"] }) if hit_data["_id"]
 
       if hit_data["highlight"]
         highlighted_attrs = attrs.dup
