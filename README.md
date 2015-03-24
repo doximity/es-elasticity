@@ -66,7 +66,8 @@ class Search::User < Elasticity::Document
       },
     }
 
-    # Creates a search object from the body and return it. The returned object # is a lazy evaluated search that behaves like a collection, being 
+    # Creates a search object from the body and return it. 
+    # The returned object # is a lazy evaluated search that behaves like a collection, being 
     # automatically triggered when data is iterated over.
     self.search(body)
   end
@@ -80,7 +81,7 @@ class Search::User < Elasticity::Document
   def to_document
     {
       name: self.name,
-      birthdate: self.birthdate.iso8601,
+      birthdate: self.birthdate.iso8601
     }
   end
 end
@@ -152,7 +153,7 @@ adults = adults.active_record(User)
 
 For more information about the `active_record` method, read [ActiveRecord integration](#activerecord-integration).
 
-### Strategies and HotRemapping
+### Strategies and Hot-remapping
 
 Strategies define how index creation and index operation happens on the lower level. Basically it define the structure that backs the document model. Currently, there are two strategies available: single-index and alias-index.
 
