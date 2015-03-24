@@ -114,7 +114,9 @@ Search::User.bulk_index(users)
 
 ### Searching
 
-Class methods have access to the `search` method, which returns a lazy evaluated search. That means that the search will only be performed when the data is necessary, not when the `search` method is called. Getting the results of a search is pretty straightforward though:
+Class methods have access to the `search` method, which returns a lazy evaluated search. That means that the search will only be performed when the data is necessary, not when the `search` method is called.
+
+The search object implements `Enumerable`, so it can be treated as a collection:
 
 ```ruby
 # Get the search object, which is an instance of `Elasticity::DocumentSearchProxy`.
@@ -125,11 +127,30 @@ adults = User.adults
 adults.each do |user|
   # do something with user
 end
-
-# Or you can also, map the results back to an ActiveRecord relation.
-# In this case, only the ids will be fetched.
-adults.active_recors(Database::User) # => Array of Database::User instances
 ```
+
+It also has some pretty interesting methods that affects the way the query is performed. Here is a list of available search types:
+
+```ruby
+# Returns an array of document instances, this is the default and what the 
+# enumerable methods will delegate to.
+adults.documents
+
+# Returns an array of hashes representing the documents.
+adults.document_hashes
+
+# Performs the search using scan&scroll. It returns a cursor that will lazily
+# fetch all the pages of the search. It can be iterated by batch/page or by 
+# document.
+cursor = adults.scan_documents
+cursor.each_batch { |batch| ... }
+cursor.each { |doc| ... }
+
+# Lastly, a search that maps back to an ActiveRecord::Relation.
+adults = adults.active_record(User)
+```
+
+For more information about the `active_record` method, read [ActiveRecord integration](#activerecord-integration).
 
 ### Strategies and HotRemapping
 
@@ -165,7 +186,79 @@ This is a simplified version, there are other things that happen to ensure consi
 
 ### ActiveRecord integration
 
-ActiveRecord integration is mainly a set of conventions rather than implementation
+ActiveRecord integration is mainly a set of conventions rather than implementation, with the exception of one method that allows mapping documents back to a relation. Here is the list of conventions:
+
+* have a class method on the document called `from_active_record` that creates a document object from the active record object;
+* have a class method on the Document for rebuilding the index from the records;
+* have an `after_save` and an `after_destroy` callbacks on the ActiveRecord model;
+
+For example:
+
+  ```ruby
+  class User < ActiveRecord::Base
+    after_save    :update_index_document
+    after_destroy :delete_index_document
+
+    def update_index_document
+      Search::User.from_active_record(self).update
+    end
+
+    def remove_index_document
+      Search::User.delete(self.id)
+    end
+  end
+
+  class Search::User < Elasticity::Document
+    # ... configuration
+
+    def self.from_active_record(ar)
+      new(name: ar.name, birthdate: ar.birthdate)
+    end
+
+    def self.rebuild_index
+      self.recreate_index
+
+      User.find_in_batches do |batch|
+        documents = batch.map { |record| from_active_record(record) }
+        self.bulk_index(documents)
+      end
+    end
+  end
+  ```
+
+This makes the code very clear in intent, easier to see when and how things happen and under the developer control, keeping both parts very decoupled.
+
+The only ActiveRecord specific utility this library have is a way to lazily map a Elasticsearch search to an ActiveRecord relation.
+
+To extend on the previous example, imagine the `Search::User` class also have the following simple search method.
+
+```ruby
+def self.adults
+  date = Date.today - 21.years
+  
+  body = {
+    filter: {
+      { range: { birthdate: { gte: date.iso8601 }}},
+    },
+  }
+
+  self.search(body)
+end
+```
+
+Because the return of that method is a lazy-evaluated search, it allows specific search strategies to be used, one of them being ActiveRecord specific:
+
+```ruby
+adults = Search::User.adults.active_record(User)
+adults.class # => ActiveRecord::Relation
+adults.all   # => [#<User: id: 1, name: "John", birthdate: 1985-10-31>, ...]
+```
+
+Note that the method takes a relation and not a class, so the following is also possible:
+
+```ruby
+Search::User.adults.active_record(User.where(active: true))
+```
 
 ## Roadmap
 
