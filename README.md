@@ -177,7 +177,19 @@ Everytime a search operation is performed, it is performed against the main alia
 When the mapping needs to change, a hot remapping can be performed by doing the following:
 
 1. Create a new index with the new mapping;
-2. change the update alias to point to the new index, and change main alias to point to both indexes;
+2. change the update alias to point to the new index, and change main alias to point to both indexes; at this point it will look something like this:
+
+  ```
+                                         |¯¯¯¯¯¯¯¯¯¯¯¯¯|
+  |¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |  Old Index  |
+  |  MainAlias  |                        |_____________|
+  |_____________|----------|
+                           |                           
+  |¯¯¯¯¯¯¯¯¯¯¯¯¯|          |-----------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
+  | UpdateAlias |----------------------> |  New Index  |
+  |_____________|                        |_____________|
+  ```
+
 3. iterate over all documents on the old index, copying them to the new index;
 4. change aliases to point only to the new index;
 5. delete the old index.
