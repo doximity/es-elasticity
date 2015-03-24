@@ -180,10 +180,9 @@ When the mapping needs to change, a hot remapping can be performed by doing the 
 2. change the update alias to point to the new index, and change main alias to point to both indexes; at this point it will look something like this:
 
   ```
-                                         |¯¯¯¯¯¯¯¯¯¯¯¯¯|
-  |¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |  Old Index  |
-  |  MainAlias  |                        |_____________|
-  |_____________|----------|
+  |¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
+  |  MainAlias  |                        |  Old Index  |
+  |_____________|----------|             |_____________|
                            |                           
   |¯¯¯¯¯¯¯¯¯¯¯¯¯|          |-----------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
   | UpdateAlias |----------------------> |  New Index  |
