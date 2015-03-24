@@ -2,16 +2,18 @@
 
 [![Build Status](https://travis-ci.org/doximity/es-elasticity.svg)](https://travis-ci.org/doximity/es-elasticity) [![Test Coverage](https://codeclimate.com/github/doximity/es-elasticity/badges/coverage.svg)](https://codeclimate.com/github/doximity/es-elasticity) [![Code Climate](https://codeclimate.com/github/doximity/es-elasticity/badges/gpa.svg)](https://codeclimate.com/github/doximity/es-elasticity) [![Dependency Status](https://gemnasium.com/doximity/es-elasticity.svg)](https://gemnasium.com/doximity/es-elasticity)
 
-Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem.
+Elasticity is a model oriented approach to Elasticsearch. In simple words, a Document is represented by it's own class, similar to what ActiveRecord does for database rows.
 
-Mainly, it provides a model-oriented approach to Elasticsearch, similar to what [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) provides to relational databases. It leverages [ActiveModel](https://github.com/rails/rails/tree/master/activemodel) to provide a familiar format for Rails developers.
+In Elasticsearch terminology, a document is an entity stored in Elasticsearch and associated to an index. Whenever a search is performed, a collection of documents is returned.
+
+Elasticity maps those documents into objects, providing a rich object representation of a document.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'elasticity'
+gem 'es-elasticity', require "elasticity"
 ```
 
 And then execute:
@@ -20,18 +22,20 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install elasticity
+    $ gem install es-elasticity
 
 ## Usage overview
 
-The first thing to do, is setup a model class for a index and document type that inherits from `Elasticity::Document`.
+The first thing to do, is setup a model representing your documents. The class level represents the index, while the instance level represents each Document stored in the index. This is similar to how ActiveRecord maps tables vs rows.
 
 ```ruby
 class Search::User < Elasticity::Document
-  # All models automatically have the id attribute but you need to define the others.
+  # All models automatically have the id attribute but you need to define the 
+  # others.
   attr_accessor :name, :birthdate
 
-  # Define the index mapping for the index and document type this model represents.
+  # Define the index mapping for the index and document type this model 
+  # represents.
   self.mappings = {
     properties: {
       name: { type: "string" },
@@ -43,17 +47,16 @@ class Search::User < Elasticity::Document
   def self.adults
     date = Date.today - 21.years
 
-    # This is the query that will be submited to ES, same format ES would expect,
-    # translated to a Ruby hash.
+    # This is the query that will be submited to ES, same format ES would 
+    # expect, translated to a Ruby hash.
     body = {
       filter: {
         { range: { birthdate: { gte: date.iso8601 }}},
       },
     }
 
-    # Creates a search object from the body and return it. The returned object is a
-    # lazy evaluated search that behaves like a collection, being automatically
-    # triggered when data is iterated over.
+    # Creates a search object from the body and return it. The returned object # is a lazy evaluated search that behaves like a collection, being 
+    # automatically triggered when data is iterated over.
     self.search(body)
   end
 
@@ -68,7 +71,7 @@ class Search::User < Elasticity::Document
 end
 ```
 
-Then instances of that model can be indexed pretty easily by just calling the `update` method.
+An instance of the model is an in-memory representation of a Document. The document can be stored on the index by calling the `update` method.
 
 ```ruby
 # Creates a new document on the index
@@ -80,7 +83,7 @@ u.name = "Jonh Jon"
 u.update
 ```
 
-Getting the results of a search is also pretty straightforward:
+Class methods have access to the `search` method, which returns a lazy evaluated search. That means that the search will only be performed when the data is necessary, not when the `search` method is called. Getting the results of a search is pretty straightforward though:
 
 ```ruby
 # Get the search object, which is an instance of `Elasticity::DocumentSearchProxy`.
@@ -97,13 +100,15 @@ end
 adults.active_recors(Database::User) # => Array of Database::User instances
 ```
 
-## Design Goals
+## Model/Index definition
 
-- Provide model specific for Elasticsearch documents instead of an ActiveRecord mixin;
-- proper separation of concerns and de-coupling;
-- lazy search evaluation and easy composition of multi-searches;
-- easy of debug;
-- higher level API that resembles Elasticsearch API;
+## Indexing
+
+## Searching
+
+## Strategies and Hot Swapping
+
+## ActiveRecord integration
 
 ## Roadmap
 
