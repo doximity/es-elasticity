@@ -13,6 +13,30 @@ RSpec.describe "Search" do
     ]}}
   end
 
+  let :aggregations do
+    {
+      "logins_count" => { "value" => 1495 },
+      "gender" => {
+          "buckets" => [
+              {
+                  "doc_count" => 100,
+                  "key" => "M"
+              },
+              {
+                  "doc_count" => 100,
+                  "key" => "F"
+              }
+          ],
+          "doc_count_error_upper_bound" => 0,
+          "sum_other_doc_count" => 0
+      }
+    }
+  end
+
+  let :full_response_with_aggregations do
+    full_response.merge("aggregations" => aggregations)
+  end
+
   let :ids_response do
     { "hits" => { "total" => 2, "hits" => [
       { "_id" => 1 },
@@ -72,6 +96,13 @@ RSpec.describe "Search" do
 
       expect(docs.each.first).to eq expected[0]
       expect(Array(docs)).to eq expected
+    end
+
+    it "searches and the index returns aggregations" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response_with_aggregations)
+
+      docs = subject.documents(klass)
+      expect(docs.aggregations).to eq aggregations
     end
 
     it "searches using scan&scroll" do

@@ -91,6 +91,10 @@ module Elasticity
         response["hits"]["total"]
       end
 
+      def aggregations
+        response["aggregations"] ||= {}
+      end
+
       def suggestions
         response["hits"]["suggest"] ||= {}
       end
