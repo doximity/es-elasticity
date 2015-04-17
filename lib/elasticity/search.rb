@@ -100,8 +100,7 @@ module Elasticity
       end
 
       def count(args = {})
-        return @count if defined?(@count)
-        @count = @client.count(args)["count"]
+        @client.count(@search_definition.to_search_args.reverse_merge(args))["count"]
       end
 
       def search_results
