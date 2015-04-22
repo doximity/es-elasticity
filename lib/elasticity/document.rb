@@ -140,6 +140,15 @@ module Elasticity
       end
     end
 
+    # Bulk delete documents matching provided ids
+    def self.bulk_delete(ids)
+      self.strategy.bulk do |b|
+        ids.each do |id|
+          b.delete(self.document_type, id)
+        end
+      end
+    end
+
     # Define common attributes for all documents
     attr_accessor :_id, :highlighted
 

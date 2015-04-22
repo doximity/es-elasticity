@@ -163,5 +163,23 @@ RSpec.describe "Persistence", elasticsearch: true do
       results = subject.search(sort: :name)
       expect(results.total).to eq(2010)
     end
+
+    it "bulk indexes and delete" do
+      docs = 2000.times.map do |i|
+        subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      end
+
+      subject.bulk_index(docs)
+      subject.flush_index
+
+      results = subject.search(from: 0, size: 3000)
+      expect(results.total).to eq 2000
+
+      subject.bulk_delete(results.documents.map(&:_id))
+      subject.flush_index
+
+      results = subject.search(from: 0, size: 3000)
+      expect(results.total).to eq 0
+    end
   end
 end
