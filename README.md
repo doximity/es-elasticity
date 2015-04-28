@@ -26,6 +26,21 @@ Or install it yourself as:
 
 ## Usage
 
+### Configuration
+
+It is recommended you use Typhoeus for HTTP connections to Elasticsearch.
+
+```ruby
+# config/initializers/es-elasticity.rb
+require 'typhoeus'
+require 'typhoeus/adapters/faraday'
+
+Elasticity.configure do |config|
+  config.client = Elasticsearch::Client.new
+  config.namespace = Rails.env.to_s.downcase
+end
+```
+
 ### Document model definition
 
 The first thing to do, is setup a model representing your documents. The class level represents the index, while the instance level represents each Document stored in the index. This is similar to how ActiveRecord maps tables vs rows.
