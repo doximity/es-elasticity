@@ -31,7 +31,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       subject.delete_index
     end
 
-    it "successfully index, update, search and delete" do
+    it "successfully index, update, search, count and delete" do
       john = subject.new(name: "John", birthdate: "1985-10-31")
       mari = subject.new(name: "Mari", birthdate: "1986-09-24")
 
@@ -45,6 +45,8 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       expect(results[0]).to eq(john)
       expect(results[1]).to eq(mari)
+
+      expect(subject.search({query: {filtered: { query: { match_all: {} } } } }).count).to eq(2)
 
       john.update
       mari.delete

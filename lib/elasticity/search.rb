@@ -99,6 +99,10 @@ module Elasticity
         response["hits"]["suggest"] ||= {}
       end
 
+      def count(args = {})
+        @client.count(@search_definition.to_search_args.reverse_merge(args))["count"]
+      end
+
       def search_results
         return @search_results if defined?(@search_results)
 
