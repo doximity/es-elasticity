@@ -74,8 +74,10 @@ class Search::User < Elasticity::Document
     date = Date.today - 21.years
 
     # This is the query that will be submited to ES, same format ES would 
-    # expect, translated to a Ruby hash.
+    # expect, translated to a Ruby hash, note the pagination params.
     body = {
+      from: 0, 
+      size: 10,
       filter: {
         { range: { birthdate: { gte: date.iso8601 }}},
       },
