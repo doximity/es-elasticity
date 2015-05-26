@@ -73,23 +73,23 @@ class Search::User < Elasticity::Document
   def self.adults
     date = Date.today - 21.years
 
-    # This is the query that will be submited to ES, same format ES would 
+    # This is the query that will be submited to ES, same format ES would
     # expect, translated to a Ruby hash, note the pagination params.
     body = {
-      from: 0, 
+      from: 0,
       size: 10,
       filter: {
         { range: { birthdate: { gte: date.iso8601 }}},
       },
     }
 
-    # Creates a search object from the body and return it. 
-    # The returned object # is a lazy evaluated search that behaves like a collection, being 
+    # Creates a search object from the body and return it.
+    # The returned object # is a lazy evaluated search that behaves like a collection, being
     # automatically triggered when data is iterated over.
     self.search(body)
   end
 
-  # All models automatically have the id attribute but you need to define the 
+  # All models automatically have the id attribute but you need to define the
   # other accessors so that they can be set and get properly.
   attr_accessor :name, :birthdate
 
@@ -145,12 +145,15 @@ adults = User.adults
 adults.each do |user|
   # do something with user
 end
+
+# Or get the count
+adults.count
 ```
 
 It also has some pretty interesting methods that affects the way the query is performed. Here is a list of available search types:
 
 ```ruby
-# Returns an array of document instances, this is the default and what the 
+# Returns an array of document instances, this is the default and what the
 # enumerable methods will delegate to.
 adults.documents
 
@@ -158,7 +161,7 @@ adults.documents
 adults.document_hashes
 
 # Performs the search using scan&scroll. It returns a cursor that will lazily
-# fetch all the pages of the search. It can be iterated by batch/page or by 
+# fetch all the pages of the search. It can be iterated by batch/page or by
 # document.
 cursor = adults.scan_documents
 cursor.each_batch { |batch| ... }
@@ -187,7 +190,7 @@ Here is what it looks like:
                                        |    Index    |
 |¯¯¯¯¯¯¯¯¯¯¯¯¯|         |------------> |_____________|
 | UpdateAlias |---------|
-|_____________| 
+|_____________|
 ```
 
 Everytime a search operation is performed, it is performed against the main alias; when an update operation is performed, it is performed against the update alias; and, when a delete operation is performed, it is performed against the indexes pointed by both aliases.
@@ -201,7 +204,7 @@ When the mapping needs to change, a hot remapping can be performed by doing the 
   |¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
   |  MainAlias  |                        |  Old Index  |
   |_____________|----------|             |_____________|
-                           |                           
+                           |
   |¯¯¯¯¯¯¯¯¯¯¯¯¯|          |-----------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
   | UpdateAlias |----------------------> |  New Index  |
   |_____________|                        |_____________|
@@ -264,7 +267,7 @@ To extend on the previous example, imagine the `Search::User` class also have th
 ```ruby
 def self.adults
   date = Date.today - 21.years
-  
+
   body = {
     filter: {
       { range: { birthdate: { gte: date.iso8601 }}},
