@@ -3,9 +3,10 @@ module Elasticity
     class SingleIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_name)
-        @client     = client
-        @index_name = index_name
+      def initialize(client, index_name, document_type)
+        @client        = client
+        @index_name    = index_name
+        @document_type = document_type
       end
 
       def ref_index_name
@@ -78,17 +79,13 @@ module Elasticity
       end
 
       def settings
-        args = { index: @index_name }
-        settings = @client.index_get_settings(index: @index_name)
-        settings[@index_name]["settings"]
+        @client.index_get_settings(index: @index_name, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
 
       def mappings
-        args = { index: @index_name }
-        mapping = @client.index_get_mapping(index: @index_name)
-        mapping[@index_name]["mappings"]
+        @client.index_get_mapping(index: @index_name, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end

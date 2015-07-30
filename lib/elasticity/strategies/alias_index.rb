@@ -6,10 +6,11 @@ module Elasticity
     class AliasIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_base_name)
+      def initialize(client, index_base_name, document_type)
         @client       = client
         @main_alias   = index_base_name
         @update_alias = "#{index_base_name}_update"
+        @document_type = document_type
       end
 
       def ref_index_name
@@ -231,17 +232,13 @@ module Elasticity
       end
 
       def settings
-        args = { index: @main_alias }
-        settings = @client.index_get_settings(index: @main_alias)
-        settings[@main_alias]["settings"]
+        @client.index_get_settings(index: @main_alias, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
 
       def mappings
-        args = { index: @main_alias }
-        mapping = @client.index_get_mapping(index: @main_alias)
-        mapping[@main_alias]["mappings"]
+        @client.index_get_mapping(index: @main_alias, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end

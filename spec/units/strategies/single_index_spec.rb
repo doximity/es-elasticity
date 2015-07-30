@@ -1,14 +1,14 @@
 RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
   subject do
-    described_class.new(Elasticity.config.client, "test_index_name")
+    described_class.new(Elasticity.config.client, "test_index_name", "document")
   end
 
   let :index_def do
     {
-      mappings: {
-        document: {
-          properties: {
-            name: { type: "string" }
+      "mappings" => {
+        "document" => {
+          "properties" => {
+            "name" => { "type" => "string" }
           }
         }
       }
@@ -21,10 +21,10 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
 
   it "allows creating, recreating and deleting an index" do
     subject.create(index_def)
-    expect(subject.mappings).to eq({"document"=>{"properties"=>{"name"=>{"type"=>"string"}}}})
+    expect(subject.mappings).to eq(index_def)
 
     subject.recreate(index_def)
-    expect(subject.mappings).to eq({"document"=>{"properties"=>{"name"=>{"type"=>"string"}}}})
+    expect(subject.mappings).to eq(index_def)
 
     subject.delete
     expect(subject.mappings).to be nil
