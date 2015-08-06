@@ -27,7 +27,7 @@ module Elasticity
         index_base_name = "#{namespace}_#{@config.index_base_name}"
       end
 
-      @strategy = @config.strategy.new(Elasticity.config.client, index_base_name)
+      @strategy = @config.strategy.new(Elasticity.config.client, index_base_name, document_type)
     end
 
     # Document type

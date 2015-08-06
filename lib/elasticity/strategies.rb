@@ -4,8 +4,8 @@ module Elasticity
       attr_reader :index_base_name
 
       def initialize(index_base_name, message)
-        @index_name = index_name
-        super("#{index_name}: #{message}")
+        @index_base_name = index_base_name
+        super("#{index_base_name}: #{message}")
       end
     end
 
