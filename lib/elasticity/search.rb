@@ -40,13 +40,15 @@ module Elasticity
       # Performs the search using the default search type and returning an iterator that will yield
       # hash representations of the documents.
       def document_hashes
-        LazySearch.new(@client, @search_definition)
+        return @document_hashes if defined?(@document_hashes)
+        @document_hashes = LazySearch.new(@client, @search_definition)
       end
 
       # Performs the search using the default search type and returning an iterator that will yield
       # each document, converted to the provided document_klass.
       def documents(document_klass)
-        LazySearch.new(@client, @search_definition) do |hit|
+        return @documents if defined?(@documents)
+        @documents = LazySearch.new(@client, @search_definition) do |hit|
           document_klass.from_hit(hit)
         end
       end
@@ -56,7 +58,8 @@ module Elasticity
       #
       # More info: http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/scan-scroll.html
       def scan_documents(document_klass, **options)
-        ScanCursor.new(@client, @search_definition, document_klass, **options)
+        return @scan_documents if defined?(@scan_documents)
+        @scan_documents = ScanCursor.new(@client, @search_definition, document_klass, **options)
       end
 
       # Performs the search only fetching document ids using it to load ActiveRecord objects from the provided
