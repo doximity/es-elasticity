@@ -118,6 +118,22 @@ module Elasticity
         end
       end
 
+      # for pagination
+      def per_page
+        @search_definition.body[:size] || 10
+      end
+
+      # for pagination
+      def total_pages
+        total / per_page
+      end
+
+      # for pagination
+      def current_page
+        return 1 if @search_definition.body[:form].nil?
+        @search_definition.body[:from] / per_page
+      end
+
       private
 
       def response
