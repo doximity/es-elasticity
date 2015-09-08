@@ -140,6 +140,40 @@ RSpec.describe "Search" do
     end
   end
 
+  describe Elasticity::Search::LazySearch do
+    it "provides defaul properties for pagination" do
+      subject = Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
+      docs = subject.documents(klass)
+
+      expect(docs.per_page).to eq(10)
+      expect(docs.total_pages).to eq(1)
+      expect(docs.current_page).to eq(1)
+    end
+
+    it "provides custom properties for pagination" do
+      subject = Elasticity::Search::Facade.new(
+        client,
+        Elasticity::Search::Definition.new(
+          index_name,
+          document_type,
+          { size: 14, from: 25, filter: {} }
+        )
+      )
+      expect(client).to receive(:search).
+        with(
+          index: index_name,
+          type: document_type,
+          body: { size: 14, from: 25, filter: {} }
+        ).and_return({ "hits" => { "total" => 112 } })
+      docs = subject.documents(klass)
+
+      expect(docs.per_page).to eq(14)
+      expect(docs.total_pages).to eq(8)
+      expect(docs.current_page).to eq(2)
+    end
+  end
+
   describe Elasticity::Search::DocumentProxy do
     let :search do
       Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, "document", body))
