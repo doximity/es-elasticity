@@ -76,6 +76,8 @@ module Elasticity
 
       attr_accessor :search_definition
 
+      DEFAULT_SIZE = 10
+
       def initialize(client, search_definition, &mapper)
         @client            = client
         @search_definition = search_definition
@@ -120,16 +122,12 @@ module Elasticity
 
       # for pagination
       def per_page
-        @search_definition.body[:size] || 10
+        @search_definition.body[:size] || DEFAULT_SIZE
       end
 
       # for pagination
       def total_pages
-        if total < per_page
-          1
-        else
-          total / per_page
-        end
+        (total.to_f / per_page.to_f).ceil
       end
 
       # for pagination
