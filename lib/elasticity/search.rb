@@ -125,13 +125,17 @@ module Elasticity
 
       # for pagination
       def total_pages
-        total / per_page
+        if total < per_page
+          1
+        else
+          total / per_page
+        end
       end
 
       # for pagination
       def current_page
-        return 1 if @search_definition.body[:form].nil?
-        @search_definition.body[:from] / per_page
+        return 1 if @search_definition.body[:from].nil?
+        @search_definition.body[:from] / per_page + 1
       end
 
       private
