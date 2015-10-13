@@ -16,7 +16,7 @@ module Elasticity
     end
 
     # Generate wrapper methods for @client
-    %w(index delete get mget search count msearch scroll delete_by_query bulk).each do |method_name|
+    %w(index delete get mget search count msearch scroll delete_by_query bulk perform_request).each do |method_name|
       define_method(method_name) do |*args, &block|
         instrument(method_name, args) do
           @client.public_send(method_name, *args, &block)
