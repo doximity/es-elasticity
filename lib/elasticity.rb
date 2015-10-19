@@ -10,6 +10,8 @@ require "elasticsearch"
 module Elasticity
   autoload :Bulk,               "elasticity/bulk"
   autoload :Config,             "elasticity/config"
+  autoload :IndexConfig,        "elasticity/index_config"
+  autoload :IndexMapper,        "elasticity/index_mapper"
   autoload :Document,           "elasticity/document"
   autoload :InstrumentedClient, "elasticity/instrumented_client"
   autoload :LogSubscriber,      "elasticity/log_subscriber"
