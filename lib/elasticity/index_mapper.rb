@@ -1,5 +1,27 @@
 module Elasticity
   class IndexMapper
+    def self.set_delegates(obj, to)
+      obj.delegate(
+        :document_type,
+        :mapping,
+        :ref_index_name,
+        :create_index,
+        :recreate_index,
+        :delete_index,
+        :index_exists?,
+        :remap!,
+        :flush_index,
+        :index_document,
+        :search,
+        :get,
+        :delete,
+        :delete_by_search,
+        :bulk_index,
+        :bulk_delete,
+        to: to
+      )
+    end
+
     def initialize(document_klass, index_config)
       @document_klass = document_klass
       @index_config   = index_config

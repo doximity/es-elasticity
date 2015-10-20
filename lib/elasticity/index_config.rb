@@ -9,6 +9,12 @@ module Elasticity
       validate!
     end
 
+    def segment(name)
+      new_config = self.dup
+      new_config.index_base_name = "#{index_base_name}_#{name}"
+      new_config
+    end
+
     def client
       @elasticity_config.client
     end
@@ -22,7 +28,11 @@ module Elasticity
 
       if namespace = @elasticity_config.namespace
         @fq_index_base_name = "#{namespace}_#{@index_base_name}"
+      else
+        @fq_index_base_name = @index_base_name
       end
+
+      @fq_index_base_name
     end
 
     def strategy
