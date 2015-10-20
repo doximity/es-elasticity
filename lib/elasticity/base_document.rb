@@ -2,6 +2,15 @@ module Elasticity
   class BaseDocument
     include ::ActiveModel::Model
 
+    # Stores configuration for this class and all subclasses.
+    class_attribute :config
+
+    # Configure the given klass, changing default parameters and resetting
+    # some of the internal state.
+    def self.configure(&block)
+      self.config = IndexConfig.new(Elasticity.config, &block)
+    end
+
     # Define common attributes for all documents
     attr_accessor :_id, :highlighted
 
