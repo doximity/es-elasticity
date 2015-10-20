@@ -1,6 +1,6 @@
 module Elasticity
   class SegmentedDocument < BaseDocument
-    # Creates a new segment which behaves almost the same as a Document class dinamically
+    # Creates a new segment which behaves almost the same as a Document class dynamically
     # configured to access a segmented index.
     #
     # It creates a new class in runtime that inherits from your defined class, allowing
