@@ -13,7 +13,7 @@ module Elasticity
         IndexMapper.set_delegates(singleton_class, :mapper)
 
         def self.inspect
-          "#{superclass.name}(#{segment_name})"
+          "#{superclass.name}{\"#{segment_name}\"}"
         end
 
         def inspect

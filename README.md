@@ -79,7 +79,7 @@ class Search::User < Elasticity::Document
       from: 0,
       size: 10,
       filter: {
-        { range: { birthdate: { gte: date.iso8601 }}},
+        range: { birthdate: { lte: date.iso8601 }},
       },
     }
 
@@ -172,6 +172,90 @@ adults = adults.active_record(User)
 ```
 
 For more information about the `active_record` method, read [ActiveRecord integration](#activerecord-integration).
+
+### Segmented Documents
+
+The idea of segmented documents is that documents of the same type/class can be distributed over separate segments, which are backed by separated indexes. This is good for manually sharding documents into their own indexes. For example, an application that supports multiple clients/organizations might want to separate the documents for each organization under separate indexes, making it easier to delete the data and isolate the documents.
+
+Using this feature is very easy and very similar to traditional documents. The only difference is that your document class should inherit from `Elasticity::SegmentedDocument`. Adjusting the definition that we had before:
+
+```ruby
+class Search::User < Elasticity::SegmentedDocument
+  configure do |c|
+    # Defines how the index will be named, the final name
+    # will depend on the stragy being used.
+    c.index_base_name = "users"
+
+    # Defines the document type that this class represents.
+    c.document_type = "user"
+
+    # Select which strategy should be used. AliasIndex uses two aliases
+    # in order to support hot remapping of indexes. This is the recommended
+    # strategy.
+    c.strategy = Elasticity::Strategies::AliasIndex
+
+    # Defines the mapping for this index/document_type.
+    c.mapping  = {
+      properties: {
+        name: { type: "string" },
+        birthdate: { type: "date" },
+      }
+    }
+  end
+
+  # Defines a search method.
+  def self.adults
+    date = Date.today - 21.years
+
+    # This is the query that will be submited to ES, same format ES would
+    # expect, translated to a Ruby hash, note the pagination params.
+    body = {
+      from: 0,
+      size: 10,
+      filter: {
+        range: { birthdate: { lte: date.iso8601 }},
+      },
+    }
+
+    # Creates a search object from the body and return it.
+    # The returned object # is a lazy evaluated search that behaves like a collection, being
+    # automatically triggered when data is iterated over.
+    self.search(body)
+  end
+
+  # All models automatically have the id attribute but you need to define the
+  # other accessors so that they can be set and get properly.
+  attr_accessor :name, :birthdate
+
+  # to_document is the only required method that needs to be implemented so an
+  # instance of this model can be indexed.
+  def to_document
+    {
+      name: self.name,
+      birthdate: self.birthdate.iso8601
+    }
+  end
+end
+```
+
+This class on itself can't be queried or manipulated directly. Trying to call the `adults` search method, one would get an error: `NoMethodError: undefined method 'search' for #<Class:0x007fd582933460>`. To be able to call any method you first need to define the segment that you want to use, which can easily be done by calling the method `segment`, which will return a class derived from the base class that contains all the available methods:
+
+```ruby
+users = Search::User.segment("doximity.com")
+users.create_index
+
+# users is a dynamically defined class that inherits from the Search::User class, 
+# therefore having all the necessary methods defined just properly.
+users           # => Search::User{"doximity.com"}
+users.class     # => Class
+users.ancestors # => [Search::User{"doximity.com"}, User, Elasticity::SegmentedDocument, ...]
+
+john = users.new(name: "John", birthdate: Date.civil(1985, 10, 31))
+john # => #<Search::User{"doximity.com"}:0x81a3ab6a0dea @name="John" @birthdate=Thu, 31 Oct 1985>
+john.update
+
+users.adults.to_a # => [#<Search::User{"doximity.com"}:0x819cc5a50cd5 @_id="AVCHLz5JyttLSz7M-tRI" @name="John" @birthdate="1985-10-31" @highlighted=nil>]
+```
 
 ### Strategies and Hot-remapping
 
