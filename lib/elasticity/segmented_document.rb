@@ -26,7 +26,7 @@ module Elasticity
       end
 
       klass.segment_name = segment_name
-      klass.mapper = IndexMapper.new(klass, config)
+      klass.mapper = IndexMapper.new(klass, config.segment(segment_name))
       klass
     end
   end

@@ -11,7 +11,7 @@ module Elasticity
 
     def segment(name)
       new_config = self.dup
-      new_config.index_base_name = "#{index_base_name}_#{name}"
+      new_config.index_base_name = "#{index_base_name}_#{name.underscore}"
       new_config
     end
 
