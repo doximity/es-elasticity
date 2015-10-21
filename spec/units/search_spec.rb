@@ -59,14 +59,16 @@ RSpec.describe "Search" do
     ]}}
   end
 
+  let :mapper do
+    -> (hit) {
+      klass.new(_id: hit["_id"], name: hit["_source"]["name"], age: hit["_source"]["age"])
+    }
+  end
+
   let :klass do
     Class.new do
       include ActiveModel::Model
       attr_accessor :_id, :name, :age
-
-      def self.from_hit(hit)
-        new(_id: hit["_id"], name: hit["_source"]["name"], age: hit["_source"]["age"])
-      end
 
       def ==(other)
         self._id == other._id && self.name == other.name
@@ -82,7 +84,7 @@ RSpec.describe "Search" do
     it "searches the index and return document models" do
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
 
-      docs = subject.documents(klass)
+      docs = subject.documents(mapper)
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
 
       expect(docs.total).to eq 2
@@ -101,7 +103,7 @@ RSpec.describe "Search" do
     it "searches and the index returns aggregations" do
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response_with_aggregations)
 
-      docs = subject.documents(klass)
+      docs = subject.documents(mapper)
       expect(docs.aggregations).to eq aggregations
     end
 
@@ -110,7 +112,7 @@ RSpec.describe "Search" do
       expect(client).to receive(:scroll).with(scroll_id: "abc123", scroll: "1m").and_return(scroll_response)
       expect(client).to receive(:scroll).with(scroll_id: "abc456", scroll: "1m").and_return(empty_response)
 
-      docs = subject.scan_documents(klass)
+      docs = subject.scan_documents(mapper)
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
 
       expect(docs.total).to eq 2
@@ -144,7 +146,7 @@ RSpec.describe "Search" do
     it "provides defaul properties for pagination" do
       subject = Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
-      docs = subject.documents(klass)
+      docs = subject.documents(mapper)
 
       expect(docs.per_page).to eq(10)
       expect(docs.total_pages).to eq(1)
@@ -166,7 +168,7 @@ RSpec.describe "Search" do
           type: document_type,
           body: { size: 14, from: 25, filter: {} }
         ).and_return({ "hits" => { "total" => 112 } })
-      docs = subject.documents(klass)
+      docs = subject.documents(mapper)
 
       expect(docs.per_page).to eq(14)
       expect(docs.total_pages).to eq(8)
@@ -180,7 +182,7 @@ RSpec.describe "Search" do
     end
 
     subject do
-      described_class.new(search, klass)
+      described_class.new(search, mapper)
     end
 
     it "automatically maps the documents into the provided Document class" do

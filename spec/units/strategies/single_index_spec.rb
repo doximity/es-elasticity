@@ -69,16 +69,6 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       expect(subject.get_document("document", 2)).to eq({"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "found"=>true, "_source"=>{"name"=>"bar"}})
     end
 
-    it "allows searching documents" do
-      subject.index_document("document", 1, name: "test")
-      subject.flush
-
-      search = subject.search("document", filter: { term: { name: "test" }})
-      hashes = search.document_hashes
-      expect(hashes.size).to be 1
-      expect(hashes[0]).to eq("_id" => "1", "_index" => "test_index_name", "_type" => "document", "_score" => 1.0, "_source" => { "name" => "test" })
-    end
-
     it "allows deleting by queryu" do
       subject.index_document("document", 1, name: "foo")
       subject.index_document("document", 2, name: "bar")

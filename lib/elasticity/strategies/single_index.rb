@@ -64,8 +64,8 @@ module Elasticity
         @client.get(index: @index_name, type: type, id: id)
       end
 
-      def search(type, body)
-        Search::Facade.new(@client, Search::Definition.new(@index_name, type, body))
+      def search_index
+        @index_name
       end
 
       def delete_by_query(type, body)

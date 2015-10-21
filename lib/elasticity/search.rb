@@ -1,5 +1,10 @@
 module Elasticity
   module Search
+    def self.build(client, index_name, document_type, body)
+      search_def = Search::Definition.new(index_name, document_type, body)
+      Search::Facade.new(client, search_def)
+    end
+
     # Elasticity::Search::Definition is a struct that encapsulates all the data specific to one
     # ElasticSearch search.
     class Definition
@@ -45,11 +50,11 @@ module Elasticity
       end
 
       # Performs the search using the default search type and returning an iterator that will yield
-      # each document, converted to the provided document_klass.
-      def documents(document_klass)
+      # each document, converted using the provided mapper
+      def documents(mapper)
         return @documents if defined?(@documents)
         @documents = LazySearch.new(@client, @search_definition) do |hit|
-          document_klass.from_hit(hit)
+          mapper.(hit)
         end
       end
 
@@ -57,9 +62,9 @@ module Elasticity
       # as fast as possible. The sort option will be discarded.
       #
       # More info: http://www.elasticsearch.org/guide/en/elasticsearch/guide/current/scan-scroll.html
-      def scan_documents(document_klass, **options)
+      def scan_documents(mapper, **options)
         return @scan_documents if defined?(@scan_documents)
-        @scan_documents = ScanCursor.new(@client, @search_definition, document_klass, **options)
+        @scan_documents = ScanCursor.new(@client, @search_definition, mapper, **options)
       end
 
       # Performs the search only fetching document ids using it to load ActiveRecord objects from the provided
@@ -147,10 +152,10 @@ module Elasticity
     class ScanCursor
       include Enumerable
 
-      def initialize(client, search_definition, document_klass, size: 100, scroll: "1m")
+      def initialize(client, search_definition, mapper, size: 100, scroll: "1m")
         @client            = client
         @search_definition = search_definition
-        @document_klass    = document_klass
+        @mapper            = mapper
         @size              = size
         @scroll            = scroll
       end
@@ -190,7 +195,7 @@ module Elasticity
             hits     = response["hits"]["hits"]
             break if hits.empty?
 
-            y << hits.map { |hit| @document_klass.from_hit(hit) }
+            y << hits.map { |hit| @mapper.(hit) }
           end
         end
       end
