@@ -20,6 +20,10 @@ module Elasticity
         self.class.new(@index_name, @document_type, @body.deep_merge(body_changes))
       end
 
+      def to_count_args
+        { index: @index_name, type: @document_type, body: { query: @body.fetch(:query) }}
+      end
+
       def to_search_args
         { index: @index_name, type: @document_type, body: @body }
       end
@@ -110,7 +114,7 @@ module Elasticity
       end
 
       def count(args = {})
-        @client.count(@search_definition.to_search_args.reverse_merge(args))["count"]
+        @client.count(@search_definition.to_count_args.reverse_merge(args))["count"]
       end
 
       def search_results
