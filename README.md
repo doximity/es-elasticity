@@ -398,3 +398,8 @@ Search::User.adults.active_record(User.where(active: true))
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+6. Sign the CLA if you haven't yet. See CONTRIBUTING.md
+
+## License
+
+MPN is licensed under an Apache 2 license. Contributors are required to sign an contributor license agreement. See LICENSE.txt and CONTRIBUTING.md for more information.
