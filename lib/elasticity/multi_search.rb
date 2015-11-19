@@ -46,7 +46,7 @@ module Elasticity
 
         results[name] = case
         when search[:documents]
-          resp["hits"]["hits"].map { |hit| search[:documents].from_hit(hit) }
+          resp["hits"]["hits"].map { |hit| search[:documents].map_hit(hit) }
         when search[:active_records]
           Search::ActiveRecordProxy.from_hits(search[:active_records], resp["hits"]["hits"])
         end

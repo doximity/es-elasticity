@@ -11,7 +11,7 @@ RSpec.describe Elasticity::MultiSearch do
       include ActiveModel::Model
       attr_accessor :_id, :name
 
-      def self.from_hit(hit)
+      def self.map_hit(hit)
         new(_id: hit["_id"], name: hit["_source"]["name"])
       end
 

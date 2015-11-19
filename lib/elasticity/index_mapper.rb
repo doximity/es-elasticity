@@ -18,6 +18,7 @@ module Elasticity
         :delete_by_search,
         :bulk_index,
         :bulk_delete,
+        :map_hit,
         to: to
       )
     end
@@ -117,8 +118,6 @@ module Elasticity
         end
       end
     end
-
-    private
 
     # Creates a instance of a document from a ElasticSearch hit data.
     def map_hit(hit)
