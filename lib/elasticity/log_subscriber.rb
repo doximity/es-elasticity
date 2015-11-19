@@ -5,13 +5,13 @@ module Elasticity
   GRAY = "\e[90m"
 
   class LogSubscriber < ::ActiveSupport::LogSubscriber
-    %w(exists create delete get_settings get_mapping flush get_alias get_aliases put_alias delete_alias exists_alias update_aliases).each do |method_name|
+    InstrumentedClient::INDICES_METHODS.each do |method_name|
       define_method("index_#{method_name}") do |event|
         log_event(event)
       end
     end
 
-    %w(index delete get search scroll delete_by_query bulk).each do |method_name|
+    InstrumentedClient::INDEX_METHODS.each do |method_name|
       define_method(method_name) do |event|
         log_event(event)
       end

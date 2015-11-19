@@ -31,6 +31,11 @@ RSpec.describe "Persistence", elasticsearch: true do
       subject.delete_index
     end
 
+    it "counts empty search" do
+      count = subject.search({}).count
+      expect(count).to eq 0
+    end
+
     it "successfully index, update, search, count and delete" do
       john = subject.new(name: "John", birthdate: "1985-10-31")
       mari = subject.new(name: "Mari", birthdate: "1986-09-24")
@@ -90,6 +95,11 @@ RSpec.describe "Persistence", elasticsearch: true do
 
     after do
       subject.delete_index
+    end
+
+    it "counts empty search" do
+      count = subject.search({}).count
+      expect(count).to eq 0
     end
 
     it "remaps to a different index transparently" do

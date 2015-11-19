@@ -21,7 +21,10 @@ module Elasticity
       end
 
       def to_count_args
-        { index: @index_name, type: @document_type, body: { query: @body.fetch(:query) }}
+        { index: @index_name, type: @document_type}.tap do |args|
+          body = @body.slice(:query)
+          args[:body] = body if body.present?
+        end
       end
 
       def to_search_args
