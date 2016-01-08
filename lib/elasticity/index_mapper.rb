@@ -122,6 +122,7 @@ module Elasticity
     # Creates a instance of a document from a ElasticSearch hit data.
     def map_hit(hit)
       attrs = { _id: hit["_id"] }
+      attrs.merge!(_score: hit["_score"])
       attrs.merge!(hit["_source"]) if hit["_source"]
 
       if hit["highlight"]

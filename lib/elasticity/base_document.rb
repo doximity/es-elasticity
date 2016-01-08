@@ -12,7 +12,7 @@ module Elasticity
     end
 
     # Define common attributes for all documents
-    attr_accessor :_id, :highlighted
+    attr_accessor :_id, :highlighted, :_score
 
     def attributes=(attributes)
       attributes.each do |attr, value|
