@@ -10,6 +10,8 @@ rvm:
   - 2.2.3
 services:
   - elasticsearch
+before_script:
+  - sleep 5
 env:
   global:
     - secure: "HZa3D2GGwC6Jl062LJulbWZLTCieeBFC3FOJrArC5ul7ACGR5CEtANe0/UTnIf/Ad40p7I5VhiTdNFTcHunTbNc7Ae7dE5fOkiBHtxo/zwgpvHZK0iPvIoxsSfdcHobHeaF7NvfcXUkYUKcdRUyplHdB56eHQqYPVsah66K/4XA="
