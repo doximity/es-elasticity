@@ -25,6 +25,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
     before do
       subject.recreate_index
+      @elastic_search_client.cluster.health wait_for_status: 'yellow'
     end
 
     after do
