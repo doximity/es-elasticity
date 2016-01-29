@@ -43,8 +43,9 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
     expect(success).to be true
 
     seg.flush_index
-    results = seg.by_name("rodrigo").to_a
-    expect(results).to eq [rodrigo]
+    results = seg.by_name("rodrigo").to_a.first
+    expect(results.class).to eq rodrigo.class
+    expect(results.name).to eq rodrigo.name
 
     rodrigo.delete
     seg.flush_index
@@ -69,10 +70,12 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
     seg_a.flush_index
     seg_b.flush_index
 
-    res_a = seg_a.by_name("doc").to_a
-    expect(res_a).to eq [doc_a]
+    res_a = seg_a.by_name("doc").to_a.first
+    expect(res_a.class).to eq doc_a.class
+    expect(res_a.name).to eq doc_a.name
 
-    res_b = seg_b.by_name("doc").to_a
-    expect(res_b).to eq [doc_b]
+    res_b = seg_b.by_name("doc").to_a.first
+    expect(res_b.class).to eq doc_b.class
+    expect(res_b.name).to eq doc_b.name
   end
 end
