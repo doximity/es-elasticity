@@ -1,2 +1,4 @@
+v0.4.5
+  - Fix issue with hash strings and pagination
 v0.4.4
   - Added support for surfacing document _score on query results.

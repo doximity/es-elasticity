@@ -13,7 +13,7 @@ module Elasticity
       def initialize(index_name, document_type, body)
         @index_name    = index_name
         @document_type = document_type
-        @body          = body
+        @body          = body.deep_symbolize_keys!
       end
 
       def update(body_changes)
