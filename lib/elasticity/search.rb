@@ -77,7 +77,7 @@ module Elasticity
       # Performs the search only fetching document ids using it to load ActiveRecord objects from the provided
       # relation. It returns the relation matching the objects found on ElasticSearch.
       def active_records(relation)
-        ActiveRecordProxy.new(@client, @search_definition, relation)
+        ActiveRecordProxy.new(self.document_hashes, @client, @search_definition, relation)
       end
     end
 
@@ -229,6 +229,7 @@ module Elasticity
       end
 
       class Relation < ActiveSupport::ProxyObject
+
         def initialize(relation)
           @relation = relation
         end
@@ -247,8 +248,9 @@ module Elasticity
           "#<#{self.class}: #{@relation.to_sql}>"
         end
       end
-
-      def initialize(client, search_definition, relation)
+      
+      def initialize(search, client, search_definition, relation)
+        @search            = search
         @client            = client
         @search_definition = search_definition.update(_source: false)
         @relation          = Relation.new(relation)
@@ -264,6 +266,21 @@ module Elasticity
 
       def suggestions
         metadata[:suggestions]
+      end
+
+      # for pagination
+      def per_page
+        @search.per_page
+      end
+
+      # for pagination
+      def total_pages
+        @search.total_pages
+      end
+
+      # for pagination
+      def current_page
+        @search.current_page
       end
 
       def method_missing(name, *args, &block)
