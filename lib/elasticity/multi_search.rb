@@ -1,5 +1,7 @@
 module Elasticity
   class MultiSearch
+    include Enumerable
+
     def initialize
       @searches = {}
       @mappers  = {}
@@ -23,11 +25,23 @@ module Elasticity
     end
 
     def [](name)
-      @results ||= fetch
-      @results[name]
+      results_collection[name]
+    end
+
+    def each(&block)
+      @searches.keys.map { |key| self[key] }.each(&block)
+    end
+
+    def total
+      results_collection unless defined? @results_collection
+      @total
     end
 
     private
+
+    def results_collection
+      @results_collection ||= fetch
+    end
 
     def fetch
       bodies = @searches.values.map do |hsh|
@@ -39,10 +53,12 @@ module Elasticity
       end
 
       results = {}
+      @total = 0
 
       @searches.keys.each_with_index do |name, idx|
         resp = response["responses"][idx]
         search = @searches[name]
+        @total += resp["hits"]["total"]
 
         results[name] = case
         when search[:documents]
