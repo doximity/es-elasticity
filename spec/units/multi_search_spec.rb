@@ -41,7 +41,6 @@ RSpec.describe Elasticity::MultiSearch do
 
     expect(Array(subject[:first])). to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
     expect(Array(subject[:second])). to eq [klass.new(_id: 3, name: "baz")]
-    expect(subject.total).to eq(3)
     expect(subject.each).to be_a Enumerable
   end
 end

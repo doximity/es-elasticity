@@ -4,7 +4,7 @@ RSpec.describe "Search" do
   let(:client)         { double(:client) }
   let(:index_name)     { "index_name" }
   let(:document_type)  { "document" }
-  let(:body)           { {} }
+  let(:body)           { { } }
 
   let :full_response do
     { "hits" => { "total" => 2, "hits" => [
@@ -132,6 +132,7 @@ RSpec.describe "Search" do
         klass: double(:klass, primary_key: "id"),
         to_sql: "SELECT * FROM table_name WHERE id IN (1)"
       )
+
       allow(relation.connection).to receive(:quote_column_name) { |name| name }
       allow(relation.connection).to receive(:quote) { |name| name }
 
@@ -167,7 +168,7 @@ RSpec.describe "Search" do
           index: index_name,
           type: document_type,
           body: { size: 14, from: 25, filter: {} }
-        ).and_return({ "hits" => { "total" => 112 } })
+        ).and_return({ "hits" => { "total" => 112, "hits" => [] } })
       docs = subject.documents(mapper)
 
       expect(docs.per_page).to eq(14)

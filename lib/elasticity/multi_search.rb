@@ -32,11 +32,6 @@ module Elasticity
       @searches.keys.map { |key| self[key] }.each(&block)
     end
 
-    def total
-      results_collection unless defined? @results_collection
-      @total
-    end
-
     private
 
     def results_collection
@@ -51,20 +46,17 @@ module Elasticity
       response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
         Elasticity.config.client.msearch(body: bodies.map(&:dup))
       end
-
       results = {}
-      @total = 0
 
       @searches.keys.each_with_index do |name, idx|
         resp = response["responses"][idx]
         search = @searches[name]
-        @total += resp["hits"]["total"]
 
         results[name] = case
         when search[:documents]
-          resp["hits"]["hits"].map { |hit| search[:documents].map_hit(hit) }
+          Search::Results.new(resp, bodies[idx], search[:documents].method(:map_hit))
         when search[:active_records]
-          Search::ActiveRecordProxy.from_hits(search[:active_records], resp["hits"]["hits"])
+          Search::ActiveRecordProxy.from_hits(search[:active_records], bodies[idx], resp)
         end
       end
 
