@@ -186,15 +186,15 @@ module Elasticity
     end
 
     class ActiveRecordProxy
-      def self.map_response(relation, search_definition, response)
+      def self.map_response(relation, body, response)
         ids = response["hits"]["hits"].map { |hit| hit["_id"] }
 
         if ids.any?
           id_col  = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
           id_vals = ids.map { |id| relation.connection.quote(id) }
-          Relation.new(relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})"), search_definition, response)
+          Relation.new(relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})"), body, response)
         else
-          Relation.new(relation.none, search_definition, response)
+          Relation.new(relation.none, body, response)
         end
       end
 
@@ -254,7 +254,7 @@ module Elasticity
 
       def filtered_relation
         return @filtered_relation if defined?(@filtered_relation)
-        @filtered_relation = ActiveRecordProxy.map_response(@relation, @search_definition, response)
+        @filtered_relation = ActiveRecordProxy.map_response(@relation, @search_definition.body, response)
       end
     end
 
