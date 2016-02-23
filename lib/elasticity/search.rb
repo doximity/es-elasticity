@@ -279,8 +279,8 @@ module Elasticity
       end
     end
 
-    class Results
-      include Enumerable
+    class Results < ActiveSupport::ProxyObject
+      include ::Enumerable
 
       delegate :each, :size, :length, :[], :+, :-, :&, :|, to: :@documents
 
@@ -294,6 +294,10 @@ module Elasticity
         else
           @response["hits"]["hits"].map { |hit| mapper.(hit) }
         end
+      end
+
+      def method_missing(name, *args, &block)
+        @documents.public_send(name, *args, &block)
       end
 
       def each(&block)
