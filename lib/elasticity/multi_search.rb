@@ -1,5 +1,6 @@
 module Elasticity
   class MultiSearch
+
     def initialize
       @searches = {}
       @mappers  = {}
@@ -23,11 +24,14 @@ module Elasticity
     end
 
     def [](name)
-      @results ||= fetch
-      @results[name]
+      results_collection[name]
     end
 
     private
+
+    def results_collection
+      @results_collection ||= fetch
+    end
 
     def fetch
       bodies = @searches.values.map do |hsh|
@@ -37,7 +41,6 @@ module Elasticity
       response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
         Elasticity.config.client.msearch(body: bodies.map(&:dup))
       end
-
       results = {}
 
       @searches.keys.each_with_index do |name, idx|
@@ -46,9 +49,9 @@ module Elasticity
 
         results[name] = case
         when search[:documents]
-          resp["hits"]["hits"].map { |hit| search[:documents].map_hit(hit) }
+          Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
         when search[:active_records]
-          Search::ActiveRecordProxy.from_hits(search[:active_records], resp["hits"]["hits"])
+          Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition].body, resp)
         end
       end
 

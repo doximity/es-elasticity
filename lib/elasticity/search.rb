@@ -84,11 +84,10 @@ module Elasticity
     class LazySearch
       include Enumerable
 
-      delegate :each, :size, :length, :[], :+, :-, :&, :|, to: :search_results
+      delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page,
+        :total_pages, :current_page, to: :search_results
 
       attr_accessor :search_definition
-
-      DEFAULT_SIZE = 10
 
       def initialize(client, search_definition, &mapper)
         @client            = client
@@ -104,10 +103,6 @@ module Elasticity
         empty?
       end
 
-      def total
-        response["hits"]["total"]
-      end
-
       def aggregations
         response["aggregations"] ||= {}
       end
@@ -121,31 +116,7 @@ module Elasticity
       end
 
       def search_results
-        return @search_results if defined?(@search_results)
-
-        hits = response["hits"]["hits"]
-
-        @search_results = if @mapper.nil?
-          hits
-        else
-          hits.map { |hit| @mapper.(hit) }
-        end
-      end
-
-      # for pagination
-      def per_page
-        @search_definition.body[:size] || DEFAULT_SIZE
-      end
-
-      # for pagination
-      def total_pages
-        (total.to_f / per_page.to_f).ceil
-      end
-
-      # for pagination
-      def current_page
-        return 1 if @search_definition.body[:from].nil?
-        @search_definition.body[:from] / per_page + 1
+        @search_results ||= Search::Results.new(response, @search_definition.body, @mapper)
       end
 
       private
@@ -199,10 +170,9 @@ module Elasticity
 
           loop do
             response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @scroll)
-            hits     = response["hits"]["hits"]
-            break if hits.empty?
+            break if response["hits"]["hits"].empty?
 
-            y << hits.map { |hit| @mapper.(hit) }
+            y << Search::Results.new(response, @search_definition.body, @mapper)
           end
         end
       end
@@ -216,21 +186,27 @@ module Elasticity
     end
 
     class ActiveRecordProxy
-      def self.from_hits(relation, hits)
-        ids = hits.map { |hit| hit["_id"] }
+      def self.map_response(relation, body, response)
+        ids = response["hits"]["hits"].map { |hit| hit["_id"] }
 
         if ids.any?
           id_col  = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
           id_vals = ids.map { |id| relation.connection.quote(id) }
-          relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})")
+          Relation.new(relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})"), body, response)
         else
-          relation.none
+          Relation.new(relation.none, body, response)
         end
       end
 
       class Relation < ActiveSupport::ProxyObject
-        def initialize(relation)
+
+        delegate :total, :per_page, :total_pages, :current_page, to: :@results
+
+        def initialize(relation, search_definition, response)
           @relation = relation
+          @search_definition = search_definition
+          @response = response
+          @results = Results.new(response, search_definition)
         end
 
         def method_missing(name, *args, &block)
@@ -251,7 +227,7 @@ module Elasticity
       def initialize(client, search_definition, relation)
         @client            = client
         @search_definition = search_definition.update(_source: false)
-        @relation          = Relation.new(relation)
+        @relation          = relation
       end
 
       def metadata
@@ -278,7 +254,7 @@ module Elasticity
 
       def filtered_relation
         return @filtered_relation if defined?(@filtered_relation)
-        @filtered_relation = ActiveRecordProxy.from_hits(@relation, response["hits"]["hits"])
+        @filtered_relation = ActiveRecordProxy.map_response(@relation, @search_definition.body, response)
       end
     end
 
@@ -300,6 +276,52 @@ module Elasticity
 
       def method_missing(method_name, *args, &block)
         documents.public_send(method_name, *args, &block)
+      end
+    end
+
+    class Results < ActiveSupport::ProxyObject
+      include ::Enumerable
+
+      delegate :each, :size, :length, :[], :+, :-, :&, :|, to: :@documents
+
+      DEFAULT_SIZE = 10
+
+      def initialize(response, body, mapper = nil)
+        @response = response
+        @body = body
+        @documents = if mapper.nil?
+          @response["hits"]["hits"]
+        else
+          @response["hits"]["hits"].map { |hit| mapper.(hit) }
+        end
+      end
+
+      def method_missing(name, *args, &block)
+        @documents.public_send(name, *args, &block)
+      end
+
+      def each(&block)
+        @documents.each(&block)
+      end
+
+      def total
+        @response["hits"]["total"]
+      end
+
+      # for pagination
+      def per_page
+        @body[:size] || DEFAULT_SIZE
+      end
+
+      # for pagination
+      def total_pages
+        (total.to_f / per_page.to_f).ceil
+      end
+
+      # for pagination
+      def current_page
+        return 1 if @body[:from].nil?
+        @body[:from] / per_page + 1
       end
     end
   end
