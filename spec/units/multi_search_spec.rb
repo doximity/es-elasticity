@@ -31,15 +31,18 @@ RSpec.describe Elasticity::MultiSearch do
   end
 
   it "performs multi search" do
-    subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first })), documents: klass)
+    subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first, size: 2 })), documents: klass)
     subject.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
 
     expect(Elasticity.config.client).to receive(:msearch).with(body: [
-      { index: "index_first", type: "document_first", search: { search: :first } },
+      { index: "index_first", type: "document_first", search: { search: :first, size: 2 } },
       { index: "index_second", type: "document_second", search: { search: :second } },
     ]).and_return(response)
 
-    expect(Array(subject[:first])). to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
-    expect(Array(subject[:second])). to eq [klass.new(_id: 3, name: "baz")]
+    expect(Array(subject[:first])).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
+    expect(Array(subject[:second])).to eq [klass.new(_id: 3, name: "baz")]
+    expect(subject[:first].total).to eq 2
+    expect(subject[:first].total_pages).to eq 1
+    expect(subject[:first].current_page).to eq 1
   end
 end

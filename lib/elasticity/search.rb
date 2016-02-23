@@ -116,7 +116,7 @@ module Elasticity
       end
 
       def search_results
-        @search_results ||= Search::Results.new(response, @search_definition, @mapper)
+        @search_results ||= Search::Results.new(response, @search_definition.body, @mapper)
       end
 
       private
@@ -172,7 +172,7 @@ module Elasticity
             response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @scroll)
             break if response["hits"]["hits"].empty?
 
-            y << Search::Results.new(response, @search_definition, @mapper)
+            y << Search::Results.new(response, @search_definition.body, @mapper)
           end
         end
       end
@@ -286,9 +286,9 @@ module Elasticity
 
       DEFAULT_SIZE = 10
 
-      def initialize(response, search_definition, mapper = nil)
+      def initialize(response, body, mapper = nil)
         @response = response
-        @search_definition = search_definition
+        @body = body
         @documents = if mapper.nil?
           @response["hits"]["hits"]
         else
@@ -310,7 +310,7 @@ module Elasticity
 
       # for pagination
       def per_page
-        @search_definition.body[:size] || DEFAULT_SIZE
+        @body[:size] || DEFAULT_SIZE
       end
 
       # for pagination
@@ -320,8 +320,8 @@ module Elasticity
 
       # for pagination
       def current_page
-        return 1 if @search_definition.body[:from].nil?
-        @search_definition.body[:from] / per_page + 1
+        return 1 if @body[:from].nil?
+        @body[:from] / per_page + 1
       end
     end
   end

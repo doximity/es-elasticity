@@ -49,9 +49,9 @@ module Elasticity
 
         results[name] = case
         when search[:documents]
-          Search::Results.new(resp, bodies[idx], search[:documents].method(:map_hit))
+          Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
         when search[:active_records]
-          Search::ActiveRecordProxy.map_response(search[:active_records], bodies[idx], resp)
+          Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition], resp)
         end
       end
 
