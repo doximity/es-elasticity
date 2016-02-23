@@ -1,6 +1,5 @@
 module Elasticity
   class MultiSearch
-    include Enumerable
 
     def initialize
       @searches = {}
@@ -28,10 +27,6 @@ module Elasticity
       results_collection[name]
     end
 
-    def each(&block)
-      @searches.keys.map { |key| self[key] }.each(&block)
-    end
-
     private
 
     def results_collection
@@ -56,7 +51,7 @@ module Elasticity
         when search[:documents]
           Search::Results.new(resp, bodies[idx], search[:documents].method(:map_hit))
         when search[:active_records]
-          Search::ActiveRecordProxy.from_hits(search[:active_records], bodies[idx], resp)
+          Search::ActiveRecordProxy.map_response(search[:active_records], bodies[idx], resp)
         end
       end
 

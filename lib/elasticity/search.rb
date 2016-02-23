@@ -186,7 +186,7 @@ module Elasticity
     end
 
     class ActiveRecordProxy
-      def self.from_hits(relation, search_definition, response)
+      def self.map_response(relation, search_definition, response)
         ids = response["hits"]["hits"].map { |hit| hit["_id"] }
 
         if ids.any?
@@ -199,12 +199,14 @@ module Elasticity
       end
 
       class Relation < ActiveSupport::ProxyObject
-        DEFAULT_SIZE = 10
+
+        delegate :total, :per_page, :total_pages, :current_page, to: :@results
 
         def initialize(relation, search_definition, response)
           @relation = relation
           @search_definition = search_definition
           @response = response
+          @results = Results.new(response, search_definition)
         end
 
         def method_missing(name, *args, &block)
@@ -215,26 +217,6 @@ module Elasticity
           pp.object_group(self) do
             pp.text " #{@relation.to_sql}"
           end
-        end
-
-        def total
-          @response["hits"]["total"]
-        end
-
-        # for pagination
-        def per_page
-          @search_definition.body[:size] || DEFAULT_SIZE
-        end
-
-        # for pagination
-        def total_pages
-          (total.to_f / per_page.to_f).ceil
-        end
-
-        # for pagination
-        def current_page
-          return 1 if @search_definition.body[:from].nil?
-          @search_definition.body[:from] / per_page + 1
         end
 
         def inspect
@@ -272,7 +254,7 @@ module Elasticity
 
       def filtered_relation
         return @filtered_relation if defined?(@filtered_relation)
-        @filtered_relation = ActiveRecordProxy.from_hits(@relation, @search_definition, response)
+        @filtered_relation = ActiveRecordProxy.map_response(@relation, @search_definition, response)
       end
     end
 

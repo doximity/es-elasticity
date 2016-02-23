@@ -4,7 +4,7 @@ RSpec.describe "Search" do
   let(:client)         { double(:client) }
   let(:index_name)     { "index_name" }
   let(:document_type)  { "document" }
-  let(:body)           { { } }
+  let(:body)           { {} }
 
   let :full_response do
     { "hits" => { "total" => 2, "hits" => [
