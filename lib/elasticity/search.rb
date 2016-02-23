@@ -187,7 +187,6 @@ module Elasticity
 
     class ActiveRecordProxy
       def self.from_hits(relation, search_definition, response)
-        relation
         ids = response["hits"]["hits"].map { |hit| hit["_id"] }
 
         if ids.any?
@@ -205,6 +204,7 @@ module Elasticity
         def initialize(relation, search_definition, response)
           @relation = relation
           @search_definition = search_definition
+          @response = response
         end
 
         def method_missing(name, *args, &block)
@@ -218,7 +218,7 @@ module Elasticity
         end
 
         def total
-          response["hits"]["total"]
+          @response["hits"]["total"]
         end
 
         # for pagination
