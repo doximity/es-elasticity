@@ -1,7 +1,10 @@
+v0.5.1
+  - Add ability to reindex individual attributes of a document using the
+  bulk_update API.
 v0.5.0
 	- Refactor of multisearch and search facade
 	- add Search::Results proxy object so pagination and meta data methods can
-	be standardize across all responses  
+	be standardize across all responses
   - Searches no longer return a simple array, they now return the
   Search::Results object which proxies array and is enumerable.
 v0.4.5
