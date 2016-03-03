@@ -75,17 +75,19 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.strategy        =  Elasticity::Strategies::AliasIndex
 
           c.mapping = {
+            _id: { path: "id" },
             properties: {
+              id: { type: "integer" },
               name: { type: "string" },
               birthdate: { type: "date" },
             },
           }
         end
 
-        attr_accessor :name, :birthdate
+        attr_accessor :id, :name, :birthdate
 
         def to_document
-          { name: name, birthdate: birthdate }
+          { id: id, name: name, birthdate: birthdate }
         end
       end
     end
@@ -104,8 +106,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "remaps to a different index transparently" do
-      john = subject.new(name: "John", birthdate: "1985-10-31")
-      mari = subject.new(name: "Mari", birthdate: "1986-09-24")
+      john = subject.new(id: 1, name: "John", birthdate: "1985-10-31")
+      mari = subject.new(id: 2, name: "Mari", birthdate: "1986-09-24")
 
       john.update
       mari.update
@@ -129,8 +131,9 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "handles in between state while remapping" do
-      docs = 2000.times.map do |i|
-        subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      number_of_docs = 2000
+      docs = number_of_docs.times.map do |i|
+        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
@@ -142,7 +145,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       to_delete.each(&:delete)
 
       20.times.map do |i|
-        subject.new(name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t.join
@@ -153,8 +156,9 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "recover from remap interrupts" do
-      docs = 2000.times.map do |i|
-        subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+      number_of_docs = 2000
+      docs = number_of_docs.times.map do |i|
+        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
@@ -166,7 +170,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       to_delete.each(&:delete)
 
       20.times.map do |i|
-        subject.new(name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       t.raise("Test Interrupt")
@@ -177,9 +181,9 @@ RSpec.describe "Persistence", elasticsearch: true do
       expect(results.total).to eq(2010)
     end
 
-    it "bulk indexes and delete" do
+    it "bulk indexes, updates and delete" do
       docs = 2000.times.map do |i|
-        subject.new(name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
       end
 
       subject.bulk_index(docs)
@@ -187,6 +191,18 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 2000
+
+      docs = 2000.times.map do |i|
+        { _id: i, attr_name: "name", attr_value: "Updated" }
+      end
+
+      subject.bulk_update(docs)
+      subject.flush_index
+
+      results = subject.search(from: 0, size: 3000)
+      expect(results.total).to eq 2000
+
+      expect(subject.search({ query: { match: { name: "Updated" } } } ).count).to eq(2000)
 
       subject.bulk_delete(results.documents.map(&:_id))
       subject.flush_index

@@ -118,7 +118,7 @@ module Elasticity
           b.update(
             document_type,
             doc[:_id],
-            { doc: { doc[:attr_name] => doc[:attr_vale] } }
+            { doc: { doc[:attr_name] => doc[:attr_value] } }
           )
         end
       end
