@@ -9,6 +9,10 @@ module Elasticity
       @operations << { index: { _index: index_name, _type: type, _id: id, data: attributes }}
     end
 
+    def update(index_name, type, id, attributes)
+      @operations << { update: { _index: index_name, _type: type, _id: id, data: attributes }}
+    end
+
     def delete(index_name, type, id)
       @operations << { delete: { _index: index_name, _type: type, _id: id }}
     end
@@ -27,6 +31,10 @@ module Elasticity
         super(@index_name, type, id, attributes)
       end
 
+      def update(type, id, attributes)
+        super(@index_name, type, id, attributes)
+      end
+
       def delete(type, id)
         super(@index_name, type, id)
       end
@@ -40,6 +48,10 @@ module Elasticity
       end
 
       def index(type, id, attributes)
+        super(@update_alias, type, id, attributes)
+      end
+
+      def update(type, id, attributes)
         super(@update_alias, type, id, attributes)
       end
 

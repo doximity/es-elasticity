@@ -17,6 +17,7 @@ module Elasticity
         :delete,
         :delete_by_search,
         :bulk_index,
+        :bulk_update,
         :bulk_delete,
         :map_hit,
         to: to
@@ -106,6 +107,19 @@ module Elasticity
       @strategy.bulk do |b|
         documents.each do |doc|
           b.index(document_type, doc._id, doc.to_document)
+        end
+      end
+    end
+
+    # Bulk update the specicied attribute of the provided documents
+    def bulk_update(documents)
+      @strategy.bulk do |b|
+        documents.each do |doc|
+          b.update(
+            document_type,
+            doc[:_id],
+            { doc: { doc[:attr_name] => doc[:attr_value] } }
+          )
         end
       end
     end

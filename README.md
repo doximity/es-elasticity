@@ -129,6 +129,19 @@ users = [
 Search::User.bulk_index(users)
 ```
 
+### Individual Attribute Indexing
+
+If you you'd like to update a single attribute of the document instead of updating the entire document, you can use the `bulk_update` api.
+
+```ruby
+document = [
+  { _id: 1, attr_name: "attr_name", attr_vale: "attr_value" },
+  { _id: 2, attr_name: "attr_name", attr_vale: "attr_value" }
+]
+
+Search::User.bulk_update(documents)
+```
+
 
 ### Searching
 
@@ -244,7 +257,7 @@ This class on itself can't be queried or manipulated directly. Trying to call th
 users = Search::User.segment("doximity.com")
 users.create_index
 
-# users is a dynamically defined class that inherits from the Search::User class, 
+# users is a dynamically defined class that inherits from the Search::User class,
 # therefore having all the necessary methods defined just properly.
 users           # => Search::User{"doximity.com"}
 users.class     # => Class
