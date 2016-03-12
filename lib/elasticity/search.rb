@@ -85,7 +85,7 @@ module Elasticity
       include Enumerable
 
       delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page,
-        :total_pages, :current_page, to: :search_results
+        :total_pages, :current_page, :aggregations, to: :search_results
 
       attr_accessor :search_definition
 
@@ -101,10 +101,6 @@ module Elasticity
 
       def blank?
         empty?
-      end
-
-      def aggregations
-        response["aggregations"] ||= {}
       end
 
       def suggestions
@@ -200,7 +196,7 @@ module Elasticity
 
       class Relation < ActiveSupport::ProxyObject
 
-        delegate :total, :per_page, :total_pages, :current_page, to: :@results
+        delegate :total, :per_page, :total_pages, :current_page, :aggregations, to: :@results
 
         def initialize(relation, search_definition, response)
           @relation = relation
@@ -306,6 +302,10 @@ module Elasticity
 
       def total
         @response["hits"]["total"]
+      end
+
+      def aggregations
+        @response["aggregations"] ||= {}
       end
 
       # for pagination

@@ -21,11 +21,60 @@ RSpec.describe Elasticity::MultiSearch do
     end
   end
 
+  let :index_with_one_hit do
+    {
+      "hits" => {
+        "total" => 1,
+        "hits" => [
+          { "_id" => 3, "_source" => { "name" => "baz" }}
+        ]
+      }
+    }
+  end
+
+  let :index_with_two_hits do
+    {
+      "hits" => {
+        "total" => 2,
+        "hits" => [
+          { "_id" => 1, "_source" => { "name" => "foo" }},
+          { "_id" => 2, "_source" => { "name" => "bar" }}
+        ]
+      }
+    }
+  end
+
+  let :aggregations do
+    {
+      "aggregations" => {
+        "logins_count" => { "value" => 1495 },
+        "gender" => {
+          "buckets" => [
+            {
+              "doc_count" => 100,
+              "key" => "M"
+            },
+            {
+              "doc_count" => 100,
+              "key" => "F"
+            }
+          ],
+          "doc_count_error_upper_bound" => 0,
+          "sum_other_doc_count" => 0
+        }
+      }
+    }
+  end
+
+  let :index_with_two_hits_and_aggregations do
+    index_with_two_hits.merge(aggregations)
+  end
+
   let :response do
     {
       "responses" => [
-        { "hits" => { "total" => 2, "hits" => [{ "_id" => 1, "_source" => { "name" => "foo" }}, { "_id" => 2, "_source" => { "name" => "bar" }}]}},
-        { "hits" => { "total" => 1, "hits" => [{ "_id" => 3, "_source" => { "name" => "baz" }}]}},
+        index_with_two_hits_and_aggregations,
+        index_with_one_hit
       ]
     }
   end
@@ -44,5 +93,7 @@ RSpec.describe Elasticity::MultiSearch do
     expect(subject[:first].total).to eq 2
     expect(subject[:first].total_pages).to eq 1
     expect(subject[:first].current_page).to eq 1
+    expect(subject[:first].aggregations).to eq aggregations["aggregations"]
+    expect(subject[:second].aggregations).to eq Hash.new
   end
 end
