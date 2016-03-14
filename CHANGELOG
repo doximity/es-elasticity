@@ -1,3 +1,5 @@
+v0.5.2
+  - Add aggregations to multi_search
 v0.5.1
   - Add ability to reindex individual attributes of a document using the
   bulk_update API.
