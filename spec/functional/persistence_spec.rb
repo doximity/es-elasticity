@@ -2,6 +2,10 @@ RSpec.describe "Persistence", elasticsearch: true do
   describe "single index strategy" do
     subject do
       Class.new(Elasticity::Document) do
+        def self.name
+          'SomeClass'
+        end
+
         configure do |c|
           c.index_base_name = "users"
           c.document_type   = "user"
@@ -71,7 +75,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
-        c.subclasses = ["Cat", "Dog"]
+        c.subclasses = { cat: "Cat", dog: "Dog" }
       end
     end
 
@@ -80,7 +84,6 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type  = "cat"
-        c.validate_as_subclass = true
         c.mapping = { properties: {
           name: { type: "string" },
           age: { type: "integer" }
@@ -99,7 +102,6 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type = "dog"
-        c.validate_as_subclass = true
         c.mapping = { properties: {
           name: { type: "string" },
           age: { type: "integer" },
@@ -151,6 +153,10 @@ RSpec.describe "Persistence", elasticsearch: true do
   describe "alias index strategy" do
     subject do
       Class.new(Elasticity::Document) do
+        def self.name
+          "SomeClass"
+        end
+
         configure do |c|
           c.index_base_name = "users"
           c.document_type   = "user"

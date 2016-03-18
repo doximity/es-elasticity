@@ -1,10 +1,11 @@
 module Elasticity
   class IndexConfig
-    ATTRS = [:index_base_name, :document_type, :mapping, :strategy, :subclasses, :validate_as_subclass].freeze
+    ATTRS = [:index_base_name, :document_type, :mapping, :strategy, :subclasses].freeze
 
     attr_accessor *ATTRS
 
-    def initialize(elasticity_config)
+    def initialize(elasticity_config, default_document_type)
+      @document_type = default_document_type
       @elasticity_config = elasticity_config
       yield(self)
       validate!
@@ -21,15 +22,15 @@ module Elasticity
     end
 
     def definition
-      definition = { settings: @elasticity_config.settings, mappings: { } }
-      if subclasses.present?
-        subclasses.each do |subclass|
-          definition[:mappings][Object.const_get(subclass).document_type] = Object.const_get(subclass).mapping
-        end
-      else
-        definition[:mappings] = { @document_type => @mapping }
-      end
+      definition = { settings: @elasticity_config.settings, mappings: { @document_type => @mapping || {} } }
+      subclasses.each do |doc_type, subclass|
+        definition[:mappings][doc_type] = subclass.constantize.mapping
+      end if subclasses.present?
       definition
+    end
+
+    def document_types
+      definition[:mappings].collect { |doc_type, mapping| doc_type }
     end
 
     def fq_index_base_name
@@ -57,9 +58,7 @@ module Elasticity
     end
 
     def validatable_attributes
-      validatable_attrs = ATTRS - [:document_type, :mapping, :subclasses, :validate_as_subclass]
-      validatable_attrs = validatable_attrs - [:index_base_name] if public_send(:validate_as_subclass)
-      validatable_attrs
+      ATTRS - [:document_type, :mapping, :subclasses]
     end
   end
 end

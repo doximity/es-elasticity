@@ -1,6 +1,10 @@
 RSpec.describe "Segmented indexes", elasticsearch: true do
   subject do
     Class.new(Elasticity::SegmentedDocument) do
+      def self.name
+        "SomeClass"
+      end
+
       configure do |c|
         c.index_base_name = "people"
         c.document_type = "person"

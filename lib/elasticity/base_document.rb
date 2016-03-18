@@ -8,7 +8,7 @@ module Elasticity
     # Configure the given klass, changing default parameters and resetting
     # some of the internal state.
     def self.configure(&block)
-      self.config = IndexConfig.new(Elasticity.config, &block)
+      self.config = IndexConfig.new(Elasticity.config, self.name.underscore.gsub("/", "_"), &block)
     end
 
     # Define common attributes for all documents

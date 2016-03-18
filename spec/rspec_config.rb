@@ -1,6 +1,7 @@
 require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
+require "byebug"
 
 CodeClimate::TestReporter.start
 
