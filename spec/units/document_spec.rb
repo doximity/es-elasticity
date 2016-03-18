@@ -16,6 +16,10 @@ RSpec.describe Elasticity::Document do
 
   let :klass do
     Class.new(described_class) do
+      def self.name
+        "SomeClass"
+      end
+
       configure do |c|
         c.index_base_name = "class_names"
         c.document_type   = "class_name"

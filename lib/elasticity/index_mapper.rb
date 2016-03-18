@@ -32,6 +32,7 @@ module Elasticity
 
     delegate(
       :document_type,
+      :document_types,
       :mapping,
       :ref_index_name,
       to: :@index_config
@@ -82,7 +83,7 @@ module Elasticity
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
     def search(body)
-      search_obj = Search.build(@index_config.client, @strategy.search_index, document_type, body)
+      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body)
       Search::DocumentProxy.new(search_obj, self.method(:map_hit))
     end
 
@@ -152,8 +153,11 @@ module Elasticity
 
         highlighted = @document_klass.new(highlighted_attrs)
       end
-
-      @document_klass.new(attrs.merge(highlighted: highlighted))
+      if @document_klass.config.subclasses.present?
+        @document_klass.config.subclasses[hit["_type"].to_sym].constantize.new(attrs.merge(highlighted: highlighted))
+      else
+        @document_klass.new(attrs.merge(highlighted: highlighted))
+      end
     end
   end
 end
