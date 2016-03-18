@@ -1,6 +1,7 @@
 module Elasticity
   class IndexConfig
     ATTRS = [:index_base_name, :document_type, :mapping, :strategy, :subclasses].freeze
+    VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy]
 
     attr_accessor *ATTRS
 
@@ -53,13 +54,9 @@ module Elasticity
     private
 
     def validate!
-      validatable_attributes.each do |attr|
+      VALIDATABLE_ATTRS.each do |attr|
         raise "#{attr} is not set" if public_send(attr).nil?
       end
-    end
-
-    def validatable_attributes
-      ATTRS - [:mapping, :subclasses]
     end
   end
 end
