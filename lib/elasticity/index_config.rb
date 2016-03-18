@@ -58,7 +58,7 @@ module Elasticity
     end
 
     def validatable_attributes
-      ATTRS - [:document_type, :mapping, :subclasses]
+      ATTRS - [:mapping, :subclasses]
     end
   end
 end
