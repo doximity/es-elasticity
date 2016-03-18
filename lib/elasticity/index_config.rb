@@ -1,7 +1,7 @@
 module Elasticity
   class IndexConfig
     ATTRS = [:index_base_name, :document_type, :mapping, :strategy, :subclasses].freeze
-    VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy]
+    VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
 
     attr_accessor *ATTRS
 
