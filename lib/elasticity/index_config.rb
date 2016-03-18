@@ -1,6 +1,7 @@
 module Elasticity
   class IndexConfig
-    ATTRS = [:index_base_name, :document_type, :mapping, :strategy].freeze
+    ATTRS = [:index_base_name, :document_type, :mapping, :strategy, :subclasses, :validate_as_subclass].freeze
+
     attr_accessor *ATTRS
 
     def initialize(elasticity_config)
@@ -20,7 +21,15 @@ module Elasticity
     end
 
     def definition
-      { settings: @elasticity_config.settings, mappings: { @document_type => @mapping } }
+      definition = { settings: @elasticity_config.settings, mappings: { } }
+      if subclasses.present?
+        subclasses.each do |subclass|
+          definition[:mappings][Object.const_get(subclass).document_type] = Object.const_get(subclass).mapping
+        end
+      else
+        definition[:mappings] = { @document_type => @mapping }
+      end
+      definition
     end
 
     def fq_index_base_name
@@ -42,9 +51,15 @@ module Elasticity
     private
 
     def validate!
-      ATTRS.each do |attr|
+      validatable_attributes.each do |attr|
         raise "#{attr} is not set" if public_send(attr).nil?
       end
+    end
+
+    def validatable_attributes
+      validatable_attrs = ATTRS - [:document_type, :mapping, :subclasses, :validate_as_subclass]
+      validatable_attrs = validatable_attrs - [:index_base_name] if public_send(:validate_as_subclass)
+      validatable_attrs
     end
   end
 end

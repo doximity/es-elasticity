@@ -66,6 +66,88 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
   end
 
+  describe 'multi mapping index' do
+    class CatAndDog < Elasticity::Document
+      configure do |c|
+        c.index_base_name = "cats_and_dogs"
+        c.strategy = Elasticity::Strategies::SingleIndex
+        c.subclasses = ["Cat", "Dog"]
+      end
+    end
+
+    class Cat < CatAndDog
+      configure do |c|
+        c.index_base_name = "cats_and_dogs"
+        c.strategy = Elasticity::Strategies::SingleIndex
+        c.document_type  = "cat"
+        c.validate_as_subclass = true
+        c.mapping = { properties: {
+          name: { type: "string" },
+          age: { type: "integer" }
+        } }
+      end
+
+      attr_accessor :name, :age
+
+      def to_document
+        { name: name, age: age }
+      end
+    end
+
+    class Dog < CatAndDog
+      configure do |c|
+        c.index_base_name = "cats_and_dogs"
+        c.strategy = Elasticity::Strategies::SingleIndex
+        c.document_type = "dog"
+        c.validate_as_subclass = true
+        c.mapping = { properties: {
+          name: { type: "string" },
+          age: { type: "integer" },
+          hungry: { type: "boolean" }
+        } }
+      end
+      attr_accessor :name, :age, :hungry
+
+      def to_document
+        { name: name, age: age, hungry: hungry }
+      end
+    end
+
+    before do
+      CatAndDog.recreate_index
+      @elastic_search_client.cluster.health wait_for_status: 'yellow'
+    end
+
+    it "successful index, update, search, count and deletes" do
+      cat = Cat.new(name: "felix", age: 10)
+      dog = Dog.new(name: "fido", age: 4, hungry: true)
+
+      cat.update
+      dog.update
+
+      CatAndDog.flush_index
+
+      results = CatAndDog.search({})
+      expect(results.total).to eq 2
+      expect(results.map(&:class)).to include(Cat, Dog)
+
+      results = Cat.search({})
+      expect(results.total).to eq 1
+      expect(results.first.class).to eq Cat
+
+      results = Dog.search({})
+      expect(results.total).to eq 1
+      expect(results.first.class).to eq Dog
+
+      cat.delete
+      CatAndDog.flush_index
+
+      results = CatAndDog.search({})
+      expect(results.total).to eq 1
+      expect(results.map(&:class)).to include(Dog)
+    end
+  end
+
   describe "alias index strategy" do
     subject do
       Class.new(Elasticity::Document) do

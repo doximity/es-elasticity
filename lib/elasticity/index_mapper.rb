@@ -152,8 +152,20 @@ module Elasticity
 
         highlighted = @document_klass.new(highlighted_attrs)
       end
+      if @document_klass.config.subclasses.present?
+        Object.const_get(subclass_types[hit["_type"]]).new(attrs.merge(highlighted: highlighted))
+      else
+        @document_klass.new(attrs.merge(highlighted: highlighted))
+      end
+    end
 
-      @document_klass.new(attrs.merge(highlighted: highlighted))
+    def subclass_types
+      return @subclass_types if defined?(@subclass_types)
+      @subclass_types = {}
+      @document_klass.config.subclasses.each do |subclass|
+        @subclass_types[Object.const_get(subclass).config.document_type] = subclass
+      end
+      @subclass_types
     end
   end
 end
