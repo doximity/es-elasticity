@@ -71,7 +71,7 @@ RSpec.describe "Persistence", elasticsearch: true do
   end
 
   describe 'multi mapping index' do
-    class CatAndDog < Elasticity::Document
+    class Animal < Elasticity::Document
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
@@ -79,7 +79,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       end
     end
 
-    class Cat < CatAndDog
+    class Cat < Animal
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
@@ -97,7 +97,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       end
     end
 
-    class Dog < CatAndDog
+    class Dog < Animal
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
@@ -116,7 +116,7 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     before do
-      CatAndDog.recreate_index
+      Aniaml.recreate_index
       @elastic_search_client.cluster.health wait_for_status: 'yellow'
     end
 
@@ -127,9 +127,9 @@ RSpec.describe "Persistence", elasticsearch: true do
       cat.update
       dog.update
 
-      CatAndDog.flush_index
+      Animal.flush_index
 
-      results = CatAndDog.search({})
+      results = Animal.search({})
       expect(results.total).to eq 2
       expect(results.map(&:class)).to include(Cat, Dog)
 
@@ -142,9 +142,9 @@ RSpec.describe "Persistence", elasticsearch: true do
       expect(results.first.class).to eq Dog
 
       cat.delete
-      CatAndDog.flush_index
+      Animal.flush_index
 
-      results = CatAndDog.search({})
+      results = Animal.search({})
       expect(results.total).to eq 1
       expect(results.map(&:class)).to include(Dog)
     end
