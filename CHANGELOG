@@ -1,3 +1,12 @@
+v0.6.0
+	- Change documents to be able to define indexes with multiple doc types.  A
+	Document class can define subclasses which are of different doc_types and
+	all live in the same index's mappings.
+	- updated search queries to pass either a list of document types or a single
+	document type.
+	- Update documents to generate a default document_type from the class name
+	so that Documents always have a document type. You'll still usually want to
+	manually define the document type, but it's no longer necessary.
 v0.5.2
   - Add aggregations to multi_search
 v0.5.1
