@@ -22,15 +22,16 @@ module Elasticity
     end
 
     def definition
-      definition = { settings: @elasticity_config.settings, mappings: { @document_type => @mapping || {} } }
+      return @definition if defined?(@definition)
+      @definition = { settings: @elasticity_config.settings, mappings: { @document_type => @mapping || {} } }
       subclasses.each do |doc_type, subclass|
-        definition[:mappings][doc_type] = subclass.constantize.mapping
+        @definition[:mappings][doc_type] = subclass.constantize.mapping
       end if subclasses.present?
-      definition
+      @definition
     end
 
     def document_types
-      definition[:mappings].collect { |doc_type, mapping| doc_type }
+      @document_types ||= definition[:mappings].collect { |doc_type, mapping| doc_type }
     end
 
     def fq_index_base_name
