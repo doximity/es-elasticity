@@ -42,8 +42,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "successfully index, update, search, count and delete" do
-      john = subject.new(name: "John", birthdate: "1985-10-31")
-      mari = subject.new(name: "Mari", birthdate: "1986-09-24")
+      john = subject.new(name: "John", birthdate: "1985-10-31", sort: ['john'])
+      mari = subject.new(name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
 
       john.update
       mari.update
@@ -194,8 +194,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "remaps to a different index transparently" do
-      john = subject.new(id: 1, name: "John", birthdate: "1985-10-31")
-      mari = subject.new(id: 2, name: "Mari", birthdate: "1986-09-24")
+      john = subject.new(id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
+      mari = subject.new(id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
 
       john.update
       mari.update
