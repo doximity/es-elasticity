@@ -138,6 +138,7 @@ module Elasticity
     def map_hit(hit)
       attrs = { _id: hit["_id"] }
       attrs.merge!(_score: hit["_score"])
+      attrs.merge!(sort: hit["sort"])
       attrs.merge!(hit["_source"]) if hit["_source"]
 
       if hit["highlight"]
