@@ -1,3 +1,6 @@
+v0.6.2
+	- update multi search `[]` method to raise an exception with key name to
+	make it easier to debug failed queries within a multi search hash.
 v0.6.0
 	- Change documents to be able to define indexes with multiple doc types.  A
 	Document class can define subclasses which are of different doc_types and
