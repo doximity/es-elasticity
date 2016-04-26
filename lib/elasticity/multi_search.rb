@@ -25,6 +25,8 @@ module Elasticity
 
     def [](name)
       results_collection[name]
+    rescue NoMethodError => e
+      raise "#{e.inspect} with key #{name}"
     end
 
     private
