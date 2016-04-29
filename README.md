@@ -134,7 +134,7 @@ Search::User.bulk_index(users)
 If you you'd like to update a single attribute of the document instead of updating the entire document, you can use the `bulk_update` api.
 
 ```ruby
-document = [
+documents = [
   { _id: 1, attr_name: "attr_name", attr_vale: "attr_value" },
   { _id: 2, attr_name: "attr_name", attr_vale: "attr_value" }
 ]
