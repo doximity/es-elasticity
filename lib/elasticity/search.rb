@@ -85,7 +85,7 @@ module Elasticity
       include Enumerable
 
       delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page,
-        :total_pages, :current_page, :aggregations, to: :search_results
+        :total_pages, :current_page, :next_page, :previous_page, :aggregations, to: :search_results
 
       attr_accessor :search_definition
 
@@ -196,7 +196,8 @@ module Elasticity
 
       class Relation < ActiveSupport::ProxyObject
 
-        delegate :total, :per_page, :total_pages, :current_page, :aggregations, to: :@results
+        delegate :total, :per_page, :total_pages, :current_page, :next_page,
+          :previous_page, :aggregations, to: :@results
 
         def initialize(relation, search_definition, response)
           @relation = relation
@@ -300,12 +301,18 @@ module Elasticity
         @documents.each(&block)
       end
 
+      def aggregations
+        @response["aggregations"] ||= {}
+      end
+
       def total
         @response["hits"]["total"]
       end
+      alias_method :total_entries, :total
 
-      def aggregations
-        @response["aggregations"] ||= {}
+      # for pagination
+      def total_pages
+        (total.to_f / per_page.to_f).ceil
       end
 
       # for pagination
@@ -314,14 +321,17 @@ module Elasticity
       end
 
       # for pagination
-      def total_pages
-        (total.to_f / per_page.to_f).ceil
-      end
-
-      # for pagination
       def current_page
         return 1 if @body[:from].nil?
         @body[:from] / per_page + 1
+      end
+
+      def next_page
+        current_page < total_pages ? (current_page + 1) : nil
+      end
+
+      def previous_page
+        current_page > 1 ? (current_page - 1) : nil
       end
     end
   end

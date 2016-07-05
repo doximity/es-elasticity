@@ -152,6 +152,8 @@ RSpec.describe "Search" do
       expect(docs.per_page).to eq(10)
       expect(docs.total_pages).to eq(1)
       expect(docs.current_page).to eq(1)
+      expect(docs.next_page).to eq(nil)
+      expect(docs.previous_page).to eq(nil)
     end
 
     it "provides custom properties for pagination" do
@@ -160,20 +162,22 @@ RSpec.describe "Search" do
         Elasticity::Search::Definition.new(
           index_name,
           document_type,
-          { size: 14, from: 25, filter: {} }
+          { size: 15, from: 15, filter: {} }
         )
       )
       expect(client).to receive(:search).
         with(
           index: index_name,
           type: document_type,
-          body: { size: 14, from: 25, filter: {} }
+          body: { size: 15, from: 15, filter: {} }
         ).and_return({ "hits" => { "total" => 112, "hits" => [] } })
       docs = subject.documents(mapper)
 
-      expect(docs.per_page).to eq(14)
+      expect(docs.per_page).to eq(15)
       expect(docs.total_pages).to eq(8)
       expect(docs.current_page).to eq(2)
+      expect(docs.next_page).to eq(3)
+      expect(docs.previous_page).to eq(1)
     end
   end
 
