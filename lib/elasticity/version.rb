@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "0.6.3.willpaginate"
+  VERSION = "0.6.3"
 end
