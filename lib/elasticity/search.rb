@@ -333,6 +333,10 @@ module Elasticity
       def previous_page
         current_page > 1 ? (current_page - 1) : nil
       end
+
+      def self.none
+        new({ "hits" => { "total" => 0, "hits" => [] } }, { from: 0 })
+      end
     end
   end
 end
