@@ -1,3 +1,8 @@
+v0.6.4
+	- update suggestions to pull from the proper key
+v0.6.3
+	- add next_page and previous_page to be compatible with will_paginate
+	interface
 v0.6.2
 	- update multi search `[]` method to raise an exception with key name to
 	make it easier to debug failed queries within a multi search hash.

@@ -104,7 +104,7 @@ module Elasticity
       end
 
       def suggestions
-        response["hits"]["suggest"] ||= {}
+        response["suggest"] ||= {}
       end
 
       def count(args = {})
@@ -228,7 +228,7 @@ module Elasticity
       end
 
       def metadata
-        @metadata ||= { total: response["hits"]["total"], suggestions: response["hits"]["suggest"] || {} }
+        @metadata ||= { total: response["hits"]["total"], suggestions: response["suggest"] || {} }
       end
 
       def total
