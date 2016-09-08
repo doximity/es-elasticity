@@ -181,10 +181,10 @@ cursor.each_batch { |batch| ... }
 cursor.each { |doc| ... }
 
 # Lastly, a search that maps back to an ActiveRecord::Relation.
-adults = adults.active_record(User)
+adults = adults.active_records(User)
 ```
 
-For more information about the `active_record` method, read [ActiveRecord integration](#activerecord-integration).
+For more information about the `active_records` method, read [ActiveRecord integration](#activerecord-integration).
 
 ### Segmented Documents
 
@@ -378,7 +378,7 @@ end
 Because the return of that method is a lazy-evaluated search, it allows specific search strategies to be used, one of them being ActiveRecord specific:
 
 ```ruby
-adults = Search::User.adults.active_record(User)
+adults = Search::User.adults.active_records(User)
 adults.class # => ActiveRecord::Relation
 adults.all   # => [#<User: id: 1, name: "John", birthdate: 1985-10-31>, ...]
 ```
@@ -386,7 +386,7 @@ adults.all   # => [#<User: id: 1, name: "John", birthdate: 1985-10-31>, ...]
 Note that the method takes a relation and not a class, so the following is also possible:
 
 ```ruby
-Search::User.adults.active_record(User.where(active: true))
+Search::User.adults.active_records(User.where(active: true))
 ```
 
 ## Roadmap
