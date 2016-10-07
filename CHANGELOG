@@ -1,3 +1,6 @@
+v0.6.5
+	- update search and multi search interfaces to allow passing of general
+	search definition arguments found in https://github.com/elastic/elasticsearch-ruby/blob/bdf5e145e5acc21726dddcd34492debbbddde568/elasticsearch-api/lib/elasticsearch/api/actions/search.rb#L125-L162
 v0.6.4
 	- update suggestions to pull from the proper key
 v0.6.3
