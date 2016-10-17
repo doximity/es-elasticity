@@ -179,6 +179,22 @@ RSpec.describe "Search" do
       expect(docs.next_page).to eq(3)
       expect(docs.previous_page).to eq(1)
     end
+
+    it "merges in additional arguments for search" do
+      results = double(:results, :[] => { "hits" => [] })
+      subject = Elasticity::Search::Facade.new(
+        client,
+        Elasticity::Search::Definition.new(index_name, document_type, {})
+      )
+
+      expect(client).to receive(:search).with(
+        index: index_name,
+        type: document_type,
+        body: {},
+        search_type: :dfs_query_and_fetch
+      ).and_return(results)
+      subject.documents(mapper, search_type: :dfs_query_and_fetch).search_results
+    end
   end
 
   describe Elasticity::Search::DocumentProxy do
@@ -201,5 +217,13 @@ RSpec.describe "Search" do
       expect(search).to receive(:active_records).with(rel).and_return(records)
       expect(subject.active_records(rel)).to be records
     end
+
+    it "accepts additional arguments for a search" do
+      results = double(:results)
+
+      expect(search).to receive(:documents).with(mapper, search_type: :dfs_query_then_fetch).and_return(results)
+      expect(subject.documents(search_type: :dfs_query_then_fetch)).to eq(results)
+    end
+
   end
 end

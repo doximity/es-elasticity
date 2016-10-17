@@ -1,9 +1,10 @@
 module Elasticity
   class MultiSearch
 
-    def initialize
+    def initialize(msearch_args = {})
       @searches = {}
       @mappers  = {}
+      @msearch_args = msearch_args
       yield self if block_given?
     end
 
@@ -25,8 +26,6 @@ module Elasticity
 
     def [](name)
       results_collection[name]
-    rescue NoMethodError => e
-      raise "#{e.inspect} with key #{name}"
     end
 
     private
@@ -41,7 +40,8 @@ module Elasticity
       end
 
       response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
-        Elasticity.config.client.msearch(body: bodies.map(&:dup))
+        args = { body: bodies.map(&:dup) }.reverse_merge(@msearch_args)
+        Elasticity.config.client.msearch(args)
       end
       results = {}
 

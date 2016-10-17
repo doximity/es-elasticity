@@ -11,9 +11,9 @@ module Elasticity
       attr_accessor :index_name, :document_types, :body
 
       def initialize(index_name, document_types, body)
-        @index_name    = index_name
+        @index_name     = index_name
         @document_types = document_types
-        @body          = body.deep_symbolize_keys!
+        @body           = body.deep_symbolize_keys!
       end
 
       def update(body_changes)
@@ -51,16 +51,16 @@ module Elasticity
 
       # Performs the search using the default search type and returning an iterator that will yield
       # hash representations of the documents.
-      def document_hashes
+      def document_hashes(search_args = {})
         return @document_hashes if defined?(@document_hashes)
-        @document_hashes = LazySearch.new(@client, @search_definition)
+        @document_hashes = LazySearch.new(@client, @search_definition, search_args)
       end
 
       # Performs the search using the default search type and returning an iterator that will yield
       # each document, converted using the provided mapper
-      def documents(mapper)
+      def documents(mapper, search_args = {})
         return @documents if defined?(@documents)
-        @documents = LazySearch.new(@client, @search_definition) do |hit|
+        @documents = LazySearch.new(@client, @search_definition, search_args) do |hit|
           mapper.(hit)
         end
       end
@@ -89,10 +89,11 @@ module Elasticity
 
       attr_accessor :search_definition
 
-      def initialize(client, search_definition, &mapper)
+      def initialize(client, search_definition, search_args, &mapper)
         @client            = client
         @search_definition = search_definition
         @mapper            = mapper
+        @search_args       = search_args
       end
 
       def empty?
@@ -119,7 +120,7 @@ module Elasticity
 
       def response
         return @response if defined?(@response)
-        @response = @client.search(@search_definition.to_search_args)
+        @response = @client.search(@search_definition.to_search_args.reverse_merge(@search_args))
       end
     end
 
@@ -263,8 +264,8 @@ module Elasticity
 
       delegate :search_definition, :active_records, to: :@search
 
-      def documents
-        @search.documents(@document_klass)
+      def documents(search_args = {})
+        @search.documents(@document_klass, search_args)
       end
 
       def scan_documents(**options)

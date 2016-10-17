@@ -96,4 +96,17 @@ RSpec.describe Elasticity::MultiSearch do
     expect(subject[:first].aggregations).to eq aggregations["aggregations"]
     expect(subject[:second].aggregations).to eq Hash.new
   end
+
+  it "performs multi search with additional arguments" do
+    msearch = Elasticity::MultiSearch.new(search_type: :dfs_query_then_fetch)
+    msearch.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first, size: 2 })), documents: klass)
+    msearch.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
+
+    expect(Elasticity.config.client).to receive(:msearch).with(search_type: :dfs_query_then_fetch, body: [
+      { index: "index_first", type: "document_first", search: { search: :first, size: 2 } },
+      { index: "index_second", type: "document_second", search: { search: :second } },
+    ]).and_return(response)
+
+    expect(Array(msearch[:first])).to eq([klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")])
+  end
 end
