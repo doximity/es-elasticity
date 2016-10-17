@@ -51,14 +51,14 @@ module Elasticity
 
       # Performs the search using the default search type and returning an iterator that will yield
       # hash representations of the documents.
-      def document_hashes(search_args={})
+      def document_hashes(search_args = {})
         return @document_hashes if defined?(@document_hashes)
         @document_hashes = LazySearch.new(@client, @search_definition, search_args)
       end
 
       # Performs the search using the default search type and returning an iterator that will yield
       # each document, converted using the provided mapper
-      def documents(mapper, search_args={})
+      def documents(mapper, search_args = {})
         return @documents if defined?(@documents)
         @documents = LazySearch.new(@client, @search_definition, search_args) do |hit|
           mapper.(hit)
@@ -264,7 +264,7 @@ module Elasticity
 
       delegate :search_definition, :active_records, to: :@search
 
-      def documents(search_args={})
+      def documents(search_args = {})
         @search.documents(@document_klass, search_args)
       end
 
