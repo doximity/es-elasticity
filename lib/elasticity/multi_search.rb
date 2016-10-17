@@ -1,7 +1,7 @@
 module Elasticity
   class MultiSearch
 
-    def initialize(msearch_args={})
+    def initialize(msearch_args = {})
       @searches = {}
       @mappers  = {}
       @msearch_args = msearch_args
