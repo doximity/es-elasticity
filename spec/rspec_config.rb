@@ -1,8 +1,7 @@
-require "codeclimate-test-reporter"
 require "simplecov"
 require "oj"
 
-CodeClimate::TestReporter.start
+SimpleCov.start
 
 require "elasticity"
 
