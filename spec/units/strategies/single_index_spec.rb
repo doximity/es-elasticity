@@ -21,17 +21,17 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
 
   it "allows creating, recreating and deleting an index" do
     subject.create(index_def)
-    expect(subject.mappings).to eq(index_def)
+    expect(subject.mapping).to eq(index_def)
 
     subject.recreate(index_def)
-    expect(subject.mappings).to eq(index_def)
+    expect(subject.mapping).to eq(index_def)
 
     subject.delete
-    expect(subject.mappings).to be nil
+    expect(subject.mapping).to be nil
   end
 
   it "returns nil for mapping and settings when index does not exist" do
-    expect(subject.mappings).to be nil
+    expect(subject.mapping).to be nil
     expect(subject.settings).to be nil
   end
 
