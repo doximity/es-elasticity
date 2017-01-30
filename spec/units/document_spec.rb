@@ -46,4 +46,15 @@ RSpec.describe Elasticity::Document do
       subject.update
     end
   end
+
+
+  context 'from_active_record' do
+    let(:model) { double(name: 'Window', items: ['glass', 'lock'] ) }
+
+    it "converts the model to a document instance" do
+      doc = klass.from_active_record(model)
+      expect(doc.name).to eql('Window')
+      expect(doc.items).to eql(['glass', 'lock'])
+    end
+  end
 end

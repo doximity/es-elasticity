@@ -52,6 +52,14 @@ module Elasticity
           acc
         end
       end
+
+      define_singleton_method(:from_active_record) do |model|
+        attrs = args.reduce(Hash.new) do |acc, key|
+                  acc[key] = model.send(key)
+                  acc
+                end.merge(_id: 'ben')
+        new(attrs)
+      end
     end
 
     private
