@@ -2,6 +2,8 @@ RSpec.describe "Persistence", elasticsearch: true do
   describe "single index strategy" do
     subject do
       Class.new(Elasticity::Document) do
+        elasticity_attributes :name, :birthdate
+
         def self.name
           'SomeClass'
         end
@@ -17,12 +19,6 @@ RSpec.describe "Persistence", elasticsearch: true do
               birthdate: { type: "date" },
             },
           }
-        end
-
-        attr_accessor :name, :birthdate
-
-        def to_document
-          { name: name, birthdate: birthdate }
         end
       end
     end
@@ -80,6 +76,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     class Cat < Animal
+      elasticity_attributes :name, :age
+
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
@@ -89,15 +87,11 @@ RSpec.describe "Persistence", elasticsearch: true do
           age: { type: "integer" }
         } }
       end
-
-      attr_accessor :name, :age
-
-      def to_document
-        { name: name, age: age }
-      end
     end
 
     class Dog < Animal
+      elasticity_attributes :name, :age, :hungry
+
       configure do |c|
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
@@ -107,11 +101,6 @@ RSpec.describe "Persistence", elasticsearch: true do
           age: { type: "integer" },
           hungry: { type: "boolean" }
         } }
-      end
-      attr_accessor :name, :age, :hungry
-
-      def to_document
-        { name: name, age: age, hungry: hungry }
       end
     end
 
@@ -152,7 +141,11 @@ RSpec.describe "Persistence", elasticsearch: true do
 
   describe "alias index strategy" do
     subject do
+
+
       Class.new(Elasticity::Document) do
+        elasticity_attributes :id, :name, :birthdate
+
         def self.name
           "SomeClass"
         end
@@ -170,12 +163,6 @@ RSpec.describe "Persistence", elasticsearch: true do
               birthdate: { type: "date" },
             },
           }
-        end
-
-        attr_accessor :id, :name, :birthdate
-
-        def to_document
-          { id: id, name: name, birthdate: birthdate }
         end
       end
     end
