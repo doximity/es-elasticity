@@ -16,6 +16,8 @@ RSpec.describe Elasticity::Document do
 
   let :klass do
     Class.new(described_class) do
+      elasticity_attributes :name, :items
+
       def self.name
         "SomeClass"
       end
@@ -24,12 +26,6 @@ RSpec.describe Elasticity::Document do
         c.index_base_name = "class_names"
         c.document_type   = "class_name"
         c.mapping         = mappings
-      end
-
-      attr_accessor :name, :items
-
-      def to_document
-        { name: name, items: items }
       end
     end
   end
@@ -40,10 +36,6 @@ RSpec.describe Elasticity::Document do
 
   before :each do
     allow(Elasticity::Strategies::SingleIndex).to receive(:new).and_return(strategy)
-  end
-
-  it "requires subclasses to define to_document method" do
-    expect { Class.new(described_class).new.to_document }.to raise_error(NotImplementedError)
   end
 
   context "instance" do

@@ -30,13 +30,6 @@ module Elasticity
       end
     end
 
-    # IMPLEMENT
-    # Returns a hash with the attributes as they should be stored in the index.
-    # This will be stored as _source attributes on Elasticsearch.
-    def to_document
-      raise NotImplementedError, "to_document needs to be implemented for #{self.class}"
-    end
-
     # Update this object on the index, creating or updating the document.
     def update
       self._id, @created = self.class.index_document(_id, to_document)
@@ -48,6 +41,34 @@ module Elasticity
 
     def created?
       @created || false
+    end
+
+    def self.elasticity_attributes(*args)
+      attr_accessor *args
+
+      define_method(:to_document) do
+        args.reduce(Hash.new) do |acc, key|
+          acc[key] = self.send(key)
+          acc
+        end
+      end
+    end
+
+    private
+
+    def self.index_config_defaults
+      {
+        document_type: default_document_type,
+        index_base_name: default_index_base_name
+      }
+    end
+
+    def self.default_document_type
+      self.name.gsub('::', '_').underscore
+    end
+
+    def self.default_index_base_name
+      ActiveSupport::Inflector.pluralize(default_document_type)
     end
   end
 end

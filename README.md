@@ -49,6 +49,8 @@ The first thing to do, is setup a model representing your documents. The class l
 
 ```ruby
 class Search::User < Elasticity::Document
+  elasticity_attributes :name, :birthdate
+
   configure do |c|
     # Defines how the index will be named, the final name
     # will depend on the stragy being used.
@@ -91,12 +93,8 @@ class Search::User < Elasticity::Document
     self.search(body)
   end
 
-  # All models automatically have the id attribute but you need to define the
-  # other accessors so that they can be set and get properly.
-  attr_accessor :name, :birthdate
-
-  # to_document is the only required method that needs to be implemented so an
-  # instance of this model can be indexed.
+  # override to_document to change how an instance of the document is persisted in Elasticsearch
+  # the result will be stored as _source attributes on Elasticsearch.
   def to_document
     {
       name: self.name,
@@ -403,7 +401,6 @@ Search::User.adults.active_records(User.where(active: true))
   - [ ] ActiveRecord integration
 - [ ] Better automatic index name and document type
 - [ ] Support for multiple document types
-- [ ] Get rid of to_document, generate automatically based on attributes
 - [ ] Add some delegations on Document to Index
 
 ## Contributing
