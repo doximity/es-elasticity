@@ -238,7 +238,7 @@ module Elasticity
       end
 
       def mappings
-        Elasticity::LogSubscriber.logger.warn(
+        ActiveSupport::Deprecation.warn(
           'Elasticity::Strategies::AliasIndex#mappings is deprecated, '\
           'use mapping instead'
         )

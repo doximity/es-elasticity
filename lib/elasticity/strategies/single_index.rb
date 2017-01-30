@@ -85,7 +85,7 @@ module Elasticity
       end
 
       def mappings
-        Elasticity::LogSubscriber.logger.warn(
+        ActiveSupport::Deprecation.warn(
           'Elasticity::Strategies::SingleIndex#mappings is deprecated, '\
           'use mapping instead'
         )
