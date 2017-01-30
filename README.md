@@ -239,15 +239,6 @@ class Search::User < Elasticity::SegmentedDocument
   # All models automatically have the id attribute but you need to define the
   # other accessors so that they can be set and get properly.
   attr_accessor :name, :birthdate
-
-  # to_document is the only required method that needs to be implemented so an
-  # instance of this model can be indexed.
-  def to_document
-    {
-      name: self.name,
-      birthdate: self.birthdate.iso8601
-    }
-  end
 end
 ```
 
