@@ -398,7 +398,6 @@ Search::User.adults.active_records(User.where(active: true))
   - [ ] Indexing, Bulk Indexing and Delete By Query
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
-- [ ] Better automatic index name and document type
 - [ ] Support for multiple document types
 - [ ] Get rid of to_document, generate automatically based on attributes
 - [ ] Add some delegations on Document to Index

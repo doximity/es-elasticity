@@ -8,7 +8,7 @@ module Elasticity
     # Configure the given klass, changing default parameters and resetting
     # some of the internal state.
     def self.configure(&block)
-      self.config = IndexConfig.new(Elasticity.config, self.name.underscore, &block)
+      self.config = IndexConfig.new(Elasticity.config, self.index_config_defaults, &block)
     end
 
     # Define common attributes for all documents
@@ -48,6 +48,23 @@ module Elasticity
 
     def created?
       @created || false
+    end
+
+    private
+
+    def self.index_config_defaults
+      {
+        document_type: default_document_type,
+        index_base_name: default_index_base_name
+      }
+    end
+
+    def self.default_document_type
+      self.name.gsub('::', '_').underscore
+    end
+
+    def self.default_index_base_name
+      ActiveSupport::Inflector.pluralize(default_document_type)
     end
   end
 end
