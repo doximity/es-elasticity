@@ -57,7 +57,7 @@ module Elasticity
         attrs = args.reduce(Hash.new) do |acc, key|
                   acc[key] = model.public_send(key)
                   acc
-                end.merge(_id: 'ben')
+                end.merge(_id: model.id)
         new(attrs)
       end
     end
