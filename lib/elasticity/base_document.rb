@@ -48,14 +48,14 @@ module Elasticity
 
       define_method(:to_document) do
         args.reduce(Hash.new) do |acc, key|
-          acc[key] = self.send(key)
+          acc[key] = self.public_send(key)
           acc
         end
       end
 
       define_singleton_method(:from_active_record) do |model|
         attrs = args.reduce(Hash.new) do |acc, key|
-                  acc[key] = model.send(key)
+                  acc[key] = model.public_send(key)
                   acc
                 end.merge(_id: 'ben')
         new(attrs)
