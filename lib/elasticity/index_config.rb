@@ -48,7 +48,7 @@ module Elasticity
     end
 
     def strategy
-      @strategy ||= Strategies::SingleIndex
+      @strategy ||= Strategies::AliasIndex
     end
 
     private

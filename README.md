@@ -393,7 +393,6 @@ Search::User.adults.active_records(User.where(active: true))
 
 ## Roadmap
 
-- [ ] Make Elasticity::Strategies::AliasIndex the default
 - [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
 - [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:

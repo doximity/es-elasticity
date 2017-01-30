@@ -39,7 +39,7 @@ RSpec.describe Elasticity::Document do
   end
 
   before :each do
-    allow(Elasticity::Strategies::SingleIndex).to receive(:new).and_return(strategy)
+    allow(Elasticity::Strategies::AliasIndex).to receive(:new).and_return(strategy)
   end
 
   it "requires subclasses to define to_document method" do
