@@ -313,11 +313,8 @@ When the mapping needs to change, a hot remapping can be performed by doing the 
 
 This is a simplified version, there are other things that happen to ensure consistency and avoid race conditions. For full understanding see `Elasticity::Strategies::AliasIndex#remap`.
 
-### ActiveRecord integration
-
-ActiveRecord integration is mainly a set of conventions rather than implementation, with the exception of one method that allows mapping documents back to a relation. Here is the list of conventions:
-
-* have a class method on the document called `from_active_record` that creates a document object from the active record object;
+### ActiveRecord integration and conventions
+* The attributes defined through elasticity_attributes are assumed to exist as public methods on the active record model if this is the case you can use the class `from_active_record` API to convert your AR model to an instnace of an Elasticity document. If not simply override the `from_active_record` API for your needs
 * have a class method on the Document for rebuilding the index from the records;
 * have an `after_save` and an `after_destroy` callbacks on the ActiveRecord model;
 
@@ -339,10 +336,6 @@ For example:
 
   class Search::User < Elasticity::Document
     # ... configuration
-
-    def self.from_active_record(ar)
-      new(name: ar.name, birthdate: ar.birthdate)
-    end
 
     def self.rebuild_index
       self.recreate_index
@@ -393,7 +386,6 @@ Search::User.adults.active_records(User.where(active: true))
 
 - [ ] Make Elasticity::Strategies::AliasIndex the default
 - [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
-- [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
   - [ ] Indexing, Bulk Indexing and Delete By Query
