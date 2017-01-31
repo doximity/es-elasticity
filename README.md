@@ -391,6 +391,13 @@ Note that the method takes a relation and not a class, so the following is also 
 Search::User.adults.active_records(User.where(active: true))
 ```
 
+## Upgrading from 0.7.0 to 0.8.0
+The default persistance strategy changed from SingleIndex to AliasIndex in version 0.8.0 Add the follow to your Document configuration to maintain the old behavior.
+
+```ruby
+  c.strategy = Elasticity::Strategies::SingleIndex
+```
+
 ## Roadmap
 - [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:

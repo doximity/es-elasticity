@@ -1,4 +1,4 @@
-v0.7.1
+v0.8.0
  - Make Elasticity::Strategies::AliasIndex the default
  - Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
  - Better automatic index name and document type
