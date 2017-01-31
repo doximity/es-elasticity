@@ -49,7 +49,7 @@ RSpec.describe Elasticity::Document do
 
 
   context 'from_active_record' do
-    let(:model) { double(name: 'Window', items: ['glass', 'lock'] ) }
+    let(:model) { double(id: 1, name: 'Window', items: ['glass', 'lock'] ) }
 
     it "converts the model to a document instance" do
       doc = klass.from_active_record(model)
