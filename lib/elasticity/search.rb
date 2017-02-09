@@ -287,11 +287,13 @@ module Elasticity
       def initialize(response, body, mapper = nil)
         @response = response
         @body = body
-        @documents = if mapper.nil?
-          @response["hits"]["hits"]
-        else
-          @response["hits"]["hits"].map { |hit| mapper.(hit) }
-        end
+        begin
+          @documents = if mapper.nil?
+            @response["hits"]["hits"]
+          else
+            @response["hits"]["hits"].map { |hit| mapper.(hit) }
+          end
+        rescue NoMethodError
       end
 
       def method_missing(name, *args, &block)
