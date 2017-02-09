@@ -38,7 +38,7 @@ module Elasticity
         message << "\n#{lines}"
       end
 
-      debug(message)
+      info(message)
 
       exception, message = event.payload[:exception]
       if exception
