@@ -38,7 +38,7 @@ module Elasticity
         message << "\n#{lines}"
       end
 
-      logger.add(logger.log_level, message)
+      debug(message)
 
       exception, message = event.payload[:exception]
       if exception
