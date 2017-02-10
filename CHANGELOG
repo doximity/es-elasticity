@@ -1,3 +1,5 @@
+v0.7.1
+	- add more response info to raised exceptions from reindexing
 v0.6.5
 	- update search and multi search interfaces to allow passing of general
 	search definition arguments found in https://github.com/elastic/elasticsearch-ruby/blob/bdf5e145e5acc21726dddcd34492debbbddde568/elasticsearch-api/lib/elasticsearch/api/actions/search.rb#L125-L162

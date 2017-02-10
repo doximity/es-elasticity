@@ -52,7 +52,7 @@ module Elasticity
         if id = res["_id"]
           [id, res["created"]]
         else
-          raise IndexError.new(@update_alias, "failed to index document")
+          raise IndexError.new(@update_alias, "failed to index document. Response: #{res.inspect}")
         end
       end
 
