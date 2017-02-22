@@ -238,6 +238,14 @@ module Elasticity
       end
 
       def mappings
+        ActiveSupport::Deprecation.warn(
+          'Elasticity::Strategies::AliasIndex#mappings is deprecated, '\
+          'use mapping instead'
+        )
+        mapping
+      end
+
+      def mapping
         @client.index_get_mapping(index: @main_alias, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil

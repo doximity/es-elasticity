@@ -85,6 +85,14 @@ module Elasticity
       end
 
       def mappings
+        ActiveSupport::Deprecation.warn(
+          'Elasticity::Strategies::SingleIndex#mappings is deprecated, '\
+          'use mapping instead'
+        )
+        mapping
+      end
+
+      def mapping
         @client.index_get_mapping(index: @index_name, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil

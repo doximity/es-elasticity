@@ -5,8 +5,10 @@ module Elasticity
 
     attr_accessor *ATTRS
 
-    def initialize(elasticity_config, default_document_type)
-      @document_type = default_document_type
+    def initialize(elasticity_config, defaults = {})
+      defaults.each do |k,v|
+        instance_variable_set("@#{k}",v)
+      end
       @elasticity_config = elasticity_config
       yield(self)
       validate!
@@ -48,7 +50,7 @@ module Elasticity
     end
 
     def strategy
-      @strategy ||= Strategies::SingleIndex
+      @strategy ||= Strategies::AliasIndex
     end
 
     private

@@ -391,17 +391,20 @@ Note that the method takes a relation and not a class, so the following is also 
 Search::User.adults.active_records(User.where(active: true))
 ```
 
-## Roadmap
+## Upgrading from 0.7.0 to 0.8.0
+The default persistance strategy changed from SingleIndex to AliasIndex in version 0.8.0 Add the following to your Document configuration to maintain the legacy behaviour.
 
-- [ ] Make Elasticity::Strategies::AliasIndex the default
-- [ ] Use mapping instead of mappings, we wanna be consistent to ES not to elasticsearch-ruby
+```ruby
+  c.strategy = Elasticity::Strategies::SingleIndex
+```
+
+## Roadmap
 - [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
   - [ ] Indexing, Bulk Indexing and Delete By Query
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
-- [ ] Better automatic index name and document type
 - [ ] Support for multiple document types
 - [ ] Get rid of to_document, generate automatically based on attributes
 - [ ] Add some delegations on Document to Index
