@@ -8,7 +8,7 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       "mappings" => {
         "document" => {
           "properties" => {
-            "name" => { "type" => "string" }
+            "name" => { "type" => "text" }
           }
         }
       }
@@ -54,14 +54,14 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       results_a = subject.bulk do |b|
         b.index "document", 1, name: "foo"
       end
-      expect(results_a).to include("errors"=>false, "items"=>[{"index"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"1", "_version"=>1, "status"=>201}}])
+      expect(results_a["errors"]).to be_falsey
 
       results_b = subject.bulk do |b|
         b.index  "document", 2, name: "bar"
         b.delete "document", 1
       end
 
-      expect(results_b).to include("errors"=>false, "items"=>[{"index"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "status"=>201}}, {"delete"=>{"_index"=>"test_index_name", "_type"=>"document", "_id"=>"1", "_version"=>2, "status"=>200, "found"=>true}}])
+      expect(results_b["errors"]).to be_falsey
 
       subject.flush
 
@@ -69,11 +69,12 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       expect(subject.get_document("document", 2)).to eq({"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "found"=>true, "_source"=>{"name"=>"bar"}})
     end
 
-    it "allows deleting by queryu" do
+    it "allows deleting by query" do
       subject.index_document("document", 1, name: "foo")
       subject.index_document("document", 2, name: "bar")
 
-      subject.delete_by_query("document", query: { term: { name: "foo" }})
+      subject.flush
+      subject.delete_by_query("document", { query: { match: { name: "foo" } } })
 
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
       expect { subject.get_document("document", 2) }.to_not raise_error

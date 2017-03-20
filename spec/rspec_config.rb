@@ -4,6 +4,7 @@ require "oj"
 SimpleCov.start
 
 require "elasticity"
+require "pry"
 
 def elastic_search_client
   return @elastic_search_client if defined?(@elastic_search_client)

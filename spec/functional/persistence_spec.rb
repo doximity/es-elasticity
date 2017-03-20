@@ -1,4 +1,8 @@
 RSpec.describe "Persistence", elasticsearch: true do
+  def random_birthdate
+    Time.at(0.0 + rand * (Time.now.to_f - 0.0.to_f))
+  end
+
   describe "single index strategy" do
     subject do
       Class.new(Elasticity::Document) do
@@ -13,7 +17,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
           c.mapping = {
             properties: {
-              name: { type: "string" },
+              name: { type: "text", index: "not_analyzed" },
               birthdate: { type: "date" },
             },
           }
@@ -50,23 +54,20 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       subject.flush_index
 
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq 2
 
-      expect(results[0]).to eq(john)
-      expect(results[1]).to eq(mari)
-
-      expect(subject.search({query: {filtered: { query: { match_all: {} } } } }).count).to eq(2)
+      expect(subject.search({ query: { match_all: {} } }).count).to eq(2)
 
       john.update
       mari.delete
 
       subject.flush_index
 
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq 1
 
-      expect(results[0]).to eq(john)
+      expect(results[0].name).to eq(john.name)
     end
   end
 
@@ -85,7 +86,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type  = "cat"
         c.mapping = { properties: {
-          name: { type: "string" },
+          name: { type: "text", index: "not_analyzed" },
           age: { type: "integer" }
         } }
       end
@@ -103,7 +104,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type = "dog"
         c.mapping = { properties: {
-          name: { type: "string" },
+          name: { type: "text", index: "not_analyzed" },
           age: { type: "integer" },
           hungry: { type: "boolean" }
         } }
@@ -163,10 +164,9 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.strategy        =  Elasticity::Strategies::AliasIndex
 
           c.mapping = {
-            _id: { path: "id" },
             properties: {
               id: { type: "integer" },
-              name: { type: "string" },
+              name: { type: "text", index: "not_analyzed" },
               birthdate: { type: "date" },
             },
           }
@@ -194,15 +194,14 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "remaps to a different index transparently" do
-      john = subject.new(id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
-      mari = subject.new(id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
+      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
+      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
 
       john.update
       mari.update
 
       subject.flush_index
-
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq 2
 
       subject.remap!
@@ -212,16 +211,16 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       subject.flush_index
 
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq 1
 
-      expect(results[0]).to eq(john)
+      expect(results[0].name).to eq(john.name)
     end
 
     it "handles in between state while remapping" do
       number_of_docs = 2000
       docs = number_of_docs.times.map do |i|
-        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
@@ -233,20 +232,20 @@ RSpec.describe "Persistence", elasticsearch: true do
       to_delete.each(&:delete)
 
       20.times.map do |i|
-        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: random_birthdate).tap(&:update)
       end
 
       t.join
 
       subject.flush_index
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq(2010)
     end
 
     it "recover from remap interrupts" do
       number_of_docs = 2000
       docs = number_of_docs.times.map do |i|
-        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
       end
 
       t = Thread.new { subject.remap! }
@@ -258,20 +257,20 @@ RSpec.describe "Persistence", elasticsearch: true do
       to_delete.each(&:delete)
 
       20.times.map do |i|
-        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(id: i + number_of_docs, name: "User #{i + docs.length}", birthdate: random_birthdate).tap(&:update)
       end
 
       t.raise("Test Interrupt")
       expect { t.join }.to raise_error("Test Interrupt")
 
       subject.flush_index
-      results = subject.search(sort: :name)
+      results = subject.search({})
       expect(results.total).to eq(2010)
     end
 
     it "bulk indexes, updates and delete" do
       docs = 2000.times.map do |i|
-        subject.new(id: i, name: "User #{i}", birthdate: "#{rand(20)+1980}-#{rand(11)+1}-#{rand(28)+1}").tap(&:update)
+        subject.new(_id: i, id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
       end
 
       subject.bulk_index(docs)
@@ -289,7 +288,6 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 2000
-
       expect(subject.search({ query: { match: { name: "Updated" } } } ).count).to eq(2000)
 
       subject.bulk_delete(results.documents.map(&:_id))
