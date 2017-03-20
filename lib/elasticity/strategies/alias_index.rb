@@ -52,7 +52,7 @@ module Elasticity
           })
 
           @client.index_flush(index: original_index)
-          cursor = @client.search index: original_index, scroll: '10m', size: 100
+          cursor = @client.search index: original_index, search_type: ScrollableSearch.search_type, scroll: '10m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?
@@ -103,7 +103,7 @@ module Elasticity
           })
 
           @client.index_flush(index: new_index)
-          cursor = @client.search index: new_index, scroll: '1m', size: 100
+          cursor = @client.search index: new_index, search_type: ScrollableSearch.search_type, scroll: '1m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?

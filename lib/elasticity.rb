@@ -34,6 +34,7 @@ module Elasticity
   autoload :MultiSearch,        "elasticity/multi_search"
   autoload :Search,             "elasticity/search"
   autoload :Strategies,         "elasticity/strategies"
+  autoload :ScrollableSearch,   "elasticity/scrollable_search"
 
   def self.configure
     @config = Config.new

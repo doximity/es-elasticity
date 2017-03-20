@@ -17,7 +17,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
           c.mapping = {
             properties: {
-              name: { type: "text", index: "not_analyzed" },
+              name: { type: "string", index: "not_analyzed" },
               birthdate: { type: "date" },
             },
           }
@@ -86,7 +86,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type  = "cat"
         c.mapping = { properties: {
-          name: { type: "text", index: "not_analyzed" },
+          name: { type: "string", index: "not_analyzed" },
           age: { type: "integer" }
         } }
       end
@@ -104,7 +104,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type = "dog"
         c.mapping = { properties: {
-          name: { type: "text", index: "not_analyzed" },
+          name: { type: "string", index: "not_analyzed" },
           age: { type: "integer" },
           hungry: { type: "boolean" }
         } }
@@ -166,7 +166,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.mapping = {
             properties: {
               id: { type: "integer" },
-              name: { type: "text", index: "not_analyzed" },
+              name: { type: "string", index: "not_analyzed" },
               birthdate: { type: "date" },
             },
           }

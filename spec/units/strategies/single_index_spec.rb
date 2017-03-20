@@ -8,7 +8,7 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       "mappings" => {
         "document" => {
           "properties" => {
-            "name" => { "type" => "text" }
+            "name" => { "type" => "string" }
           }
         }
       }
@@ -73,7 +73,6 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       subject.index_document("document", 1, name: "foo")
       subject.index_document("document", 2, name: "bar")
 
-      subject.flush
       subject.delete_by_query("document", { query: { match: { name: "foo" } } })
 
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
