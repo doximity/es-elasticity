@@ -1,11 +1,16 @@
 language: ruby
 before_install:
   - gem update bundler
+  - curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.deb && sudo dpkg -i --force-confnew elasticsearch-5.1.1.deb && sudo service elasticsearch start
 rvm:
   - 2.2.2
   - 2.2.3
 services:
   - elasticsearch
+addons:
+  apt:
+    packages:
+      - oracle-java8-set-default
 before_script:
   - sleep 5
 env:
