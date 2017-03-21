@@ -5,8 +5,6 @@ before_install:
 rvm:
   - 2.2.2
   - 2.2.3
-services:
-  - elasticsearch
 addons:
   apt:
     packages:
@@ -16,3 +14,4 @@ before_script:
 env:
   global:
     - secure: "HZa3D2GGwC6Jl062LJulbWZLTCieeBFC3FOJrArC5ul7ACGR5CEtANe0/UTnIf/Ad40p7I5VhiTdNFTcHunTbNc7Ae7dE5fOkiBHtxo/zwgpvHZK0iPvIoxsSfdcHobHeaF7NvfcXUkYUKcdRUyplHdB56eHQqYPVsah66K/4XA="
+sudo: true
