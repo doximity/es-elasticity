@@ -28,6 +28,11 @@ Or install it yourself as:
 
 ## Usage
 
+### Version Support
+This gem has [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) as a dependency.  In order to use different versions of elasticsearch you will need to match your version of elasticsearch-ruby to the version of elasticsearch you want to use ([see here](https://github.com/elastic/elasticsearch-ruby#compatibility).  Elasticity should work across all versions of elastisearch-ruby, although they have not all been tested so there are likely edge cases.
+
+Currently tests are run on travis ci against elasticsearch 5.1.1 with elasticsearch-ruby 5.0.3.
+
 ### Configuration
 
 It is recommended you use Typhoeus for HTTP connections to Elasticsearch.

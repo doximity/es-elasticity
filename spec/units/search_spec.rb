@@ -108,7 +108,7 @@ RSpec.describe "Search" do
     end
 
     it "searches using scan&scroll" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body, search_type: "scan", size: 100, scroll: "1m").and_return(scan_response)
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body, search_type: :query_then_fetch, size: 100, scroll: "1m").and_return(scan_response)
       expect(client).to receive(:scroll).with(scroll_id: "abc123", scroll: "1m").and_return(scroll_response)
       expect(client).to receive(:scroll).with(scroll_id: "abc456", scroll: "1m").and_return(empty_response)
 

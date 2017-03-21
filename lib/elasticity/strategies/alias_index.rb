@@ -52,9 +52,8 @@ module Elasticity
           })
 
           @client.index_flush(index: original_index)
-          cursor = @client.search index: original_index, search_type: 'scan', scroll: '10m', _source: false, size: 100
+          cursor = @client.search index: original_index, search_type: ScrollableSearch.search_type, scroll: '10m', size: 100
           loop do
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
             hits   = cursor['hits']['hits']
             break if hits.empty?
 
@@ -84,6 +83,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops) unless ops.empty?
+            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
           end
 
           # Update aliases to only point to the new index.
@@ -103,9 +103,8 @@ module Elasticity
           })
 
           @client.index_flush(index: new_index)
-          cursor = @client.search index: new_index, search_type: 'scan', scroll: '1m', size: 100
+          cursor = @client.search index: new_index, search_type: ScrollableSearch.search_type, scroll: '1m', size: 100
           loop do
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
             hits   = cursor['hits']['hits']
             break if hits.empty?
 
@@ -116,6 +115,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops)
+            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
           end
 
           @client.index_flush(index: original_index)
@@ -149,13 +149,13 @@ module Elasticity
       end
 
       def main_indexes
-        @client.index_get_aliases(index: "#{@main_alias}-*", name: @main_alias).keys
+        @client.index_get_alias(index: "#{@main_alias}-*", name: @main_alias).keys
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         []
       end
 
       def update_indexes
-        @client.index_get_aliases(index: "#{@main_alias}-*", name: @update_alias).keys
+        @client.index_get_alias(index: "#{@main_alias}-*", name: @update_alias).keys
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         []
       end
