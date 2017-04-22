@@ -54,6 +54,8 @@ The first thing to do, is setup a model representing your documents. The class l
 
 ```ruby
 class Search::User < Elasticity::Document
+  elasticity_attributes :name, :birthdate
+
   configure do |c|
     # Defines how the index will be named, the final name
     # will depend on the stragy being used.
@@ -96,12 +98,8 @@ class Search::User < Elasticity::Document
     self.search(body)
   end
 
-  # All models automatically have the id attribute but you need to define the
-  # other accessors so that they can be set and get properly.
-  attr_accessor :name, :birthdate
-
-  # to_document is the only required method that needs to be implemented so an
-  # instance of this model can be indexed.
+  # override to_document to change how an instance of the document is persisted in Elasticsearch
+  # the result will be stored as _source attributes on Elasticsearch.
   def to_document
     {
       name: self.name,
@@ -246,15 +244,6 @@ class Search::User < Elasticity::SegmentedDocument
   # All models automatically have the id attribute but you need to define the
   # other accessors so that they can be set and get properly.
   attr_accessor :name, :birthdate
-
-  # to_document is the only required method that needs to be implemented so an
-  # instance of this model can be indexed.
-  def to_document
-    {
-      name: self.name,
-      birthdate: self.birthdate.iso8601
-    }
-  end
 end
 ```
 
@@ -320,11 +309,8 @@ When the mapping needs to change, a hot remapping can be performed by doing the 
 
 This is a simplified version, there are other things that happen to ensure consistency and avoid race conditions. For full understanding see `Elasticity::Strategies::AliasIndex#remap`.
 
-### ActiveRecord integration
-
-ActiveRecord integration is mainly a set of conventions rather than implementation, with the exception of one method that allows mapping documents back to a relation. Here is the list of conventions:
-
-* have a class method on the document called `from_active_record` that creates a document object from the active record object;
+### ActiveRecord integration and conventions
+* The attributes defined through elasticity_attributes are assumed to exist as public methods on the active record model if this is the case you can use the class `from_active_record` API to convert your AR model to an instnace of an Elasticity document. If not simply override the `from_active_record` API for your needs
 * have a class method on the Document for rebuilding the index from the records;
 * have an `after_save` and an `after_destroy` callbacks on the ActiveRecord model;
 
@@ -346,10 +332,6 @@ For example:
 
   class Search::User < Elasticity::Document
     # ... configuration
-
-    def self.from_active_record(ar)
-      new(name: ar.name, birthdate: ar.birthdate)
-    end
 
     def self.rebuild_index
       self.recreate_index
@@ -404,14 +386,12 @@ The default persistance strategy changed from SingleIndex to AliasIndex in versi
 ```
 
 ## Roadmap
-- [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
   - [ ] Indexing, Bulk Indexing and Delete By Query
   - [ ] Search and Multi Search
   - [ ] ActiveRecord integration
 - [ ] Support for multiple document types
-- [ ] Get rid of to_document, generate automatically based on attributes
 - [ ] Add some delegations on Document to Index
 
 ## Contributing
