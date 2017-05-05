@@ -1,3 +1,5 @@
+v0.8.2
+	- fix scan api to work with more recent versions of elasticsearch ruby.
 v0.8.1
 	- loosen support for elasticsearch-ruby versions to support more versions of
 	elasticsearch

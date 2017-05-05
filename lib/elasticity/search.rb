@@ -166,7 +166,7 @@ module Elasticity
           response = search
 
           loop do
-            response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @scroll)
+            response = @client.scroll(scroll_id: response["_scroll_id"], scroll: @scroll, body: { scroll_id: response["_scroll_id"] })
             break if response["hits"]["hits"].empty?
 
             y << Search::Results.new(response, @search_definition.body, @mapper)
