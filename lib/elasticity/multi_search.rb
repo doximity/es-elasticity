@@ -34,21 +34,26 @@ module Elasticity
       @results_collection ||= fetch
     end
 
-    def fetch
-      bodies = @searches.values.map do |hsh|
+    def bodies
+      @bodies ||= @searches.values.map do |hsh|
         hsh[:search_definition].to_msearch_args
       end
+    end
 
-      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
+    def response
+      @response ||= ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
         args = { body: bodies.map(&:dup) }.reverse_merge(@msearch_args)
         Elasticity.config.client.msearch(args)
       end
+    end
+
+    def fetch
       results = {}
 
       @searches.keys.each_with_index do |name, idx|
         resp = response["responses"][idx]
         search = @searches[name]
-
+        raise "Error: #{resp}" if resp["error"]
         results[name] = case
         when search[:documents]
           Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
