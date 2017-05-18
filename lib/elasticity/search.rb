@@ -1,5 +1,7 @@
 module Elasticity
   module Search
+    class ElasticSearchError < StandardError; end
+
     def self.build(client, index_name, document_types, body)
       search_def = Search::Definition.new(index_name, document_types, body)
       Search::Facade.new(client, search_def)
@@ -285,6 +287,8 @@ module Elasticity
       DEFAULT_SIZE = 10
 
       def initialize(response, body, mapper = nil)
+        raise ElasticSearchError, response.to_json if response["error"]
+
         @response = response
         @body = body
         @documents = if mapper.nil?

@@ -53,7 +53,6 @@ module Elasticity
       @searches.keys.each_with_index do |name, idx|
         resp = response["responses"][idx]
         search = @searches[name]
-        raise "Error: #{resp}" if resp["error"]
         results[name] = case
         when search[:documents]
           Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
