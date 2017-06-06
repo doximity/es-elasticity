@@ -1,5 +1,6 @@
 module Elasticity
   class MultiSearch
+    class ElasticSearchError < StandardError; end
 
     def initialize(msearch_args = {})
       @results  = {}
@@ -26,30 +27,36 @@ module Elasticity
     end
 
     def [](name)
-      # FIXME: How to initialize results
       @results[name] ||= result_for(name)
     end
 
     private
 
     def result_for(name)
-      index  = @searches.keys.index(name)
       search = @searches[name]
-      resp   = response["responses"][index]
+      return if search.nil?
+
+      query_response = response_for(@searches.keys.index(name))
+      to_result(search, query_response)
+    end
+
+    def to_result(search, query_response)
+      raise ElasticSearchError, query_response.to_json if query_response["error"]
 
       case
       when search[:documents]
-        Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
+        Search::Results.new(query_response, search[:search_definition].body, search[:documents].method(:map_hit))
       when search[:active_records]
-        Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition].body, resp)
+        Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition].body, query_response)
       end
     end
 
-    def response
+    def response_for(index)
       @response ||= ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
         args = { body: bodies.map(&:dup) }.reverse_merge(@msearch_args)
         Elasticity.config.client.msearch(args)
       end
+      @response["responses"][index]
     end
 
     def bodies
