@@ -35,6 +35,7 @@ module Elasticity
   autoload :Search,             "elasticity/search"
   autoload :Strategies,         "elasticity/strategies"
   autoload :ScrollableSearch,   "elasticity/scrollable_search"
+  autoload :SearchError,        "elasticity/search_error"
 
   def self.configure
     @config = Config.new
