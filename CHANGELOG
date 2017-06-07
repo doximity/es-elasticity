@@ -1,3 +1,5 @@
+v0.8.3
+	- fix remap method to use the scan api properly.
 v0.8.2
 	- fix scan api to work with more recent versions of elasticsearch ruby.
 v0.8.1
