@@ -57,11 +57,6 @@ RSpec.describe Elasticity::SearchError do
     end
 
     it "raises an unkown error for an known status code" do
-      expect { described_class.process error_400 }.to(
-        raise_error Elasticsearch::Transport::Transport::Errors::BadRequest,
-                    error_400.to_json
-      )
-
       expect { described_class.process error_unknown }.to(
         raise_error Elasticity::SearchError::Unknown, error_unknown.to_json
       )
