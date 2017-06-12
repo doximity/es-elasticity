@@ -90,8 +90,8 @@ class Search::User < Elasticity::Document
       },
     }
 
-    # Creates a search object from the body and return it.
-    # The returned object # is a lazy evaluated search that behaves like a collection, being
+    # Creates a search object from the body and return it.  The returned
+    # object is a lazy evaluated search that behaves like a collection, being
     # automatically triggered when data is iterated over.
     self.search(body)
   end
@@ -237,8 +237,8 @@ class Search::User < Elasticity::SegmentedDocument
       },
     }
 
-    # Creates a search object from the body and return it.
-    # The returned object # is a lazy evaluated search that behaves like a collection, being
+    # Creates a search object from the body and return it.  The returned
+    # object is a lazy evaluated search that behaves like a collection, being
     # automatically triggered when data is iterated over.
     self.search(body)
   end
@@ -279,7 +279,7 @@ users.adults.to_a # => [#<Search::User{"doximity.com"}:0x819cc5a50cd5 @_id="AVCH
 
 ### Strategies and Hot-remapping
 
-Strategies define how index creation and index operation happens on the lower level. Basically it define the structure that backs the document model. Currently, there are two strategies available: single-index and alias-index.
+Strategies define how index creation and index operation happens on the lower level. Basically it defines the structure that backs the document model. Currently, there are two strategies available: single-index and alias-index.
 
 The single-index strategy is the most straightforward one. It causes one index to be created and any operation will be performed directly on that index. It's very simple but it has the downside of being a lot harder to update existing mapping since you'll have to drop the index and recreate from scratch.
 
