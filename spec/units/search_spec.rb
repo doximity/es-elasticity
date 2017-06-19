@@ -13,6 +13,15 @@ RSpec.describe "Search" do
     ]}}
   end
 
+  let :error_response do
+    {
+      "error" => {
+        "root_cause" => [{ "reason" => "too_many_clauses: maxClauseCount is set to 1024" }]
+      },
+      "status" => 400
+    }
+  end
+
   let :aggregations do
     {
       "logins_count" => { "value" => 1495 },
@@ -141,11 +150,22 @@ RSpec.describe "Search" do
 
       expect(subject.active_records(relation).to_sql).to eq "SELECT * FROM table_name WHERE id IN (1)"
     end
+
+    it "raises an ElasticSearchError when ES retrieves an error response" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(error_response)
+
+      expect { subject.documents(mapper)[0] }.to(
+        raise_error(Elasticity::Search::ElasticSearchError, error_response.to_json)
+      )
+    end
   end
 
   describe Elasticity::Search::LazySearch do
+    subject do
+      Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
+    end
+
     it "provides defaul properties for pagination" do
-      subject = Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
       docs = subject.documents(mapper)
 
@@ -181,7 +201,7 @@ RSpec.describe "Search" do
     end
 
     it "merges in additional arguments for search" do
-      results = double(:results, :[] => { "hits" => [] })
+      results = { "hits" => { "hits" => [] } }
       subject = Elasticity::Search::Facade.new(
         client,
         Elasticity::Search::Definition.new(index_name, document_type, {})
@@ -194,6 +214,14 @@ RSpec.describe "Search" do
         search_type: :dfs_query_and_fetch
       ).and_return(results)
       subject.documents(mapper, search_type: :dfs_query_and_fetch).search_results
+    end
+
+    it "raises an ElasticSearchError when ES retrieves an error response" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(error_response)
+
+      expect { subject.documents(mapper)[0] }.to(
+        raise_error(Elasticity::Search::ElasticSearchError, error_response.to_json)
+      )
     end
   end
 
@@ -225,5 +253,12 @@ RSpec.describe "Search" do
       expect(subject.documents(search_type: :dfs_query_then_fetch)).to eq(results)
     end
 
+    it "raises an ElasticSearchError when ES retrieves an error response" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(error_response)
+
+      expect { Array(subject)[0] }.to(
+        raise_error(Elasticity::Search::ElasticSearchError, error_response.to_json)
+      )
+    end
   end
 end
