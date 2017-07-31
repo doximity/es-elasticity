@@ -1,7 +1,7 @@
-require "elasticity/search_error"
+require "elasticity/multi_search_error_parser"
 
-RSpec.describe Elasticity::SearchError do
-  describe ".process" do
+RSpec.describe Elasticity::MultiSearchErrorParser do
+  describe ".parse" do
     let(:error_400) do
       {
         "error" => {
@@ -45,20 +45,20 @@ RSpec.describe Elasticity::SearchError do
     end
 
     it "raises an error for the given status code" do
-      expect { described_class.process error_400 }.to(
+      expect { described_class.parse error_400 }.to(
         raise_error Elasticsearch::Transport::Transport::Errors::BadRequest,
                     error_400.to_json
       )
 
-      expect { described_class.process error_500 }.to(
+      expect { described_class.parse error_500 }.to(
         raise_error Elasticsearch::Transport::Transport::Errors::InternalServerError,
                     error_500.to_json
       )
     end
 
     it "raises an unkown error for an known status code" do
-      expect { described_class.process error_unknown }.to(
-        raise_error Elasticity::SearchError::Unknown, error_unknown.to_json
+      expect { described_class.parse error_unknown }.to(
+        raise_error Elasticity::MultiSearchErrorParser::Unknown, error_unknown.to_json
       )
     end
   end

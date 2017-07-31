@@ -1,8 +1,8 @@
 module Elasticity
-  class SearchError
+  class MultiSearchErrorParser
     class Unknown < StandardError; end
 
-    def self.process(response)
+    def self.parse(response)
       raise error_for(response["status"]), response.to_json
     end
 

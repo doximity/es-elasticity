@@ -39,7 +39,7 @@ module Elasticity
     end
 
     def to_result(search, response)
-      SearchError.process(response) if response["error"]
+      MultiSearchErrorParser.parse(response) if response["error"]
 
       case
       when search[:documents]
