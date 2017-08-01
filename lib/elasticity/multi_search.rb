@@ -35,18 +35,7 @@ module Elasticity
       return if search.nil?
 
       query_response = response_for(@searches.keys.index(name))
-      to_result(search, query_response)
-    end
-
-    def to_result(search, response)
-      MultiSearchErrorParser.parse(response) if response["error"]
-
-      case
-      when search[:documents]
-        Search::Results.new(response, search[:search_definition].body, search[:documents].method(:map_hit))
-      when search[:active_records]
-        Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition].body, response)
-      end
+      MultiSearchResponseParser.parse(query_response, search)
     end
 
     def response_for(index)
