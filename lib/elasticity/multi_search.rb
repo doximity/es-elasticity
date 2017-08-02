@@ -1,7 +1,7 @@
 module Elasticity
   class MultiSearch
-
     def initialize(msearch_args = {})
+      @results  = {}
       @searches = {}
       @mappers  = {}
       @msearch_args = msearch_args
@@ -25,39 +25,31 @@ module Elasticity
     end
 
     def [](name)
-      results_collection[name]
+      @results[name] ||= result_for(name)
     end
 
     private
 
-    def results_collection
-      @results_collection ||= fetch
+    def result_for(name)
+      search = @searches[name]
+      return if search.nil?
+
+      query_response = response_for(@searches.keys.index(name))
+      MultiSearchResponseParser.parse(query_response, search)
     end
 
-    def fetch
-      bodies = @searches.values.map do |hsh|
-        hsh[:search_definition].to_msearch_args
-      end
-
-      response = ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
+    def response_for(index)
+      @response ||= ActiveSupport::Notifications.instrument("multi_search.elasticity", args: { body: bodies }) do
         args = { body: bodies.map(&:dup) }.reverse_merge(@msearch_args)
         Elasticity.config.client.msearch(args)
       end
-      results = {}
+      @response["responses"][index]
+    end
 
-      @searches.keys.each_with_index do |name, idx|
-        resp = response["responses"][idx]
-        search = @searches[name]
-
-        results[name] = case
-        when search[:documents]
-          Search::Results.new(resp, search[:search_definition].body, search[:documents].method(:map_hit))
-        when search[:active_records]
-          Search::ActiveRecordProxy.map_response(search[:active_records], search[:search_definition].body, resp)
-        end
+    def bodies
+      @bodies ||= @searches.values.map do |hsh|
+        hsh[:search_definition].to_msearch_args
       end
-
-      results
     end
   end
 end
