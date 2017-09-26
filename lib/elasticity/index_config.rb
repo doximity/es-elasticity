@@ -30,7 +30,7 @@ module Elasticity
     def definition
       return @definition if defined?(@definition)
       @definition = {
-        settings: settings || {}, mappings: { @document_type => @mapping || {} }
+        settings: merge_settings, mappings: { @document_type => @mapping || {} }
       }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping
@@ -64,6 +64,10 @@ module Elasticity
       VALIDATABLE_ATTRS.each do |attr|
         raise "#{attr} is not set" if public_send(attr).nil?
       end
+    end
+
+    def merge_settings
+      @elasticity_config.settings.merge(settings || {})
     end
   end
 end
