@@ -24,6 +24,7 @@ RSpec.describe Elasticity::Document do
         c.index_base_name = "class_names"
         c.document_type   = "class_name"
         c.mapping         = mappings
+        c.settings = { number_of_shards: 2 }
       end
 
       attr_accessor :name, :items
@@ -52,6 +53,11 @@ RSpec.describe Elasticity::Document do
     it "stores the document in the strategy" do
       expect(strategy).to receive(:index_document).with("class_name", 1, { name: "Foo", items: [{ name: "Item1" }] }).and_return("_id" => "1", "created" => true)
       subject.update
+    end
+
+    it "assigns number_of_shards if present" do
+      expect(subject.config.settings[:number_of_shards]).to eq 2
+      expect(subject.config.definition[:settings][:number_of_shards]).to eq 2
     end
   end
 end
