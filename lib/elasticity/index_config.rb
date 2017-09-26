@@ -2,7 +2,7 @@ module Elasticity
   class IndexConfig
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
-      :number_of_shards
+      :settings
     ].freeze
     VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
 
@@ -29,7 +29,9 @@ module Elasticity
 
     def definition
       return @definition if defined?(@definition)
-      @definition = { settings: settings, mappings: { @document_type => @mapping || {} } }
+      @definition = {
+        settings: settings || {}, mappings: { @document_type => @mapping || {} }
+      }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping
       end if subclasses.present?
@@ -62,13 +64,6 @@ module Elasticity
       VALIDATABLE_ATTRS.each do |attr|
         raise "#{attr} is not set" if public_send(attr).nil?
       end
-    end
-
-    def settings
-      if number_of_shards.present?
-        @elasticity_config.settings[:number_of_shards] = number_of_shards
-      end
-      @elasticity_config.settings
     end
   end
 end
