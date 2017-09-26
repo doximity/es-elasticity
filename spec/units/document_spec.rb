@@ -57,6 +57,7 @@ RSpec.describe Elasticity::Document do
 
     it "assigns number_of_shards if present" do
       expect(subject.config.number_of_shards).to eq 2
+      expect(subject.config.definition[:settings][:number_of_shards]).to eq 2
     end
   end
 end
