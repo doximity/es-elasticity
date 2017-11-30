@@ -80,7 +80,7 @@ class Search::User < Elasticity::Document
   def self.adults
     date = Date.today - 21.years
 
-    # This is the query that will be submited to ES, same format ES would
+    # This is the query that will be submitted to ES, same format ES would
     # expect, translated to a Ruby hash, note the pagination params.
     body = {
       from: 0,
@@ -159,7 +159,7 @@ The search object implements `Enumerable`, so it can be treated as a collection:
 ```ruby
 # Get the search object, which is an instance of `Elasticity::DocumentSearchProxy`.
 # Search is not performed until data is accessed.
-adults = User.adults
+adults = Search::User.adults
 
 # Iterating over the results will trigger the query
 adults.each do |user|
@@ -203,7 +203,7 @@ Using this feature is very easy and very similar to traditional documents. The o
 class Search::User < Elasticity::SegmentedDocument
   configure do |c|
     # Defines how the index will be named, the final name
-    # will depend on the stragy being used.
+    # will depend on the strategy being used.
     c.index_base_name = "users"
 
     # Defines the document type that this class represents.
@@ -227,7 +227,7 @@ class Search::User < Elasticity::SegmentedDocument
   def self.adults
     date = Date.today - 21.years
 
-    # This is the query that will be submited to ES, same format ES would
+    # This is the query that will be submitted to ES, same format ES would
     # expect, translated to a Ruby hash, note the pagination params.
     body = {
       from: 0,
@@ -283,7 +283,7 @@ Strategies define how index creation and index operation happens on the lower le
 
 The single-index strategy is the most straightforward one. It causes one index to be created and any operation will be performed directly on that index. It's very simple but it has the downside of being a lot harder to update existing mapping since you'll have to drop the index and recreate from scratch.
 
-The alias-index strategy is a bit more complex but it allows for seameless hot remapping. It works by creating an index and two aliases pointing to that index. Any operation is performed on the aliases rather than the index, which allows hot swapping due atomic aliases updates.
+The alias-index strategy is a bit more complex but it allows for seamless hot remapping. It works by creating an index and two aliases pointing to that index. Any operation is performed on the aliases rather than the index, which allows hot swapping due atomic aliases updates.
 
 Here is what it looks like:
 
@@ -297,7 +297,7 @@ Here is what it looks like:
 |_____________|
 ```
 
-Everytime a search operation is performed, it is performed against the main alias; when an update operation is performed, it is performed against the update alias; and, when a delete operation is performed, it is performed against the indexes pointed by both aliases.
+Every time a search operation is performed, it is performed against the main alias; when an update operation is performed, it is performed against the update alias; and, when a delete operation is performed, it is performed against the indexes pointed by both aliases.
 
 When the mapping needs to change, a hot remapping can be performed by doing the following:
 
@@ -397,7 +397,7 @@ Search::User.adults.active_records(User.where(active: true))
 ```
 
 ## Upgrading from 0.7.0 to 0.8.0
-The default persistance strategy changed from SingleIndex to AliasIndex in version 0.8.0 Add the following to your Document configuration to maintain the legacy behaviour.
+The default persistence strategy changed from SingleIndex to AliasIndex in version 0.8.0 Add the following to your Document configuration to maintain the legacy behaviour.
 
 ```ruby
   c.strategy = Elasticity::Strategies::SingleIndex
