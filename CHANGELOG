@@ -1,4 +1,4 @@
-v0.8.4
+v0.9.1
 	- fix search enumerator, missing first result set
 v0.8.3
 	- fix remap method to use the scan api properly.
