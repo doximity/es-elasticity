@@ -49,12 +49,13 @@ RSpec.describe "Search" do
   end
 
   let :scan_response do
-    { "_scroll_id" => "abc123", "hits" => { "total" => 2 } }
+    { "_scroll_id" => "abc123", "hits" => { "total" => 2, "hits" => [
+      { "_id" => 1, "_source" => { "name" => "foo" } }
+    ]}}
   end
 
   let :scroll_response do
-    { "_scroll_id" => "abc456", "hits" => { "total" => 2, "hits" => [
-      { "_id" => 1, "_source" => { "name" => "foo" } },
+    { "_scroll_id" => "abc456", "hits" => { "total" => 1, "hits" => [
       { "_id" => 2, "_source" => { "name" => "bar" } },
     ]}}
   end

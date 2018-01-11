@@ -148,6 +148,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       results = Animal.search({})
       expect(results.total).to eq 1
       expect(results.map(&:class)).to include(Dog)
+      expect(results.scan_documents.count).to eq(1)
     end
   end
 
