@@ -60,4 +60,30 @@ RSpec.describe Elasticity::Document do
       expect(subject.config.definition[:settings][:number_of_shards]).to eq 2
     end
   end
+
+  context "keys in document do not exist in mapping" do
+
+    it "raises an error on update" do
+      broke_klass = Class.new(described_class) do
+        def self.name
+          "SomeClass"
+        end
+
+        configure do |c|
+          c.index_base_name = "class_names"
+          c.document_type   = "class_name"
+          c.mapping         = mappings
+          c.settings = { number_of_shards: 2 }
+        end
+
+        attr_accessor :name, :items
+
+        def to_document
+          { not_a_thing: true }
+        end
+      end
+
+      expect { broke_klass.new(_id: 1, name: "Foo", items: [{ name: "Item1" }]).update }.to raise_error(ArgumentError)
+    end
+  end
 end

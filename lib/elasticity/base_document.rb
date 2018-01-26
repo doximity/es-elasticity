@@ -39,6 +39,7 @@ module Elasticity
 
     # Update this object on the index, creating or updating the document.
     def update
+      raise ArgumentError, "document contains keys not present in the mapping" unless document_respects_mapping?
       self._id, @created = self.class.index_document(_id, to_document)
     end
 
@@ -51,6 +52,10 @@ module Elasticity
     end
 
     private
+
+    def document_respects_mapping?
+      (to_document.keys - config.mapping[:properties].keys).empty?
+    end
 
     def self.index_config_defaults
       {
