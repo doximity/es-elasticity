@@ -66,10 +66,17 @@ module Elasticity
             docs = @client.mget(body: { docs: id_docs }, refresh: true)["docs"]
             break if docs.empty?
 
+            # Modify document hashes to match the mapping definition so that legacy fields aren't added
+            defined_mapping_fields = index_def[:mappings][docs.first["_type"]]["properties"].keys
+
             # Move only documents that still exists on the old index, into the new index.
             ops = []
             docs.each do |doc|
-              ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } } if doc["found"]
+              if doc["found"]
+                legacy_fields = doc["_source"].keys - defined_mapping_fields
+                legacy_fields.each { |field| doc["_source"].delete(field) }
+                ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } }
+              end
             end
 
             @client.bulk(body: ops)

@@ -16,7 +16,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.strategy        = Elasticity::Strategies::SingleIndex
 
           c.mapping = {
-            properties: {
+            "properties" => {
               name: { type: "string", index: "not_analyzed" },
               birthdate: { type: "date" },
             },
@@ -85,7 +85,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type  = "cat"
-        c.mapping = { properties: {
+        c.mapping = { "properties" => {
           name: { type: "string", index: "not_analyzed" },
           age: { type: "integer" }
         } }
@@ -103,7 +103,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.index_base_name = "cats_and_dogs"
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type = "dog"
-        c.mapping = { properties: {
+        c.mapping = { "properties" => {
           name: { type: "string", index: "not_analyzed" },
           age: { type: "integer" },
           hungry: { type: "boolean" }
@@ -165,7 +165,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.strategy        =  Elasticity::Strategies::AliasIndex
 
           c.mapping = {
-            properties: {
+            "properties" => {
               id: { type: "integer" },
               name: { type: "string", index: "not_analyzed" },
               birthdate: { type: "date" },
@@ -241,6 +241,50 @@ RSpec.describe "Persistence", elasticsearch: true do
       subject.flush_index
       results = subject.search({})
       expect(results.total).to eq(2010)
+    end
+
+    it "does not copy over fields not defined in the mapping" do
+      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
+      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
+
+      john.update
+      mari.update
+
+      subject.flush_index
+      results = subject.search({})
+      expect(results.first.birthdate).to be
+
+      # no birthdate
+      subject = Class.new(Elasticity::Document) do
+        def self.name
+          "SomeClass"
+        end
+
+        configure do |c|
+          c.index_base_name = "users"
+          c.document_type   = "user"
+          c.strategy        =  Elasticity::Strategies::AliasIndex
+
+          c.mapping = {
+            "properties" => {
+              id: { type: "integer" },
+              name: { type: "string", index: "not_analyzed" },
+            },
+          }
+        end
+
+        attr_accessor :id, :name
+
+        def to_document
+          { id: id, name: name }
+        end
+      end
+
+      subject.remap!
+      subject.flush_index
+
+      results = subject.search({})
+      expect(results.first.respond_to?(:birthdate)).to be false
     end
 
     it "recover from remap interrupts" do
