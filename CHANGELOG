@@ -1,3 +1,6 @@
+v0.10.0
+	- update remap to removing fields from the mapping that are not explicitly
+	defined.
 v0.9.1
 	- fix search enumerator, missing first result set
 v0.8.3
