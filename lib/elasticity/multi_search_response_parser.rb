@@ -2,8 +2,22 @@ module Elasticity
   class MultiSearchResponseParser
     class UnknownError < StandardError; end
 
-    def self.parse(response, search)
-      raise error_for(response["status"]), response.to_json if response["error"]
+    def self.parse(response, search, skip_raise_on_errors: false)
+      if response["error"]
+        exception = error_for(response["status"]).new(response.to_json)
+        raise(exception) unless skip_raise_on_errors
+        null_response = {
+          "hits" => {
+            "total" => 0,
+            "hits" => []
+           },
+           "aggregations" => {},
+           "error" => response["error"],
+           "exception" => exception
+        }
+
+        return Search::Results.new(null_response, search[:search_definition].body)
+      end
 
       case
       when search[:documents]
