@@ -70,6 +70,22 @@ RSpec.describe Elasticity::MultiSearchResponseParser do
                       response.to_json
         )
       end
+
+      context "passing :skip_raise_on_errors as true" do
+        it "does not raise" do
+          expect { described_class.parse(response, search, skip_raise_on_errors: true) }.not_to(raise_error)
+        end
+
+        it "returns a response containing the error" do
+          expected_exception =
+            Elasticsearch::Transport::Transport::Errors::BadRequest.new(response.to_json)
+          parsed = described_class.parse(response, search, skip_raise_on_errors: true)
+          expect(parsed.error).to eq(response["error"])
+          expect(parsed.total).to eq(0)
+          expect(parsed.aggregations).to eq({})
+          expect(parsed.exception).to eq(expected_exception)
+        end
+      end
     end
 
     context "for a 500 error response" do
@@ -93,6 +109,22 @@ RSpec.describe Elasticity::MultiSearchResponseParser do
                       response.to_json
         )
       end
+
+      context "passing :skip_raise_on_errors as true" do
+        it "does not raise" do
+          expect { described_class.parse(response, search, skip_raise_on_errors: true) }.not_to(raise_error)
+        end
+
+        it "returns a response containing the error" do
+          expected_exception =
+            Elasticsearch::Transport::Transport::Errors::InternalServerError.new(response.to_json)
+          parsed = described_class.parse(response, search, skip_raise_on_errors: true)
+          expect(parsed.error).to eq(response["error"])
+          expect(parsed.total).to eq(0)
+          expect(parsed.aggregations).to eq({})
+          expect(parsed.exception).to eq(expected_exception)
+        end
+      end
     end
 
     context "for an unknown error response" do
@@ -115,6 +147,22 @@ RSpec.describe Elasticity::MultiSearchResponseParser do
           raise_error Elasticity::MultiSearchResponseParser::UnknownError,
                       response.to_json
         )
+      end
+
+      context "passing :skip_raise_on_errors as true" do
+        it "does not raise" do
+          expect { described_class.parse(response, search, skip_raise_on_errors: true) }.not_to(raise_error)
+        end
+
+        it "returns a response containing the error" do
+          expected_exception =
+            Elasticity::MultiSearchResponseParser::UnknownError.new(response.to_json)
+          parsed = described_class.parse(response, search, skip_raise_on_errors: true)
+          expect(parsed.error).to eq(response["error"])
+          expect(parsed.total).to eq(0)
+          expect(parsed.aggregations).to eq({})
+          expect(parsed.exception).to eq(expected_exception)
+        end
       end
     end
   end

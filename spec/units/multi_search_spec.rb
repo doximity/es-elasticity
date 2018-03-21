@@ -154,5 +154,15 @@ RSpec.describe Elasticity::MultiSearch do
       expect(Array(subject[:first])).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
       expect { subject[:third] }.to raise_error Elasticsearch::Transport::Transport::Errors::BadRequest, error.to_json
     end
+
+    it "skips raising an error while trying to access the query result if so directed" do
+      subject = Elasticity::MultiSearch.new(skip_raise_on_errors: true)
+      subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first, size: 2 })), documents: klass)
+      subject.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
+      subject.add(:third, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_third", "document_third", { search: :third })), documents: klass)
+
+      expect(Array(subject[:first])).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
+      expect(subject[:third].error).to eq(error["error"])
+    end
   end
 end
