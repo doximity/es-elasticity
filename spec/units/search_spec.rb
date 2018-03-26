@@ -225,6 +225,30 @@ RSpec.describe "Search" do
       expect(search).to receive(:documents).with(mapper, search_type: :dfs_query_then_fetch).and_return(results)
       expect(subject.documents(search_type: :dfs_query_then_fetch)).to eq(results)
     end
+  end
 
+  describe Elasticity::Search::Definition do
+    describe "#to_search_args" do
+      it "does not include :ignore_unavailable by default" do
+        definition = Elasticity::Search::Definition.new("abc", ["a", "b"], { "some" => "body" })
+        expected = {
+          index: "abc",
+          type: ["a", "b"],
+          body: { :some => "body" }
+        }
+        expect(definition.to_search_args).to eq(expected)
+      end
+
+      it "does include :ignore_unavailable when arg is true" do
+        definition = Elasticity::Search::Definition.new("abc", ["a", "b"], { "some" => "body" }, true)
+        expected = {
+          index: "abc",
+          type: ["a", "b"],
+          body: { :some => "body" },
+          ignore_unavailable: true
+        }
+        expect(definition.to_search_args).to eq(expected)
+      end
+    end
   end
 end

@@ -83,7 +83,9 @@ module Elasticity
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
     def search(body)
-      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body)
+      ignore_unavailable = body.fetch("ignore_unavailable") { false }
+      body = body.except("ignore_unavailable")
+      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body, ignore_unavailable)
       Search::DocumentProxy.new(search_obj, self.method(:map_hit))
     end
 

@@ -1,7 +1,7 @@
 module Elasticity
   module Search
-    def self.build(client, index_name, document_types, body)
-      search_def = Search::Definition.new(index_name, document_types, body)
+    def self.build(client, index_name, document_types, body, ignore_unavailable = false)
+      search_def = Search::Definition.new(index_name, document_types, body, ignore_unavailable)
       Search::Facade.new(client, search_def)
     end
 
@@ -10,10 +10,11 @@ module Elasticity
     class Definition
       attr_accessor :index_name, :document_types, :body
 
-      def initialize(index_name, document_types, body)
+      def initialize(index_name, document_types, body, ignore_unavailable = false)
         @index_name     = index_name
         @document_types = document_types
         @body           = body.deep_symbolize_keys!
+        @ignore_unavailable = ignore_unavailable
       end
 
       def update(body_changes)
@@ -28,7 +29,13 @@ module Elasticity
       end
 
       def to_search_args
-        { index: @index_name, type: @document_types, body: @body }
+        args = {
+          index: @index_name,
+          type: @document_types,
+          body: @body
+        }
+        args[:ignore_unavailable] = @ignore_unavailable if @ignore_unavailable
+        args
       end
 
       def to_msearch_args
@@ -334,6 +341,14 @@ module Elasticity
 
       def previous_page
         current_page > 1 ? (current_page - 1) : nil
+      end
+
+      def error
+        @response["error"]
+      end
+
+      def exception
+        @response["exception"]
       end
     end
   end
