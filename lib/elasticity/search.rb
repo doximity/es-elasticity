@@ -343,6 +343,10 @@ module Elasticity
       def exception
         @response["exception"]
       end
+
+      def valid?
+        !error.present?
+      end
     end
   end
 end
