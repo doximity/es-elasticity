@@ -4,6 +4,7 @@ module Elasticity
       @results  = {}
       @searches = {}
       @mappers  = {}
+      @skip_raise_on_errors = msearch_args.delete(:skip_raise_on_errors)
       @msearch_args = msearch_args
       yield self if block_given?
     end
@@ -35,7 +36,7 @@ module Elasticity
       return if search.nil?
 
       query_response = response_for(@searches.keys.index(name))
-      MultiSearchResponseParser.parse(query_response, search)
+      MultiSearchResponseParser.parse(query_response, search, skip_raise_on_errors: @skip_raise_on_errors)
     end
 
     def response_for(index)

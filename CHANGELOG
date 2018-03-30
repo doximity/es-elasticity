@@ -1,3 +1,6 @@
+v0.11.0
+  - flag to skip raising expections when msearch has errors on some indexes
+    (default is to continuing raising to match previous behavior)
 v0.10.0
 	- update remap to removing fields from the mapping that are not explicitly
 	defined.

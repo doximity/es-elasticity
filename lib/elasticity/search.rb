@@ -335,6 +335,18 @@ module Elasticity
       def previous_page
         current_page > 1 ? (current_page - 1) : nil
       end
+
+      def error
+        @response["error"]
+      end
+
+      def exception
+        @response["exception"]
+      end
+
+      def valid?
+        !error.present?
+      end
     end
   end
 end
