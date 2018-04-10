@@ -1,3 +1,8 @@
+v0.11.0
+  - compatibilty with ES v6
+    - change mappings for 'index' to boolean. "string" type was replaced with "text"
+    - use "successful" from API response ('created' was removed)
+  - stringify keys for :mappings so clients can use symbol keys
 v0.10.0
 	- update remap to removing fields from the mapping that are not explicitly
 	defined.

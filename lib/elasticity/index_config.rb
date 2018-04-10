@@ -6,7 +6,7 @@ module Elasticity
     ].freeze
     VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
 
-    attr_accessor *ATTRS
+    attr_accessor(*ATTRS)
 
     def initialize(elasticity_config, defaults = {})
       defaults.each do |k,v|
@@ -30,7 +30,7 @@ module Elasticity
     def definition
       return @definition if defined?(@definition)
       @definition = {
-        settings: merge_settings, mappings: { @document_type => @mapping || {} }
+        settings: merge_settings, mappings: { @document_type => @mapping&.deep_stringify_keys || {} }
       }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping

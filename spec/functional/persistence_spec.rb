@@ -17,7 +17,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
           c.mapping = {
             "properties" => {
-              name: { type: "string", index: "not_analyzed" },
+              name: { type: "text", index: false },
               birthdate: { type: "date" },
             },
           }

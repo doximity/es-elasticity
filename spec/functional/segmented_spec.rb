@@ -10,7 +10,7 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
         c.document_type = "person"
         c.mapping = {
           properties: {
-            name: { type: "string" },
+            name: { type: "text" },
           },
         }
       end
@@ -42,6 +42,7 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
     ensure_index(seg)
 
     rodrigo = seg.new(name: "rodrigo")
+
     id, success = rodrigo.update
     expect(id).to be_kind_of(String)
     expect(success).to be true
