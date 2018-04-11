@@ -7,6 +7,10 @@ module Elasticity
       @client = client
     end
 
+    def versions
+      @client.cluster.stats.dig("nodes", "versions") || []
+    end
+
     # Generate wrapper methods for @client.indices
     INDICES_METHODS.each do |method_name|
       full_name = "index_#{method_name}"

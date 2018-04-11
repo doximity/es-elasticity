@@ -1,5 +1,9 @@
 module Elasticity
   class IndexConfig
+    class SubclassError < StandardError; end
+
+    SUBCLASSES_NOT_AVAILABLE = "subclasses are not available in this version of Elasticsearch".freeze
+    VERSION_WITHOUT_SUBCLASSES = "6.0.0".freeze
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
       :settings
@@ -14,6 +18,7 @@ module Elasticity
       end
       @elasticity_config = elasticity_config
       yield(self)
+      subclasses_warning
       validate!
     end
 
@@ -58,6 +63,10 @@ module Elasticity
       @strategy ||= Strategies::AliasIndex
     end
 
+    def check_subclass_exception
+      raise SubclassError.new(SUBCLASSES_NOT_AVAILABLE) if should_not_use_subclasses?
+    end
+
     private
 
     def validate!
@@ -68,6 +77,20 @@ module Elasticity
 
     def merge_settings
       @elasticity_config.settings.merge(settings || {})
+    end
+
+    def should_not_use_subclasses?
+      subclasses&.any? && version_does_not_support_subclasses?
+    end
+
+    def subclasses_warning
+      if should_not_use_subclasses?
+        Warning.warn SUBCLASS_WARNING
+      end
+    end
+
+    def version_does_not_support_subclasses?
+      client.versions.any?{ |v| v >= VERSION_WITHOUT_SUBCLASSES }
     end
   end
 end
