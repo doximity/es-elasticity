@@ -1,3 +1,7 @@
+v0.12.0
+  - warn when configuring a index with subclasses if using ES version that does support them
+  - raise exception when creating or adding document to an index configured with subclasses if using
+     an ES version that does not support them
 v0.11.0
   - compatibilty with ES v6
     - change mappings for 'index' to boolean. "string" type was replaced with "text"
