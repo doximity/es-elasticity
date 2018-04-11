@@ -85,7 +85,7 @@ module Elasticity
 
     def subclasses_warning
       if should_not_use_subclasses?
-        Warning.warn SUBCLASS_WARNING
+        Warning.warn SUBCLASSES_NOT_AVAILABLE
       end
     end
 

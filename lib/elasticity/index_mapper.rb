@@ -40,11 +40,13 @@ module Elasticity
 
     # Creates the index for this document
     def create_index
+      @index_config.check_subclass_exception
       @strategy.create_if_undefined(@index_config.definition)
     end
 
     # Re-creates the index for this document
     def recreate_index
+      @index_config.check_subclass_exception
       @strategy.recreate(@index_config.definition)
     end
 
@@ -76,6 +78,7 @@ module Elasticity
 
     # Index the given document
     def index_document(id, document_hash)
+      @index_config.check_subclass_exception
       @strategy.index_document(document_type, id, document_hash)
     end
 

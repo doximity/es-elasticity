@@ -39,7 +39,7 @@ RSpec.describe Elasticity::IndexConfig do
           c.strategy = Elasticity::Strategies::SingleIndex
           c.subclasses = { cat: "Cat", dog: "Dog" }
         end
-      end.to output(Elasticity::IndexConfig::SUBCLASS_WARNING).to_stderr
+      end.to output(Elasticity::IndexConfig::SUBCLASSES_NOT_AVAILABLE).to_stderr
     end
 
     it "does not warn if multi_mapping is supported by the ES version" do
