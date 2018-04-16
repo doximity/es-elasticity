@@ -1,7 +1,7 @@
 require 'elasticity/index_config'
 
 RSpec.describe Elasticity::IndexConfig do
-  let(:elasticity_config) { double }
+  let(:elasticity_config) { double("config", client: double("client", versions: ["5.3.4"])) }
   subject {  }
 
     let(:defaults) do
@@ -27,40 +27,67 @@ RSpec.describe Elasticity::IndexConfig do
     expect(config.document_type).to eql('users')
   end
 
-  describe "subclass warnings" do
+  context "subclass warnings and exceptions" do
     class Multied < Elasticity::Document
     end
+    describe "multi_mapping exceptions" do
+      it "raises an exception for version 7 and above if subclasses are configured" do
+        stub_version("7.0.0")
+        expect do
+          Multied.configure do |c|
+            c.index_base_name = "cats_and_dogs"
+            c.strategy = Elasticity::Strategies::SingleIndex
+            c.subclasses = { cat: "Cat", dog: "Dog" }
+          end
+        end.to raise_error(
+          Elasticity::IndexConfig::SubclassError,
+          Elasticity::IndexConfig::SUBCLASSES_ERROR
+        )
+      end
 
-    it "warns if multi_mapping is not supported by the ES version" do
-      stub_version("6.0.2")
-      expect do
-        Multied.configure do |c|
-          c.index_base_name = "cats_and_dogs"
-          c.strategy = Elasticity::Strategies::SingleIndex
-          c.subclasses = { cat: "Cat", dog: "Dog" }
-        end
-      end.to output(Elasticity::IndexConfig::SUBCLASSES_NOT_AVAILABLE).to_stderr
+      it "does not raise an exception for version 7 and above if no subclasses are configured" do
+        stub_version("7.0.0")
+        expect do
+          Multied.configure do |c|
+            c.index_base_name = "cats_and_dogs"
+            c.strategy = Elasticity::Strategies::SingleIndex
+          end
+        end.to_not raise_error
+      end
     end
 
-    it "does not warn if multi_mapping is supported by the ES version" do
-      stub_version("5.3.1")
-      expect do
-        Multied.configure do |c|
-          c.index_base_name = "cats_and_dogs"
-          c.strategy = Elasticity::Strategies::SingleIndex
-          c.subclasses = { cat: "Cat", dog: "Dog" }
-        end
-      end.to_not output.to_stderr
-    end
+    describe "multi_mapping warnings" do
+      it "warns if multi_mapping is not supported by the ES version" do
+        stub_version("6.0.2")
+        expect do
+          Multied.configure do |c|
+            c.index_base_name = "cats_and_dogs"
+            c.strategy = Elasticity::Strategies::SingleIndex
+            c.subclasses = { cat: "Cat", dog: "Dog" }
+          end
+        end.to output(Elasticity::IndexConfig::SUBCLASSES_WARNING).to_stderr
+      end
 
-    it "does not warn when no subclasses are configured" do
-      stub_version("6.0.2")
-      expect do
-        Multied.configure do |c|
-          c.index_base_name = "cats_and_dogs"
-          c.strategy = Elasticity::Strategies::SingleIndex
-        end
-      end.to_not output.to_stderr
+      it "does not warn if multi_mapping is supported by the ES version" do
+        stub_version("5.3.1")
+        expect do
+          Multied.configure do |c|
+            c.index_base_name = "cats_and_dogs"
+            c.strategy = Elasticity::Strategies::SingleIndex
+            c.subclasses = { cat: "Cat", dog: "Dog" }
+          end
+        end.to_not output.to_stderr
+      end
+
+      it "does not warn when no subclasses are configured" do
+        stub_version("6.0.2")
+        expect do
+          Multied.configure do |c|
+            c.index_base_name = "cats_and_dogs"
+            c.strategy = Elasticity::Strategies::SingleIndex
+          end
+        end.to_not output.to_stderr
+      end
     end
 
     def stub_version(version)

@@ -2,8 +2,12 @@ module Elasticity
   class IndexConfig
     class SubclassError < StandardError; end
 
-    SUBCLASSES_NOT_AVAILABLE = "subclasses are not available in this version of Elasticsearch".freeze
-    VERSION_WITHOUT_SUBCLASSES = "6.0.0".freeze
+    SUBCLASSES_WARNING = "Indices created in Elasticsearch 6.0.0 or later may only contain a single mapping type. " +
+      "Therefore, doument-type based inheritance has been disabled by Elasticity"
+    SUBCLASSES_ERROR = "Mapping types have been completely removed in Elasticsearch 7.0.0. " +
+      "Therefore, doument-type based inheritance has been disabled by Elasticity"
+    VERSION_FOR_SUBCLASS_WARNING = "6.0.0".freeze
+    VERSION_FOR_SUBCLASS_ERROR = "7.0.0".freeze
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
       :settings
@@ -18,7 +22,7 @@ module Elasticity
       end
       @elasticity_config = elasticity_config
       yield(self)
-      subclasses_warning
+      subclasses_warning_or_exception
       validate!
     end
 
@@ -63,10 +67,6 @@ module Elasticity
       @strategy ||= Strategies::AliasIndex
     end
 
-    def check_subclass_exception
-      raise SubclassError.new(SUBCLASSES_NOT_AVAILABLE) if should_not_use_subclasses?
-    end
-
     private
 
     def validate!
@@ -79,18 +79,14 @@ module Elasticity
       @elasticity_config.settings.merge(settings || {})
     end
 
-    def should_not_use_subclasses?
-      subclasses&.any? && version_does_not_support_subclasses?
+    def subclasses_warning_or_exception
+      return if subclasses.nil? || subclasses.empty?
+      raise(SubclassError.new(SUBCLASSES_ERROR)) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_ERROR)
+      Warning.warn(SUBCLASSES_WARNING) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_WARNING)
     end
 
-    def subclasses_warning
-      if should_not_use_subclasses?
-        Warning.warn SUBCLASSES_NOT_AVAILABLE
-      end
-    end
-
-    def version_does_not_support_subclasses?
-      client.versions.any?{ |v| v >= VERSION_WITHOUT_SUBCLASSES }
+    def es_version_meets_or_exceeds?(test_version)
+      client.versions.any?{ |v| v >= test_version }
     end
   end
 end
