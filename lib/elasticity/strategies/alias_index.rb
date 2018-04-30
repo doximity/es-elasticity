@@ -202,7 +202,7 @@ module Elasticity
         res = @client.index(index: @update_alias, type: type, id: id, body: attributes)
 
         if id = res["_id"]
-          [id, res["created"]]
+          [id, res.dig("_shards", "successful").to_i > 0]
         else
           raise IndexError.new(@update_alias, "failed to index document. Response: #{res.inspect}")
         end
