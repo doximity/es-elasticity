@@ -30,7 +30,7 @@ module Elasticity
     def definition
       return @definition if defined?(@definition)
       @definition = {
-        settings: merge_settings, mappings: { @document_type => @mapping&.deep_stringify_keys || {} }
+        settings: merge_settings, mappings: { @document_type => @mapping.nil? ? {} : @mapping.deep_stringify_keys }
       }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping
