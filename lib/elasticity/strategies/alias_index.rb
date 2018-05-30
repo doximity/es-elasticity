@@ -186,7 +186,9 @@ module Elasticity
       end
 
       def delete
-        @client.index_delete(index: "#{@main_alias}-*")
+        main_indexes.each do |index|
+          @client.index_delete(index: index)
+        end
       end
 
       def delete_if_defined
@@ -202,7 +204,7 @@ module Elasticity
         res = @client.index(index: @update_alias, type: type, id: id, body: attributes)
 
         if id = res["_id"]
-          [id, res.dig("_shards", "successful").to_i > 0]
+          [id, res["_shards"] && res["_shards"]["successful"].to_i > 0]
         else
           raise IndexError.new(@update_alias, "failed to index document. Response: #{res.inspect}")
         end
