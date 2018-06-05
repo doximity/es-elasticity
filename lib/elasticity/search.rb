@@ -29,11 +29,11 @@ module Elasticity
       end
 
       def to_search_args
-        { index: @index_name, type: @document_types, body: @body }.reverse_merge(@search_args)
+        @search_args.merge({ index: @index_name, type: @document_types, body: @body })
       end
 
       def to_msearch_args
-        search_body = @body.reverse_merge(@search_args)
+        search_body = @search_args.merge(@body)
 
         { index: @index_name, type: @document_types, search: search_body }
       end
