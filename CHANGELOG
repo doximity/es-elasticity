@@ -1,3 +1,6 @@
+v0.11.1
+  - support `action.destructive_requires_name` setting by being explict about which indices to delete
+
 v0.11.0
   - compatibilty with ES v6
     - change mappings for 'index' to boolean. "string" type was replaced with "text"
