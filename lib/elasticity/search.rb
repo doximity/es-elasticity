@@ -14,7 +14,7 @@ module Elasticity
         @index_name     = index_name
         @document_types = document_types
         @body           = body.deep_symbolize_keys!
-        @search_args = search_args
+        @search_args    = search_args
       end
 
       def update(body_changes)
@@ -47,10 +47,9 @@ module Elasticity
 
       # Creates a new facade for the given search definition, providing a set of helper methods
       # to trigger different type of searches and results interpretation.
-      def initialize(client, search_definition, search_args = {})
+      def initialize(client, search_definition)
         @client            = client
         @search_definition = search_definition
-        @search_args    = search_args
       end
 
       # Performs the search using the default search type and returning an iterator that will yield
