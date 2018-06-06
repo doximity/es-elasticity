@@ -206,9 +206,9 @@ search_b = SearchDoc::B.search(query_body, { explain: true })
 search_c = SearchDoc::C.search(query_body, { explain: true })
 
 multi = Elasticity::MultiSearch.new do |m|
-  m.add( :a, search_a, documents: ::SearchDoc::A)
-  m.add( :b, search_b, documents: ::SearchDoc::B)
-  m.add( :c, search_c, documents: ::SearchDoc::C)
+  m.add(:a, search_a, documents: ::SearchDoc::A)
+  m.add(:b, search_b, documents: ::SearchDoc::B)
+  m.add(:c, search_c, documents: ::SearchDoc::C)
 end
 ```
 For more information about the `active_records` method, read [ActiveRecord integration](#activerecord-integration).
