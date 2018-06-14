@@ -1,7 +1,7 @@
 module Elasticity
   module Search
-    def self.build(client, index_name, document_types, body)
-      search_def = Search::Definition.new(index_name, document_types, body)
+    def self.build(client, index_name, document_types, body, search_args = {})
+      search_def = Search::Definition.new(index_name, document_types, body, search_args)
       Search::Facade.new(client, search_def)
     end
 
@@ -10,10 +10,11 @@ module Elasticity
     class Definition
       attr_accessor :index_name, :document_types, :body
 
-      def initialize(index_name, document_types, body)
+      def initialize(index_name, document_types, body, search_args = {})
         @index_name     = index_name
         @document_types = document_types
         @body           = body.deep_symbolize_keys!
+        @search_args    = search_args
       end
 
       def update(body_changes)
@@ -28,11 +29,13 @@ module Elasticity
       end
 
       def to_search_args
-        { index: @index_name, type: @document_types, body: @body }
+        @search_args.merge({ index: @index_name, type: @document_types, body: @body })
       end
 
       def to_msearch_args
-        { index: @index_name, type: @document_types, search: @body }
+        search_body = @search_args.merge(@body)
+
+        { index: @index_name, type: @document_types, search: search_body }
       end
     end
 

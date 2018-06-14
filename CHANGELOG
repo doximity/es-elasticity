@@ -1,3 +1,7 @@
+v0.11.2
+ - Adds support for passing arguments to Search definition through `search(query, search_args)` in index searching and msearch
+ - adds _explanation to hold value of returned explanations in the base document
+
 v0.11.1
   - support `action.destructive_requires_name` setting by being explict about which indices to delete
 

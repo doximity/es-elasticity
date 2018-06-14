@@ -82,8 +82,10 @@ module Elasticity
     # Searches the index using the parameters provided in the body hash, following the same
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
-    def search(body)
-      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body)
+    # search_args allows for
+    #   explain: boolean to specify we should request _explanation of the query
+    def search(body, search_args = {})
+      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body, search_args)
       Search::DocumentProxy.new(search_obj, self.method(:map_hit))
     end
 
@@ -154,10 +156,16 @@ module Elasticity
 
         highlighted = @document_klass.new(highlighted_attrs)
       end
+
+      injected_attrs = attrs.merge({
+        highlighted: highlighted,
+        _explanation: hit["_explanation"]
+      })
+
       if @document_klass.config.subclasses.present?
-        @document_klass.config.subclasses[hit["_type"].to_sym].constantize.new(attrs.merge(highlighted: highlighted))
+        @document_klass.config.subclasses[hit["_type"].to_sym].constantize.new(injected_attrs)
       else
-        @document_klass.new(attrs.merge(highlighted: highlighted))
+        @document_klass.new(injected_attrs)
       end
     end
   end
