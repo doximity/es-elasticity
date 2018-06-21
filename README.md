@@ -15,7 +15,7 @@ Elasticity maps those documents into objects, providing a rich object representa
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'es-elasticity', require "elasticity"
+gem 'es-elasticity', require: "elasticity"
 ```
 
 And then execute:
