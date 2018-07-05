@@ -1,3 +1,6 @@
+v0.11.3
+ - Adds support for preserving the order or normalized names of `highlight` through `highlighted_attrs`
+
 v0.11.2
  - Adds support for passing arguments to Search definition through `search(query, search_args)` in index searching and msearch
  - adds _explanation to hold value of returned explanations in the base document
