@@ -159,6 +159,7 @@ module Elasticity
 
       injected_attrs = attrs.merge({
         highlighted: highlighted,
+        highlight: hit["highlight"],
         _explanation: hit["_explanation"]
       })
 

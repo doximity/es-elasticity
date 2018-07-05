@@ -34,13 +34,15 @@ RSpec.describe "Search", elasticsearch: true do
   end
 
   describe "search_args" do
+    let(:cat_name) { "felix" }
+
     before do
       CatDoc.recreate_index
       DogDoc.recreate_index
 
       @elastic_search_client.cluster.health wait_for_status: 'yellow'
 
-      cat = CatDoc.new(name: "felix", age: 10)
+      cat = CatDoc.new(name: cat_name, age: 10)
       dog = DogDoc.new(name: "fido", age: 4, hungry: true)
 
       cat.update
@@ -71,6 +73,43 @@ RSpec.describe "Search", elasticsearch: true do
 
         expect(get_explanations(subject[:cats])).to all( be_truthy )
         expect(get_explanations(subject[:dogs])).to all( be_nil )
+      end
+    end
+
+    describe "highlight" do
+      it "is nil when the highlight does not return" do
+        results =  CatDoc.search({}).search_results
+
+        expect(results.first.highlight).to be_nil
+        expect(results.first.highlighted).to be_nil
+      end
+
+      describe "when specifying highlight" do
+        let(:cat_search_result) {
+          highlight_search = {
+              query: {
+                  term: {
+                      name: cat_name
+                  }
+              },
+              highlight: {
+                  fields: {
+                      "*": {}
+                  }
+              }
+          }
+
+          CatDoc.search(highlight_search).search_results.first
+        }
+
+        it "highlight returns the name as a key" do
+          expect(cat_search_result.highlight.keys).to eq(["name"])
+          expect(cat_search_result.highlight["name"].first).to include(cat_name)
+        end
+
+        it "highlighted returns a new object with the name transformed" do
+          expect(cat_search_result.highlighted.name.first).to include(cat_name)
+        end
       end
     end
   end
