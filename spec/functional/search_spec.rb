@@ -104,8 +104,7 @@ RSpec.describe "Search", elasticsearch: true do
         }
 
         it "highlighted_attrs returns the highlighted" do
-          expect(cat_search_result.highlighted_attrs[0].keys).to eq([:name])
-          expect(cat_search_result.highlighted_attrs[1].keys).to eq([:description])
+          expect(cat_search_result.highlighted_attrs).to eq(["name", "description"])
         end
 
         it "highlighted returns a new object with the name transformed" do
