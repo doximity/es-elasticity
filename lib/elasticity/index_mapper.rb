@@ -144,14 +144,15 @@ module Elasticity
       attrs.merge!(hit["_source"]) if hit["_source"]
 
       if hit["highlight"]
-        highlighted_attrs = attrs.dup
-        attrs_set = Set.new
+        hit["highlight"]["name.foo"] = ["o"]
 
-        hit["highlight"].each do |name, v|
+        highlighted_attrs = attrs.dup
+        ordered_set = hit["highlight"].each_with_object([]) do |(name, value), set|
           name = name.gsub(/\..*\z/, '')
-          next if attrs_set.include?(name)
-          highlighted_attrs[name] = v
-          attrs_set << name
+          next if set.any? { |item| item.has_key?(name.to_sym) }
+
+          set.push({ "#{name}": value })
+          highlighted_attrs[name] = value
         end
 
         highlighted = @document_klass.new(highlighted_attrs)
@@ -159,7 +160,7 @@ module Elasticity
 
       injected_attrs = attrs.merge({
         highlighted: highlighted,
-        highlight: hit["highlight"],
+        highlighted_attrs: ordered_set,
         _explanation: hit["_explanation"]
       })
 

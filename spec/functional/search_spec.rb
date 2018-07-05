@@ -4,15 +4,16 @@ RSpec.describe "Search", elasticsearch: true do
       c.strategy = Elasticity::Strategies::SingleIndex
       c.document_type  = "cat"
       c.mapping = { "properties" => {
-        name: { type: "keyword" },
+        name: { type: "text" },
+        description: { type: "text" },
         age: { type: "integer" }
       } }
     end
 
-    attr_accessor :name, :age
+    attr_accessor :name, :age, :description
 
     def to_document
-      { name: name, age: age }
+      { name: name, age: age, description: description }
     end
   end
 
@@ -22,28 +23,27 @@ RSpec.describe "Search", elasticsearch: true do
       c.document_type = "dog"
       c.mapping = { "properties" => {
         name: { type: "keyword" },
+        description: { type: "text" },
         age: { type: "integer" },
         hungry: { type: "boolean" }
       } }
     end
-    attr_accessor :name, :age, :hungry
+    attr_accessor :name, :age, :description, :hungry
 
     def to_document
-      { name: name, age: age, hungry: hungry }
+      { name: name, age: age, description: description, hungry: hungry }
     end
   end
 
   describe "search_args" do
-    let(:cat_name) { "felix" }
-
     before do
       CatDoc.recreate_index
       DogDoc.recreate_index
 
       @elastic_search_client.cluster.health wait_for_status: 'yellow'
 
-      cat = CatDoc.new(name: cat_name, age: 10)
-      dog = DogDoc.new(name: "fido", age: 4, hungry: true)
+      cat = CatDoc.new(name: "felix the cat", age: 10, description: "I am an old cat")
+      dog = DogDoc.new(name: "fido", age: 4, hungry: true, description: "I am a hungry dog")
 
       cat.update
       dog.update
@@ -80,7 +80,7 @@ RSpec.describe "Search", elasticsearch: true do
       it "is nil when the highlight does not return" do
         results =  CatDoc.search({}).search_results
 
-        expect(results.first.highlight).to be_nil
+        expect(results.first.highlighted_attrs).to be_nil
         expect(results.first.highlighted).to be_nil
       end
 
@@ -88,8 +88,9 @@ RSpec.describe "Search", elasticsearch: true do
         let(:cat_search_result) {
           highlight_search = {
               query: {
-                  term: {
-                      name: cat_name
+                  multi_match: {
+                      query: "cat",
+                      fields: ["name^1000", "description"]
                   }
               },
               highlight: {
@@ -102,13 +103,14 @@ RSpec.describe "Search", elasticsearch: true do
           CatDoc.search(highlight_search).search_results.first
         }
 
-        it "highlight returns the name as a key" do
-          expect(cat_search_result.highlight.keys).to eq(["name"])
-          expect(cat_search_result.highlight["name"].first).to include(cat_name)
+        it "highlighted_attrs returns the highlighted" do
+          expect(cat_search_result.highlighted_attrs[0].keys).to eq([:name])
+          expect(cat_search_result.highlighted_attrs[1].keys).to eq([:description])
         end
 
         it "highlighted returns a new object with the name transformed" do
-          expect(cat_search_result.highlighted.name.first).to include(cat_name)
+          expect(cat_search_result.highlighted.name.first).to include("felix")
+          expect(cat_search_result.highlighted.description.first).to include("old")
         end
       end
     end
