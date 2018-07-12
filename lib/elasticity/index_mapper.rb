@@ -143,22 +143,21 @@ module Elasticity
       attrs.merge!(sort: hit["sort"])
       attrs.merge!(hit["_source"]) if hit["_source"]
 
-      if hit["highlight"]
-        highlighted_attrs = attrs.dup
-        attrs_set = Set.new
+      highlighted = nil
 
-        hit["highlight"].each do |name, v|
+      if hit["highlight"]
+        highlighted_attrs = hit["highlight"].each_with_object({}) do |(name, v), attrs|
           name = name.gsub(/\..*\z/, '')
-          next if attrs_set.include?(name)
-          highlighted_attrs[name] = v
-          attrs_set << name
+
+          attrs[name] ||= v
         end
 
-        highlighted = @document_klass.new(highlighted_attrs)
+        highlighted = @document_klass.new(attrs.merge(highlighted_attrs))
       end
 
       injected_attrs = attrs.merge({
         highlighted: highlighted,
+        highlighted_attrs: highlighted_attrs.try(:keys),
         _explanation: hit["_explanation"]
       })
 
