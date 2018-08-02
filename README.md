@@ -194,7 +194,7 @@ adults = adults.active_records(User)
 #### Search Args
 
 ##### explain: true
-For `search` definitions we support passing  `{ explain: true }` to the search as a second argument in order to surface the reason a search result was returned. 
+For `search` definitions we support passing  `{ explain: true }` to the search as a second argument in order to surface the reason a search result was returned.
 
 ```ruby
 # example in single search
@@ -359,7 +359,7 @@ For example:
       Search::User.from_active_record(self).update
     end
 
-    def remove_index_document
+    def delete_index_document
       Search::User.delete(self.id)
     end
   end
