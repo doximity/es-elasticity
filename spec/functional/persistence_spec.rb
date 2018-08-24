@@ -321,11 +321,14 @@ RSpec.describe "Persistence", elasticsearch: true do
       number_of_docs.times.map do |i|
         subject.new(id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
       end
-      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_raise("KAPOW")
 
-      expect { subject.remap! }.to raise_error("KAPOW")
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_raise("KAPOW")
+      expect do
+        subject.remap!
+      end.to raise_error("KAPOW")
       cleaned_up_aliases = all_aliases(subject)
       expect(cleaned_up_aliases).to match_array(expected_aliases)
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_call_original
     end
 
     it "bulk indexes, updates and delete" do
