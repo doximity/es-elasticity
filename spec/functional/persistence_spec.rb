@@ -86,7 +86,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type  = "cat"
         c.mapping = { "properties" => {
-          name: { type: "text", index: "not_analyzed" },
+          name: { type: "text", index: true },
           age: { type: "integer" }
         } }
       end
@@ -104,7 +104,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         c.strategy = Elasticity::Strategies::SingleIndex
         c.document_type = "dog"
         c.mapping = { "properties" => {
-          name: { type: "text", index: "not_analyzed" },
+          name: { type: "text", index: true },
           age: { type: "integer" },
           hungry: { type: "boolean" }
         } }
@@ -167,7 +167,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.mapping = {
             "properties" => {
               id: { type: "integer" },
-              name: { type: "text", index: "not_analyzed" },
+              name: { type: "text", index: true },
               birthdate: { type: "date" },
             },
           }
@@ -268,7 +268,7 @@ RSpec.describe "Persistence", elasticsearch: true do
           c.mapping = {
             "properties" => {
               id: { type: "integer" },
-              name: { type: "text", index: "not_analyzed" },
+              name: { type: "text", index: true },
             },
           }
         end
@@ -313,6 +313,24 @@ RSpec.describe "Persistence", elasticsearch: true do
       expect(results.total).to eq(2010)
     end
 
+    it "fully cleans up if error occurs deleting the old index during remap" do
+      expected_aliases = %w[elasticity_test_users elasticity_test_users_update]
+      original_aliases = all_aliases(subject)
+      expect(original_aliases).to match_array(expected_aliases)
+      number_of_docs = 20
+      number_of_docs.times.map do |i|
+        subject.new(id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
+      end
+
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_raise("KAPOW")
+      expect do
+        subject.remap!
+      end.to raise_error("KAPOW")
+      cleaned_up_aliases = all_aliases(subject)
+      expect(cleaned_up_aliases).to match_array(expected_aliases)
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_call_original
+    end
+
     it "bulk indexes, updates and delete" do
       docs = 2000.times.map do |i|
         subject.new(_id: i, id: i, name: "User #{i}", birthdate: random_birthdate).tap(&:update)
@@ -341,5 +359,10 @@ RSpec.describe "Persistence", elasticsearch: true do
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 0
     end
+  end
+
+  def all_aliases(subj)
+    base_name = subj.ref_index_name
+    subj.config.client.index_get_alias(index: "#{base_name}-*", name: "#{base_name}*").values.first["aliases"].keys
   end
 end

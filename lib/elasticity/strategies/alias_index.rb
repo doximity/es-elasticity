@@ -104,6 +104,7 @@ module Elasticity
         rescue
           @client.index_update_aliases(body: {
             actions: [
+              { add:    { index: original_index, alias: @main_alias } },
               { add:    { index: original_index, alias: @update_alias } },
               { remove: { index: new_index, alias: @update_alias } },
             ]
