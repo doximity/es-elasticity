@@ -33,7 +33,7 @@ module Elasticity
       #
       # It does a little bit more to ensure consistency and to handle race-conditions. For more details
       # look at the implementation.
-      def remap(index_def, retry_on_recoverable_errors = false, retry_delay = 0, max_delay = 0)
+      def remap(index_def, retry_delete_on_recoverable_errors: false, retry_delay: 0, max_delay: 0)
         main_indexes   = self.main_indexes
         update_indexes = self.update_indexes
 
@@ -108,7 +108,7 @@ module Elasticity
           begin
             @client.index_delete(index: original_index)
           rescue Elasticsearch::Transport::Transport::ServerError => e
-            if retryable?(e)  && retry_on_recoverable_errors && waiting_duration < max_delay
+            if retryable_error?(e)  && retry_delete_on_recoverable_errors && waiting_duration < max_delay
               waiting_duration += retry_delay
               sleep(retry_delay)
               retry
@@ -285,7 +285,7 @@ module Elasticity
         index_name
       end
 
-      def retryable?(e)
+      def retryable_error?(e)
         RETRYABLE_ERROR_SNIPPETS.any? do |s|
           e.message.match(s)
         end

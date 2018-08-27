@@ -354,7 +354,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         end
         build_some_docs(subject)
 
-        subject.remap!(retry_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
+        subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
         subject.flush_index
         results = subject.search({})
         expect(results.total).to eq(20)
@@ -368,7 +368,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         )
         build_some_docs(subject)
         expect {
-          subject.remap!(retry_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
+          subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
         }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
       end
 
@@ -380,7 +380,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         )
         build_some_docs(subject)
         expect {
-          subject.remap!(retry_on_recoverable_errors: false)
+          subject.remap!(retry_delete_on_recoverable_errors: false)
         }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
       end
 
@@ -391,7 +391,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         )
         build_some_docs(subject)
         expect {
-          subject.remap!(retry_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
+          subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
         }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
       end
     end
