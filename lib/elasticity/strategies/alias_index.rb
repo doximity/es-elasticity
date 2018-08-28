@@ -4,9 +4,10 @@ module Elasticity
     # runtime changes by simply atomically updating the aliases. For example, look at the remap method
     # implementation.
     class AliasIndex
+      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted".freeze
       RETRYABLE_ERROR_SNIPPETS = [
-        "Cannot delete indices that are being snapshotted"
-      ]
+        SNAPSHOT_ERROR_SNIPPET
+      ].freeze
 
       STATUSES = [:missing, :ok]
 
