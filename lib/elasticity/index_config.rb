@@ -82,7 +82,7 @@ module Elasticity
     def subclasses_warning_or_exception
       return if subclasses.nil? || subclasses.empty?
       raise(SubclassError.new(SUBCLASSES_ERROR)) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_ERROR)
-      Warning.warn(SUBCLASSES_WARNING) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_WARNING)
+      warn(SUBCLASSES_WARNING) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_WARNING)
     end
 
     def es_version_meets_or_exceeds?(test_version)

@@ -8,7 +8,7 @@ module Elasticity
     end
 
     def versions
-      @client.cluster.stats.dig("nodes", "versions") || []
+      (@client.cluster.stats["nodes"] && @client.cluster.stats["nodes"]["versions"]) || []
     end
 
     # Generate wrapper methods for @client.indices
