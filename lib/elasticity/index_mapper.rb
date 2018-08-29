@@ -65,8 +65,9 @@ module Elasticity
     end
 
     # Remap
-    def remap!
-      @strategy.remap(@index_config.definition)
+    # retry_delay & max_delay are in seconds
+    def remap!(retry_delete_on_recoverable_errors: true, retry_delay: 30, max_delay: 600)
+      @strategy.remap(@index_config.definition, retry_delete_on_recoverable_errors: retry_delete_on_recoverable_errors, retry_delay: retry_delay, max_delay: max_delay)
     end
 
     # Flushes the index, forcing any writes
@@ -82,8 +83,10 @@ module Elasticity
     # Searches the index using the parameters provided in the body hash, following the same
     # structure Elasticsearch expects.
     # Returns a DocumentSearch object.
-    def search(body)
-      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body)
+    # search_args allows for
+    #   explain: boolean to specify we should request _explanation of the query
+    def search(body, search_args = {})
+      search_obj = Search.build(@index_config.client, @strategy.search_index, document_types, body, search_args)
       Search::DocumentProxy.new(search_obj, self.method(:map_hit))
     end
 
@@ -141,23 +144,28 @@ module Elasticity
       attrs.merge!(sort: hit["sort"])
       attrs.merge!(hit["_source"]) if hit["_source"]
 
-      if hit["highlight"]
-        highlighted_attrs = attrs.dup
-        attrs_set = Set.new
+      highlighted = nil
 
-        hit["highlight"].each do |name, v|
+      if hit["highlight"]
+        highlighted_attrs = hit["highlight"].each_with_object({}) do |(name, v), attrs|
           name = name.gsub(/\..*\z/, '')
-          next if attrs_set.include?(name)
-          highlighted_attrs[name] = v
-          attrs_set << name
+
+          attrs[name] ||= v
         end
 
-        highlighted = @document_klass.new(highlighted_attrs)
+        highlighted = @document_klass.new(attrs.merge(highlighted_attrs))
       end
+
+      injected_attrs = attrs.merge({
+        highlighted: highlighted,
+        highlighted_attrs: highlighted_attrs.try(:keys),
+        _explanation: hit["_explanation"]
+      })
+
       if @document_klass.config.subclasses.present?
-        @document_klass.config.subclasses[hit["_type"].to_sym].constantize.new(attrs.merge(highlighted: highlighted))
+        @document_klass.config.subclasses[hit["_type"].to_sym].constantize.new(injected_attrs)
       else
-        @document_klass.new(attrs.merge(highlighted: highlighted))
+        @document_klass.new(injected_attrs)
       end
     end
   end

@@ -15,7 +15,7 @@ Elasticity maps those documents into objects, providing a rich object representa
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'es-elasticity', require "elasticity"
+gem 'es-elasticity', require: "elasticity"
 ```
 
 And then execute:
@@ -191,6 +191,26 @@ cursor.each { |doc| ... }
 adults = adults.active_records(User)
 ```
 
+#### Search Args
+
+##### explain: true
+For `search` definitions we support passing  `{ explain: true }` to the search as a second argument in order to surface the reason a search result was returned. 
+
+```ruby
+# example in single search
+search_results_with_explanation = SearchDoc::A.search(query_body, { explain: true }).search_results
+
+# In multisearch
+search_a = SearchDoc::A.search(query_body, { explain: true })
+search_b = SearchDoc::B.search(query_body, { explain: true })
+search_c = SearchDoc::C.search(query_body, { explain: true })
+
+multi = Elasticity::MultiSearch.new do |m|
+  m.add(:a, search_a, documents: ::SearchDoc::A)
+  m.add(:b, search_b, documents: ::SearchDoc::B)
+  m.add(:c, search_c, documents: ::SearchDoc::C)
+end
+```
 For more information about the `active_records` method, read [ActiveRecord integration](#activerecord-integration).
 
 ### Segmented Documents
