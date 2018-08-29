@@ -65,8 +65,9 @@ module Elasticity
     end
 
     # Remap
-    def remap!
-      @strategy.remap(@index_config.definition)
+    # retry_delay & max_delay are in seconds
+    def remap!(retry_delete_on_recoverable_errors: true, retry_delay: 30, max_delay: 600)
+      @strategy.remap(@index_config.definition, retry_delete_on_recoverable_errors: retry_delete_on_recoverable_errors, retry_delay: retry_delay, max_delay: max_delay)
     end
 
     # Flushes the index, forcing any writes

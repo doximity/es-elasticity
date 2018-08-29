@@ -1,3 +1,5 @@
+v0.11.5
+ - Give the option of retrying the deletion for certain exceptions during remap
 v0.11.4
  - Fully clean up if error occurs during remap (assign all aliases back to original index)
 v0.11.3

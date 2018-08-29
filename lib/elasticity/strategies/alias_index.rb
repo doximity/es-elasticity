@@ -4,6 +4,11 @@ module Elasticity
     # runtime changes by simply atomically updating the aliases. For example, look at the remap method
     # implementation.
     class AliasIndex
+      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted".freeze
+      RETRYABLE_ERROR_SNIPPETS = [
+        SNAPSHOT_ERROR_SNIPPET
+      ].freeze
+
       STATUSES = [:missing, :ok]
 
       def initialize(client, index_base_name, document_type)
@@ -29,7 +34,7 @@ module Elasticity
       #
       # It does a little bit more to ensure consistency and to handle race-conditions. For more details
       # look at the implementation.
-      def remap(index_def)
+      def remap(index_def, retry_delete_on_recoverable_errors: false, retry_delay: 0, max_delay: 0)
         main_indexes   = self.main_indexes
         update_indexes = self.update_indexes
 
@@ -99,8 +104,19 @@ module Elasticity
               { remove: { index: original_index, alias: @main_alias } },
             ]
           })
-          @client.index_delete(index: original_index)
 
+          waiting_duration = 0
+          begin
+            @client.index_delete(index: original_index)
+          rescue Elasticsearch::Transport::Transport::ServerError => e
+            if retryable_error?(e)  && retry_delete_on_recoverable_errors && waiting_duration < max_delay
+              waiting_duration += retry_delay
+              sleep(retry_delay)
+              retry
+            else
+              raise e
+            end
+          end
         rescue
           @client.index_update_aliases(body: {
             actions: [
@@ -268,6 +284,12 @@ module Elasticity
         index_name = "#{@main_alias}-#{ts}"
         @client.index_create(index: index_name, body: index_def)
         index_name
+      end
+
+      def retryable_error?(e)
+        RETRYABLE_ERROR_SNIPPETS.any? do |s|
+          e.message.match(s)
+        end
       end
     end
   end
