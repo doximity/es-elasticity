@@ -1,5 +1,13 @@
 module Elasticity
   class IndexConfig
+    class SubclassError < StandardError; end
+
+    SUBCLASSES_WARNING = "Indices created in Elasticsearch 6.0.0 or later may only contain a single mapping type. " +
+      "Therefore, doument-type based inheritance has been disabled by Elasticity"
+    SUBCLASSES_ERROR = "Mapping types have been completely removed in Elasticsearch 7.0.0. " +
+      "Therefore, doument-type based inheritance has been disabled by Elasticity"
+    VERSION_FOR_SUBCLASS_WARNING = "6.0.0".freeze
+    VERSION_FOR_SUBCLASS_ERROR = "7.0.0".freeze
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
       :settings
@@ -14,6 +22,7 @@ module Elasticity
       end
       @elasticity_config = elasticity_config
       yield(self)
+      subclasses_warning_or_exception
       validate!
     end
 
@@ -68,6 +77,16 @@ module Elasticity
 
     def merge_settings
       @elasticity_config.settings.merge(settings || {})
+    end
+
+    def subclasses_warning_or_exception
+      return if subclasses.nil? || subclasses.empty?
+      raise(SubclassError.new(SUBCLASSES_ERROR)) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_ERROR)
+      warn(SUBCLASSES_WARNING) if es_version_meets_or_exceeds?(VERSION_FOR_SUBCLASS_WARNING)
+    end
+
+    def es_version_meets_or_exceeds?(test_version)
+      client.versions.any?{ |v| v >= test_version }
     end
   end
 end
