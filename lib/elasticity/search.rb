@@ -13,7 +13,7 @@ module Elasticity
       def initialize(index_name, document_types, body, search_args = {})
         @index_name     = index_name
         @document_types = document_types
-        @body           = body.deep_symbolize_keys!
+        @body           = body.deep_symbolize_keys
         @search_args    = search_args
       end
 
