@@ -193,7 +193,7 @@ module Elasticity
         if ids.any?
           id_col  = "#{relation.connection.quote_column_name(relation.table_name)}.#{relation.connection.quote_column_name(relation.klass.primary_key)}"
           id_vals = ids.map { |id| relation.connection.quote(id) }
-          Relation.new(relation.where("#{id_col} IN (?)", ids).order("FIELD(#{id_col}, #{id_vals.join(',')})"), body, response)
+          Relation.new(relation.where("#{id_col} IN (?)", ids).order(Arel.sql("FIELD(#{id_col}, #{id_vals.join(',')})")), body, response)
         else
           Relation.new(relation.none, body, response)
         end

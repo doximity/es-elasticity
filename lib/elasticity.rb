@@ -17,6 +17,7 @@ require "bundler/setup"
 Bundler.setup
 
 require "active_support"
+require "arel"
 require "active_support/core_ext"
 require "active_model"
 require "elasticsearch"
