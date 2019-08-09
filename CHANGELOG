@@ -1,4 +1,4 @@
-v0.12.1.pre0
+v0.12.1
   - use Arel.sql to avoid unsafe sql and eliminate deprecation warnings when used in Rails projects
 v0.12.0
   - warn when configuring a index with subclasses if using ES version that does support them
