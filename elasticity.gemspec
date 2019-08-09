@@ -31,5 +31,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "activesupport", ">= 4.0.0", "< 6"
   spec.add_dependency "activemodel",   ">= 4.0.0", "< 6"
+  spec.add_dependency "activerecord",   ">= 4.0.0", "< 6"
   spec.add_dependency "elasticsearch", ">= 1.0"
 end

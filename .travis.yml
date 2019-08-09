@@ -8,7 +8,7 @@ rvm:
 addons:
   apt:
     packages:
-      - oracle-java8-set-default
+      - openjdk-8-jre-headless
 before_script:
   - sleep 5
 env:
