@@ -147,7 +147,12 @@ module Elasticity
       end
 
       def total
-        search["hits"]["total"]
+        res = search["hits"]["total"]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
 
       def each_batch
@@ -237,7 +242,12 @@ module Elasticity
       end
 
       def total
-        metadata[:total]
+        res = metadata[:total]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
 
       def suggestions
@@ -311,7 +321,12 @@ module Elasticity
       end
 
       def total
-        @response["hits"]["total"]
+        res = @response["hits"]["total"]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
       alias_method :total_entries, :total
 

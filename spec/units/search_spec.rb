@@ -13,6 +13,13 @@ RSpec.describe "Search" do
     ]}}
   end
 
+  let :full_response_v7 do
+    { "hits" => { "total" => { "value" => 2, "relation" => "eq" }, "hits" => [
+      { "_id" => 1, "_source" => { "name" => "foo" } },
+      { "_id" => 2, "_source" => { "name" => "bar" } },
+    ]}}
+  end
+
   let :aggregations do
     {
       "logins_count" => { "value" => 1495 },
@@ -86,6 +93,27 @@ RSpec.describe "Search" do
       expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
 
       docs = subject.documents(mapper)
+      expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
+
+      expect(docs.total).to eq 2
+      expect(docs.size).to eq expected.size
+
+      expect(docs).to_not be_empty
+      expect(docs).to_not be_blank
+
+      expect(docs[0].name).to eq expected[0].name
+      expect(docs[1].name).to eq expected[1].name
+
+      expect(docs.each.first).to eq expected[0]
+      expect(Array(docs)).to eq expected
+    end
+
+    it "handles the v7 'total' response object" do
+      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response_v7)
+
+      docs = subject.documents(mapper)
+      expect(docs.total).to eq 2
+
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
 
       expect(docs.total).to eq 2
