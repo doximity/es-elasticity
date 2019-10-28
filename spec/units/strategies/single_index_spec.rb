@@ -65,8 +65,16 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
 
       subject.flush
 
+      expected = {
+        "_index"=>"test_index_name",
+        "_type"=>"document",
+        "_id"=>"2",
+        "_version"=>1,
+        "found"=>true,
+        "_source"=>{"name"=>"bar"}
+      }
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
-      expect(subject.get_document("document", 2)).to eq({"_index"=>"test_index_name", "_type"=>"document", "_id"=>"2", "_version"=>1, "found"=>true, "_source"=>{"name"=>"bar"}})
+      expect(subject.get_document("document", 2)).to include(expected)
     end
 
     it "allows deleting by query" do
