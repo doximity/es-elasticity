@@ -3,10 +3,13 @@ module Elasticity
     class SingleIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_name, document_type)
+      def initialize(client, index_name, document_type, use_new_timestamp_format = false)
         @client        = client
         @index_name    = index_name
         @document_type = document_type
+
+        # not currently used. included for argument compatiblity with AliasStrategy
+        @use_new_timestamp_format = use_new_timestamp_format
       end
 
       def ref_index_name

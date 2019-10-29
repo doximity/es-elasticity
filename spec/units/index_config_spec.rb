@@ -90,6 +90,25 @@ RSpec.describe Elasticity::IndexConfig do
       end
     end
 
+    describe "passing the time_stamp option" do
+      it "allows passing of a time_stamp_format option" do
+        config = described_class.new(elasticity_config, defaults) {}
+        expect(config.index_base_name).to eql('users')
+        expect(config.document_type).to eql('user')
+        expect(config.use_new_timestamp_format).to be_falsy
+
+        config = described_class.new(elasticity_config, defaults) do |c|
+          c.index_base_name = 'user_documents'
+          c.document_type = 'users'
+          c.use_new_timestamp_format = true
+        end
+
+        expect(config.index_base_name).to eql('user_documents')
+        expect(config.document_type).to eql('users')
+        expect(config.use_new_timestamp_format).to be_truthy
+      end
+    end
+
     def stub_version(version)
       allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:versions).and_return([version])
     end

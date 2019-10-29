@@ -27,7 +27,7 @@ module Elasticity
     def initialize(document_klass, index_config)
       @document_klass = document_klass
       @index_config   = index_config
-      @strategy       = @index_config.strategy.new(@index_config.client, @index_config.fq_index_base_name, @index_config.document_type)
+      @strategy       = @index_config.strategy.new(@index_config.client, @index_config.fq_index_base_name, @index_config.document_type, @index_config.use_new_timestamp_format)
     end
 
     delegate(

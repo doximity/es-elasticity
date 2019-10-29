@@ -10,7 +10,7 @@ module Elasticity
     VERSION_FOR_SUBCLASS_ERROR = "7.0.0".freeze
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
-      :settings
+      :settings, :use_new_timestamp_format
     ].freeze
     VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
 
@@ -39,7 +39,8 @@ module Elasticity
     def definition
       return @definition if defined?(@definition)
       @definition = {
-        settings: merge_settings, mappings: { @document_type => @mapping.nil? ? {} : @mapping.deep_stringify_keys }
+        settings: merge_settings,
+        mappings: { @document_type => @mapping.nil? ? {} : @mapping.deep_stringify_keys }
       }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping

@@ -1,3 +1,8 @@
+v0.13.0
+  - changes needed for use with Elasticsearch v7
+  - handle the v7 "total" as an object rather than a scalar
+  - use timestamp with no colons
+  - update elasticsearch gem version for consistency with target ES version
 v0.12.1
   - use Arel.sql to avoid unsafe sql and eliminate deprecation warnings when used in Rails projects
 v0.12.0
