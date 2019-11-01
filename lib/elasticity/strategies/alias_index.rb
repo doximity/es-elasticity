@@ -260,6 +260,10 @@ module Elasticity
         @client.index_flush(index: @update_alias)
       end
 
+      def refresh
+        @client.index_refresh(index: @update_alias)
+      end
+
       def settings
         @client.index_get_settings(index: @main_alias, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound

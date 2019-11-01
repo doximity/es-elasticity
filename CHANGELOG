@@ -3,6 +3,7 @@ v0.13.0
   - handle the v7 "total" as an object rather than a scalar
   - use timestamp with no colons
   - update elasticsearch gem version for consistency with target ES version
+  - expose refresh_index to force write (because in v7, flush no longer forces writes)
 v0.12.1
   - use Arel.sql to avoid unsafe sql and eliminate deprecation warnings when used in Rails projects
 v0.12.0

@@ -104,6 +104,10 @@ module Elasticity
       def flush
         @client.index_flush(index: @index_name)
       end
+
+      def refresh
+        @client.index_refresh(index: @index_name)
+      end
     end
   end
 end

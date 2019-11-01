@@ -11,6 +11,7 @@ module Elasticity
         :index_exists?,
         :remap!,
         :flush_index,
+        :refresh_index,
         :index_document,
         :search,
         :get,
@@ -71,8 +72,14 @@ module Elasticity
     end
 
     # Flushes the index, forcing any writes
+    # note that v7 no longer forces any writes on flush
     def flush_index
       @strategy.flush
+    end
+
+    # Resfreshes the index, forcing any writes
+    def refresh_index
+      @strategy.refresh
     end
 
     # Index the given document
