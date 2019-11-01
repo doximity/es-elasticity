@@ -10,7 +10,7 @@ module Elasticity
     VERSION_FOR_SUBCLASS_ERROR = "7.0.0".freeze
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
-      :settings, :use_new_timestamp_format
+      :settings, :use_new_timestamp_format, :include_type_name_on_create
     ].freeze
     VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
 

@@ -11,14 +11,16 @@ module Elasticity
 
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_base_name, document_type, use_new_timestamp_format = false)
+      def initialize(client, index_base_name, document_type, use_new_timestamp_format = false, include_type_name_on_create = true)
         @client       = client
         @main_alias   = index_base_name
         @update_alias = "#{index_base_name}_update"
         @document_type = document_type
-        @use_new_timestamp_format = use_new_timestamp_format
-      end
 
+        # included for compatibility with v7
+        @use_new_timestamp_format = use_new_timestamp_format
+        @include_type_name_on_create = include_type_name_on_create
+      end
 
       def ref_index_name
         @main_alias
@@ -298,7 +300,7 @@ module Elasticity
 
       def create_index(index_def)
         name = build_index_name
-        @client.index_create(index: name, body: index_def)
+        @client.index_create(index: name, body: index_def, include_type_name: @include_type_name_on_create)
         name
       end
 
