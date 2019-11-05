@@ -4,28 +4,12 @@ workflows:
   version: 2
   main:
     jobs:
-      - build_2_2_3
-      - build_2_2_2
+      - build
 jobs:
-  build_2_2_2:
+  build:
     resource_class: small
     docker:
-      - image: ruby:2.2.2
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - xpack.security.enabled=false
-    steps:
-      - checkout
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle install
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-  build_2_2_3:
-    resource_class: small
-    docker:
-      - image: ruby:2.2.3
+      - image: ruby:2.3
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
