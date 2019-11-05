@@ -1,19 +1,15 @@
-version: 2
+version: 2.1
 
 workflows:
-  version: 2
+  version: 2.1
   main:
     jobs:
       - build
 jobs:
   build:
-    executor: ruby-latest
+    executor: ruby-2.2.3
     docker:
-      - image: circleci/ruby:2.5.3-node
-        env:
-          - RAILS_ENV=test
-          - REDIS_URL=redis://127.0.0.1:6379
-          - DATABASE_URL=mysql2://127.0.0.1:3306
+      - image: ruby-2.2.3
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
