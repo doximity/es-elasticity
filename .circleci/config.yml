@@ -1,0 +1,24 @@
+version: 2
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+jobs:
+  build:
+    executor: ruby-latest
+    docker:
+      - image: circleci/ruby:2.5.3-node
+        env:
+          - RAILS_ENV=test
+          - REDIS_URL=redis://127.0.0.1:6379
+          - DATABASE_URL=mysql2://127.0.0.1:3306
+      - image: elastic/elasticsearch:6.8.2
+        environment:
+          - xpack.security.enabled=false
+    steps:
+      - checkout
+      - run:
+        name: Run Tests
+        command: bundle exec rspec 
