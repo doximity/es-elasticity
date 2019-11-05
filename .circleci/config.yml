@@ -1,20 +1,23 @@
-version: 2.1
+version: 2
 
 workflows:
-  version: 2.1
+  version: 2
   main:
     jobs:
       - build
 jobs:
   build:
-    executor: ruby-2.2.3
+    resource_class: small
     docker:
-      - image: ruby-2.2.3
+      - image: circleci/ruby:2.5.1
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
     steps:
       - checkout
       - run:
-        name: Run Tests
-        command: bundle exec rspec 
+          name: Install Ruby Dependencies
+          command: bundle install
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
