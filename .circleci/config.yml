@@ -14,6 +14,10 @@ jobs:
         environment:
           - xpack.security.enabled=false
     steps:
+      - restore_cache:
+          keys:
+            - gem-cache-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-v2-
       - checkout
       - run:
           name: Install Ruby Dependencies
@@ -21,3 +25,8 @@ jobs:
       - run:
           name: Run Tests
           command: bundle exec rspec
+      - save_cache:
+          key: gem-cache-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+            - ./vendor/cache
