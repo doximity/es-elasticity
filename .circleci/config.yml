@@ -4,8 +4,8 @@ workflows:
   version: 2
   main:
     jobs:
-      - build_2_2_2
       - build_2_2_3
+      - build_2_2_2
 jobs:
   build_2_2_2:
     resource_class: small
