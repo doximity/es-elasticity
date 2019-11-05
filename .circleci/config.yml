@@ -4,9 +4,35 @@ workflows:
   version: 2
   main:
     jobs:
-      - build
+      - build_2_4
+      - build_2_5
+      - build_2_6
 jobs:
-  build:
+  build_2_4:
+    resource_class: small
+    docker:
+      - image: ruby:2.4
+      - image: elastic/elasticsearch:6.8.2
+        environment:
+          - xpack.security.enabled=false
+    steps:
+      - restore_cache:
+          keys:
+            - gem-cache-2_4-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_4-v2-
+      - checkout
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle install
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - save_cache:
+          key: gem-cache-2_4-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+            - ./vendor/cache
+  build_2_5:
     resource_class: small
     docker:
       - image: ruby:2.5
@@ -16,8 +42,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - gem-cache-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-v2-
+            - gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_5-v2-
       - checkout
       - run:
           name: Install Ruby Dependencies
@@ -26,7 +52,31 @@ jobs:
           name: Run Tests
           command: bundle exec rspec
       - save_cache:
-          key: gem-cache-v2-{{ checksum "Gemfile.lock" }}
+          key: gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+            - ./vendor/cache
+  build_2_6:
+    resource_class: small
+    docker:
+      - image: ruby:2.5
+      - image: elastic/elasticsearch:6.8.2
+        environment:
+          - xpack.security.enabled=false
+    steps:
+      - restore_cache:
+          keys:
+            - gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_6-v2-
+      - checkout
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle install
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - save_cache:
+          key: gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - ./vendor/bundle
             - ./vendor/cache
