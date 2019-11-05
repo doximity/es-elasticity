@@ -9,7 +9,7 @@ jobs:
   build:
     resource_class: small
     docker:
-      - image: ruby:2.3
+      - image: ruby:2.5
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
