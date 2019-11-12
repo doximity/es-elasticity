@@ -11,6 +11,7 @@ module Elasticity
         :index_exists?,
         :remap!,
         :flush_index,
+        :refresh_index,
         :index_document,
         :search,
         :get,
@@ -27,7 +28,7 @@ module Elasticity
     def initialize(document_klass, index_config)
       @document_klass = document_klass
       @index_config   = index_config
-      @strategy       = @index_config.strategy.new(@index_config.client, @index_config.fq_index_base_name, @index_config.document_type)
+      @strategy       = @index_config.strategy.new(@index_config.client, @index_config.fq_index_base_name, @index_config.document_type, @index_config.use_new_timestamp_format, @index_config.include_type_name_on_create)
     end
 
     delegate(
@@ -71,8 +72,14 @@ module Elasticity
     end
 
     # Flushes the index, forcing any writes
+    # note that v7 no longer forces any writes on flush
     def flush_index
       @strategy.flush
+    end
+
+    # Resfreshes the index, forcing any writes
+    def refresh_index
+      @strategy.refresh
     end
 
     # Index the given document

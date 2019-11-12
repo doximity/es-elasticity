@@ -3,10 +3,16 @@ module Elasticity
     class SingleIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_name, document_type)
+      def initialize(client, index_name, document_type, use_new_timestamp_format = false, include_type_name_on_create = true)
         @client        = client
         @index_name    = index_name
         @document_type = document_type
+
+        # included for compatibility with v7
+        @include_type_name_on_create = include_type_name_on_create
+
+        # not currently used. included for argument compatiblity with AliasStrategy
+        @use_new_timestamp_format = use_new_timestamp_format
       end
 
       def ref_index_name
@@ -23,7 +29,7 @@ module Elasticity
 
       def create(index_def)
         if missing?
-          @client.index_create(index: @index_name, body: index_def)
+          @client.index_create(index: @index_name, body: index_def, include_type_name: @include_type_name_on_create)
         else
           raise IndexError.new(@index_name, "index already exist")
         end
@@ -100,6 +106,10 @@ module Elasticity
 
       def flush
         @client.index_flush(index: @index_name)
+      end
+
+      def refresh
+        @client.index_refresh(index: @index_name)
       end
     end
   end

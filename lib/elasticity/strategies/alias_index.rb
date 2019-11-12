@@ -11,11 +11,15 @@ module Elasticity
 
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_base_name, document_type)
+      def initialize(client, index_base_name, document_type, use_new_timestamp_format = false, include_type_name_on_create = true)
         @client       = client
         @main_alias   = index_base_name
         @update_alias = "#{index_base_name}_update"
         @document_type = document_type
+
+        # included for compatibility with v7
+        @use_new_timestamp_format = use_new_timestamp_format
+        @include_type_name_on_create = include_type_name_on_create
       end
 
       def ref_index_name
@@ -186,11 +190,12 @@ module Elasticity
 
       def create(index_def)
         if missing?
-          index_name = create_index(index_def)
+          name = create_index(index_def)
+          @created_index_name = name
           @client.index_update_aliases(body: {
             actions: [
-              { add: { index: index_name, alias: @main_alias } },
-              { add: { index: index_name, alias: @update_alias } },
+              { add: { index: name, alias: @main_alias } },
+              { add: { index: name, alias: @update_alias } },
             ]
           })
         else
@@ -257,6 +262,10 @@ module Elasticity
         @client.index_flush(index: @update_alias)
       end
 
+      def refresh
+        @client.index_refresh(index: @update_alias)
+      end
+
       def settings
         @client.index_get_settings(index: @main_alias, type: @document_type).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
@@ -279,11 +288,20 @@ module Elasticity
 
       private
 
+      def build_index_name
+        ts = String.new
+        if @use_new_timestamp_format == true
+          ts = Time.now.utc.strftime("%Y%m%d%H%M%S%6N")
+        else
+          ts = Time.now.utc.strftime("%Y-%m-%d_%H:%M:%S.%6N")
+        end
+        "#{@main_alias}-#{ts}"
+      end
+
       def create_index(index_def)
-        ts = Time.now.utc.strftime("%Y-%m-%d_%H:%M:%S.%6N")
-        index_name = "#{@main_alias}-#{ts}"
-        @client.index_create(index: index_name, body: index_def)
-        index_name
+        name = build_index_name
+        @client.index_create(index: name, body: index_def, include_type_name: @include_type_name_on_create)
+        name
       end
 
       def retryable_error?(e)

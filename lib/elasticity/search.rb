@@ -87,7 +87,7 @@ module Elasticity
     class LazySearch
       include Enumerable
 
-      delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page,
+      delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page, :to_ary,
         :total_pages, :current_page, :next_page, :previous_page, :aggregations, to: :search_results
 
       attr_accessor :search_definition
@@ -147,7 +147,12 @@ module Elasticity
       end
 
       def total
-        search["hits"]["total"]
+        res = search["hits"]["total"]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
 
       def each_batch
@@ -237,7 +242,12 @@ module Elasticity
       end
 
       def total
-        metadata[:total]
+        res = metadata[:total]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
 
       def suggestions
@@ -311,7 +321,12 @@ module Elasticity
       end
 
       def total
-        @response["hits"]["total"]
+        res = @response["hits"]["total"]
+        if res.is_a?(::Hash)
+          res["value"]
+        else
+          res
+        end
       end
       alias_method :total_entries, :total
 

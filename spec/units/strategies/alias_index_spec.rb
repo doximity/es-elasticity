@@ -1,4 +1,4 @@
-RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
+RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
   subject do
     described_class.new(Elasticity.config.client, "test_index_name", "document")
   end
@@ -35,6 +35,31 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
     expect(subject.settings).to be nil
   end
 
+  context "naming a new index" do
+    it "will use the oirignal timestamp format by default" do
+      time = Time.new(2019, 10, 11, 12, 13, 14, "+00:00")
+      Timecop.freeze(time) do
+        subject.create(index_def)
+        subject.index_document("document", 1, name: "test")
+
+        doc = subject.get_document("document", 1)
+        expect(doc["_index"]).to eq("test_index_name-2019-10-11_12:13:14.000000")
+      end
+    end
+
+    it "will use the new timestamp format if direcrted" do
+      time = Time.new(2019, 10, 11, 12, 13, 14, "+00:00")
+      Timecop.freeze(time) do
+        subject = described_class.new(Elasticity.config.client, "test_index_name", "document", true)
+        subject.create(index_def)
+        subject.index_document("document", 1, name: "test")
+
+        doc = subject.get_document("document", 1)
+        expect(doc["_index"]).to eq("test_index_name-20191011121314000000")
+      end
+    end
+  end
+
   context "with existing index" do
     before do
       subject.create_if_undefined(index_def)
@@ -66,7 +91,6 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       subject.flush
 
       expected = {
-        "_index"=>"test_index_name",
         "_type"=>"document",
         "_id"=>"2",
         "_version"=>1,
