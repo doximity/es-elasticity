@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "0.13.1.pre"
+  VERSION = "0.13.1"
 end
