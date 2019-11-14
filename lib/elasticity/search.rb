@@ -87,7 +87,7 @@ module Elasticity
     class LazySearch
       include Enumerable
 
-      delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page, :to_ary,
+      delegate :each, :size, :length, :[], :+, :-, :&, :|, :total, :per_page,
         :total_pages, :current_page, :next_page, :previous_page, :aggregations, to: :search_results
 
       attr_accessor :search_definition

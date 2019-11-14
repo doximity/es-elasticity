@@ -1,3 +1,5 @@
+v0.13.1
+  - remove superfluous 'to_ary' delegation that was causing issues downstream
 v0.13.0
   - changes needed for use with Elasticsearch v7
   - handle the v7 "total" as an object rather than a scalar
