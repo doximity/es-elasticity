@@ -4,10 +4,18 @@ orbs:
   gem: doximity/gem-publisher@0
 
 executors:
-  ruby_2_6:
+  ruby-latest:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.6
+      - image: circleci/ruby:latest
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
+  ruby_2_5:
+    resource_class: small
+    docker:
+      - image: circleci/ruby:2.5
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
@@ -33,30 +41,27 @@ version_tags_only: &version_tags_only
       only: /^v.*/
 
 jobs:
-  build_2_6:
-    executor: ruby_2_6
+  build_2_5:
+    executor: ruby_2_5
     steps:
       - checkout
+      - run:
+          name: Install Bundler specific version
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - restore_cache:
           keys:
-            - gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_6-v2-
+            - gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_5-v2-
       - run:
           name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+          key: gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - ./vendor/bundle
       - run:
           name: Run Tests
           command: bundle exec rspec
-      - run:
-          name: Build documentation
-          command: bundle exec rake ci:doc
-      - store_artifacts:
-          name: Saves documentation
-          path: doc
       - persist_to_workspace:
           root: .
           paths:
@@ -65,23 +70,25 @@ workflows:
   version: 2
   trunk:
     jobs:
-      - build_2_6:
+      - build_2_5:
           <<: *master_only
       - gem/build:
           <<: *master_only
+          executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_6
+            - build_2_5
 
   pull-requests:
     jobs:
-      - build_2_6:
+      - build_2_5:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
+          executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_6
+            - build_2_5
       - pre-release-approval:
           <<: *pr_only
           type: approval
@@ -98,13 +105,14 @@ workflows:
 
   final-release:
     jobs:
-      - build_2_6:
+      - build_2_5:
           <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
+          executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_6
+            - build_2_5
       - gem/publish:
           <<: *version_tags_only
           name: gem-publish

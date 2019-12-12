@@ -8,7 +8,7 @@ PATH
       elasticsearch (>= 1.0)
 
 GEM
-  remote: https://rubygems.org/
+  remote: https://artifacts.dox.support/repository/gems/
   specs:
     activemodel (5.2.4)
       activesupport (= 5.2.4)
@@ -78,7 +78,6 @@ DEPENDENCIES
   bundler (~> 1.7)
   byebug
   codeclimate-test-reporter
-  elasticsearch (= 7.2.0)
   es-elasticity!
   oj
   pry
