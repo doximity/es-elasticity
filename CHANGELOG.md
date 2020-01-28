@@ -1,10 +1,9 @@
 Changelog
 =========
-## 0.13.1
+## 0.13.2.pre
   * Release on Nexus using gem-publisher CircleCI Orb
-  * Build doc and make it available on CircleCI's build artifacts
   * Packing gems
-  * preserve existing version because no code changes are involved
+  * bump the version for testing the Nexus repo
 v0.13.1
   - remove superfluous 'to_ary' delegation that was causing issues downstream
 v0.13.0
