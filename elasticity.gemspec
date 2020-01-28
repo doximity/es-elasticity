@@ -14,6 +14,9 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
+    spec.files = `git ls-files -z`.split("\x0").reject do |f|
+      f.match(%r{^(bin|test|spec|vendor|tmp|coverage)/})
+    end
   # spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.executables   = []
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
@@ -29,6 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "codeclimate-test-reporter"
   spec.add_development_dependency "redis"
   spec.add_development_dependency "timecop"
+  spec.add_development_dependency "rspec_junit_formatter"
 
   spec.add_dependency "activesupport", ">= 4.0.0", "< 6"
   spec.add_dependency "activemodel",   ">= 4.0.0", "< 6"
