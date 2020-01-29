@@ -1,6 +1,6 @@
 Changelog
 =========
-## 0.13.2.pre
+## 0.13.2
   * Release on Nexus using gem-publisher CircleCI Orb
   * Packing gems
   * bump the version for testing the Nexus repo
