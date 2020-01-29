@@ -443,6 +443,20 @@ The default persistence strategy changed from SingleIndex to AliasIndex in versi
 5. Create a new Pull Request
 6. Sign the CLA if you haven't yet. See CONTRIBUTING.md
 
+## Gem documentation
+
+You can find the documentation by going to CircleCI, looking for the `build` job, going to Artifacts and clicking on `index.html`. A visual guide on this can be found in our wiki at [Gems Development: Where to find documentation for our gems](https://wiki.doximity.com/articles/gems-development-where-to-find-documentation-for-our-gems).
+
+## Gem development
+
+After checking out the repo, run `bundle install` to install dependencies. Then, run `rake spec` to run the tests.
+You can also run `bundle console` for an interactive prompt that will allow you to experiment.
+
+This repository uses a gem publishing mechanism on the CI configuration, meaning most work related with cutting a new
+version is done automatically.
+
+To release a new version, follow the [wiki instructions](https://wiki.doximity.com/articles/gems-development-releasing-new-versions).
+
 ## License
 
 MPN is licensed under an Apache 2 license. Contributors are required to sign an contributor license agreement. See LICENSE.txt and CONTRIBUTING.md for more information.

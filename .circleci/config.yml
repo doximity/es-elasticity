@@ -1,82 +1,123 @@
-version: 2
+version: 2.1
 
-workflows:
-  version: 2
-  main:
-    jobs:
-      - build_2_4
-      - build_2_5
-      - build_2_6
-jobs:
-  build_2_4:
+orbs:
+  gem: doximity/gem-publisher@0
+
+executors:
+  ruby-latest:
     resource_class: small
     docker:
-      - image: ruby:2.4
+      - image: circleci/ruby:latest
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
+  ruby_2_5:
+    resource_class: small
+    docker:
+      - image: circleci/ruby:2.5
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
         environment:
           - xpack.security.enabled=false
+
+# yaml anchor filters
+master_only: &master_only
+  filters:
+    branches:
+      only: master
+    tags:
+      ignore: /.*/
+pr_only: &pr_only
+  filters:
+    branches:
+      ignore: master
+    tags:
+      ignore: /.*/
+version_tags_only: &version_tags_only
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^v.*/
+
+jobs:
+  build_2_5:
+    executor: ruby_2_5
     steps:
-      - restore_cache:
-          keys:
-            - gem-cache-2_4-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_4-v2-
       - checkout
       - run:
-          name: Install Ruby Dependencies
-          command: bundle install
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - save_cache:
-          key: gem-cache-2_4-v2-{{ checksum "Gemfile.lock" }}
-          paths:
-            - ./vendor/bundle
-            - ./vendor/cache
-  build_2_5:
-    resource_class: small
-    docker:
-      - image: ruby:2.5
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - xpack.security.enabled=false
-    steps:
+          name: Install Bundler specific version
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - restore_cache:
           keys:
             - gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
             - gem-cache-2_5-v2-
-      - checkout
       - run:
           name: Install Ruby Dependencies
-          command: bundle install
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
+          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
           key: gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - ./vendor/bundle
-            - ./vendor/cache
-  build_2_6:
-    resource_class: small
-    docker:
-      - image: ruby:2.5
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - xpack.security.enabled=false
-    steps:
-      - restore_cache:
-          keys:
-            - gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_6-v2-
-      - checkout
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle install
       - run:
           name: Run Tests
           command: bundle exec rspec
-      - save_cache:
-          key: gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+      - persist_to_workspace:
+          root: .
           paths:
-            - ./vendor/bundle
-            - ./vendor/cache
+            - vendor/bundle
+workflows:
+  version: 2
+  trunk:
+    jobs:
+      - build_2_5:
+          <<: *master_only
+      - gem/build:
+          <<: *master_only
+          executor: ruby-latest
+          name: gem-build
+          requires:
+            - build_2_5
+
+  pull-requests:
+    jobs:
+      - build_2_5:
+          <<: *pr_only
+      - gem/build:
+          <<: *pr_only
+          executor: ruby-latest
+          name: gem-build
+          requires:
+            - build_2_5
+      - pre-release-approval:
+          <<: *pr_only
+          type: approval
+          requires:
+            - gem-build
+      - gem/publish:
+          <<: *pr_only
+          name: gem-publish
+          to_nexus: true
+          pre_release: true
+          requires:
+            - pre-release-approval
+          context: artifact_publishing
+
+  final-release:
+    jobs:
+      - build_2_5:
+          <<: *version_tags_only
+      - gem/build:
+          <<: *version_tags_only
+          executor: ruby-latest
+          name: gem-build
+          requires:
+            - build_2_5
+      - gem/publish:
+          <<: *version_tags_only
+          name: gem-publish
+          to_nexus: true
+          pre_release: false
+          requires:
+            - gem-build
+          context: artifact_publishing
