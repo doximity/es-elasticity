@@ -445,7 +445,7 @@ The default persistence strategy changed from SingleIndex to AliasIndex in versi
 
 ## Gem documentation
 
-You can find the documentation by going to CircleCI, looking for the `build` job, going to Artifacts and clicking on `index.html`. A visual guide on this can be found in our wiki at [Gems Development: Where to find documentation for our gems](https://wiki.doximity.com/articles/gems-development-where-to-find-documentation-for-our-gems).
+You can find the documentation by going to CircleCI, looking for the `build` jobs, going to Artifacts and clicking on `index.html`. A visual guide on this can be found in our wiki at [Gems Development: Where to find documentation for our gems](https://wiki.doximity.com/articles/gems-development-where-to-find-documentation-for-our-gems).
 
 ## Gem development
 
