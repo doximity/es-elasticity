@@ -1,19 +1,41 @@
 version: 2.1
 
 orbs:
-  gem: doximity/gem-publisher@0
+  gem: doximity/gem-publisher@dev:3673d17
 
 executors:
+
+  # used for building the gem
   ruby-latest:
     resource_class: small
     docker:
       - image: circleci/ruby:latest
         environment:
           BUNDLE_VERSION: "~> 1.17"
+
+  # used for testing the gem:
   ruby_2_5:
     resource_class: small
     docker:
       - image: circleci/ruby:2.5
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
+      - image: elastic/elasticsearch:6.8.2
+        environment:
+          - xpack.security.enabled=false
+  ruby_2_6:
+    resource_class: small
+    docker:
+      - image: circleci/ruby:2.6
+        environment:
+          BUNDLE_VERSION: "~> 1.17"
+      - image: elastic/elasticsearch:6.8.2
+        environment:
+          - xpack.security.enabled=false
+  ruby_2_7:
+    resource_class: small
+    docker:
+      - image: circleci/ruby:2.7
         environment:
           BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
@@ -66,6 +88,57 @@ jobs:
           root: .
           paths:
             - vendor/bundle
+  build_2_6:
+    executor: ruby_2_6
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - restore_cache:
+          keys:
+            - gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_6-v2-
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
+  build_2_7:
+    executor: ruby_2_7
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - restore_cache:
+          keys:
+            - gem-cache-2_7-v2-{{ checksum "Gemfile.lock" }}
+            - gem-cache-2_7-v2-
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: gem-cache-2_7-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - ./vendor/bundle
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
+
 workflows:
   version: 2
   trunk:
