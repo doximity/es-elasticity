@@ -10,7 +10,7 @@ require "timecop"
 
 def elastic_search_client
   return @elastic_search_client if defined?(@elastic_search_client)
-  @elastic_search_client = Elasticsearch::Client.new host: "http://0.0.0.0:9200"
+  @elastic_search_client = Elasticsearch::Client.new host: "http://127.0.0.1:9200"
 end
 
 logger = Logger.new("spec/spec.log")
