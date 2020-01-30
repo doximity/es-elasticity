@@ -69,18 +69,18 @@ jobs:
       - checkout
       - run:
           name: Install Bundler specific version
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_5-v2-
+            - v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
-          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: gem-cache-2_5-v2-{{ checksum "Gemfile.lock" }}
+          key: v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
           paths:
-            - ./vendor/bundle
+            - vendor/bundle
       - run:
           name: Run Tests
           command: bundle exec rspec
@@ -94,18 +94,18 @@ jobs:
       - checkout
       - run:
           name: Install Bundler specific version
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_6-v2-
+            - v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
-          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: gem-cache-2_6-v2-{{ checksum "Gemfile.lock" }}
+          key: v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
           paths:
-            - ./vendor/bundle
+            - vendor/bundle
       - run:
           name: Run Tests
           command: bundle exec rspec
@@ -119,18 +119,18 @@ jobs:
       - checkout
       - run:
           name: Install Bundler specific version
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - gem-cache-2_7-v2-{{ checksum "Gemfile.lock" }}
-            - gem-cache-2_7-v2-
+            - v1-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
-          command: bundle install --path=vendor/bundle --jobs=4 --retry=3
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: gem-cache-2_7-v2-{{ checksum "Gemfile.lock" }}
+          key: v1-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
           paths:
-            - ./vendor/bundle
+            - vendor/bundle
       - run:
           name: Run Tests
           command: bundle exec rspec
