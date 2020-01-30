@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    es-elasticity (0.13.2)
+    es-elasticity (0.13.3.pre1)
       activemodel (>= 4.0.0, < 6)
       activerecord (>= 4.0.0, < 6)
       activesupport (>= 4.0.0, < 6)

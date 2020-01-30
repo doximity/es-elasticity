@@ -97,7 +97,7 @@ workflows:
       - gem/publish:
           <<: *pr_only
           name: gem-publish
-          to_nexus: true
+          to_rubygems: true
           pre_release: true
           requires:
             - pre-release-approval
@@ -116,7 +116,7 @@ workflows:
       - gem/publish:
           <<: *version_tags_only
           name: gem-publish
-          to_nexus: true
+          to_rubygems: true
           pre_release: false
           requires:
             - gem-build
