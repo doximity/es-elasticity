@@ -10,32 +10,31 @@ Gem::Specification.new do |spec|
   spec.email         = ["rodrigo@doximity.com"]
   spec.summary       = %q{ActiveModel-based library for working with Elasticsearch}
   spec.description   = %q{Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/doximity/es-elasticity"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
     spec.files = `git ls-files -z`.split("\x0").reject do |f|
       f.match(%r{^(bin|test|spec|vendor|tmp|coverage)/})
     end
-  # spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.executables   = []
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.7"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec", "~> 3.1.0"
-  spec.add_development_dependency "simplecov", "~> 0.7.1"
-  spec.add_development_dependency "oj"
-  spec.add_development_dependency "pry"
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "codeclimate-test-reporter"
+  spec.add_development_dependency "oj"
+  spec.add_development_dependency "pry"
+  spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "redis"
-  spec.add_development_dependency "timecop"
+  spec.add_development_dependency "rspec", "~> 3.1.0"
   spec.add_development_dependency "rspec_junit_formatter"
+  spec.add_development_dependency "simplecov", "~> 0.7.1"
+  spec.add_development_dependency "timecop"
 
-  spec.add_dependency "activesupport", ">= 4.0.0", "< 6"
   spec.add_dependency "activemodel",   ">= 4.0.0", "< 6"
   spec.add_dependency "activerecord",   ">= 4.0.0", "< 6"
+  spec.add_dependency "activesupport", ">= 4.0.0", "< 6"
   spec.add_dependency "elasticsearch", ">= 1.0"
 end
