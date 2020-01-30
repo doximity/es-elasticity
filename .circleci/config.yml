@@ -162,7 +162,7 @@ workflows:
           <<: *master_only
       - build_2_6:
           <<: *master_only
-      - build_2_5:
+      - build_2_7:
           <<: *master_only
       - gem/build:
           <<: *master_only
