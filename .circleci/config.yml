@@ -24,7 +24,6 @@ executors:
         environment:
           - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
           - discovery.type=single-node
-          - http.port=9350
           - xpack.security.enabled=false
 
 # yaml anchor filters
@@ -66,6 +65,9 @@ jobs:
           key: v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
+      - run:
+          name: Wait for ElasticSearch
+          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
       - run:
           name: Run Tests
           command: bundle exec rspec
