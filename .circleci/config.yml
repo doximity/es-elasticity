@@ -77,34 +77,24 @@ workflows:
     jobs:
       - build_2_5:
           <<: *master_only
-      - build_2_6:
-          <<: *master_only
-      - build_2_7:
-          <<: *master_only
       - gem/build:
           <<: *master_only
           executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
-            - build_2_6
             - build_2_7
 
   pull-requests:
     jobs:
       - build_2_5:
           <<: *pr_only
-      - build_2_6:
-          <<: *pr_only
-      - build_2_7:
-          <<: *pr_only
       - gem/build:
           <<: *pr_only
           executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
-            - build_2_6
             - build_2_7
       - pre-release-approval:
           <<: *pr_only
@@ -124,18 +114,12 @@ workflows:
     jobs:
       - build_2_5:
           <<: *version_tags_only
-      - build_2_6:
-          <<: *version_tags_only
-      - build_2_7:
-          <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
           executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
-            - build_2_6
-            - build_2_7
       - gem/publish:
           <<: *version_tags_only
           name: gem-publish
