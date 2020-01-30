@@ -83,7 +83,6 @@ workflows:
           name: gem-build
           requires:
             - build_2_5
-            - build_2_7
 
   pull-requests:
     jobs:
@@ -95,7 +94,6 @@ workflows:
           name: gem-build
           requires:
             - build_2_5
-            - build_2_7
       - pre-release-approval:
           <<: *pr_only
           type: approval
