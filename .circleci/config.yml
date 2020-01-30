@@ -22,6 +22,9 @@ executors:
           BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
         environment:
+          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - discovery.type=single-node
+          - http.port=9350
           - xpack.security.enabled=false
 
 # yaml anchor filters
