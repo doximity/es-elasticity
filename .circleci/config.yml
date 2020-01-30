@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  gem: doximity/gem-publisher@dev:3673d17
+  gem: doximity/gem-publisher@0
 
 executors:
 
