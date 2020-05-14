@@ -76,6 +76,25 @@ RSpec.describe "Search", elasticsearch: true do
       end
     end
 
+    describe "matched_queries" do
+      it "returns a list of named queries that were matched on the result" do
+        query = {
+          query: {
+            match: {
+              description: {
+                query: "old",
+                _name: "description_query"
+              }
+            }
+          }
+        }
+        results = CatDoc.search(query).search_results
+        expect(results.size).to eq(1)
+        result = results.first
+        expect(result.matched_queries).to eq(["description_query"])
+      end
+    end
+
     describe "highlight" do
       it "is nil when the highlight does not return" do
         results =  CatDoc.search({}).search_results
