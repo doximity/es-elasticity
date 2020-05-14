@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.13.4.dblackmon.0] - 2020-05-30
+### Changed
+- expose 'matched_queries' property
+
 ## [0.13.3] - 2020-01-30
 ### Changed
 - Release on RubyGems using gem-publisher CircleCI Orb
