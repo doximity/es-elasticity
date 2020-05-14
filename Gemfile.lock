@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    es-elasticity (0.13.4.dblackmon.0)
+    es-elasticity (0.13.4.dblackmon.1)
       activemodel (>= 4.0.0, < 6)
       activerecord (>= 4.0.0, < 6)
       activesupport (>= 4.0.0, < 6)
