@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.13.4] - 2020-05-20
+### Changed
+- Compatibility with Rails 6
+
 ## [0.13.3] - 2020-01-30
 ### Changed
 - Release on RubyGems using gem-publisher CircleCI Orb
