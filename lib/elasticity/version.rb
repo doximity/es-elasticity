@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "0.13.4.zpesic"
+  VERSION = "0.13.4"
 end
