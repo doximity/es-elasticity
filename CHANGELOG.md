@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 
-## [0.13.5.dblackmon.1] - 2020-05-21
+## [0.13.5] - 2020-05-21
 ### Changed
 - expose 'matched_queries' property
 
