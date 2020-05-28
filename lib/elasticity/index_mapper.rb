@@ -150,6 +150,7 @@ module Elasticity
       attrs.merge!(_score: hit["_score"])
       attrs.merge!(sort: hit["sort"])
       attrs.merge!(hit["_source"]) if hit["_source"]
+      attrs.merge!(matched_queries: hit["matched_queries"]) if hit["matched_queries"]
 
       highlighted = nil
 
