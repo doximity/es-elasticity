@@ -6,10 +6,10 @@ orbs:
 executors:
 
   # used for building the gem
-  ruby-latest:
+  ruby-2-6:
     resource_class: small
     docker:
-      - image: circleci/ruby:latest
+      - image: cimg/ruby:2.6
         environment:
           BUNDLE_VERSION: "~> 1.17"
 
@@ -166,7 +166,7 @@ workflows:
           <<: *master_only
       - gem/build:
           <<: *master_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build_2_5
@@ -181,7 +181,7 @@ workflows:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build_2_5
@@ -209,7 +209,7 @@ workflows:
           <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build_2_5
