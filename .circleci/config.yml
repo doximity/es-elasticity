@@ -6,10 +6,10 @@ orbs:
 executors:
 
   # used for building the gem
-  ruby-2-6:
+  ruby-latest:
     resource_class: small
     docker:
-      - image: cimg/ruby:2.6
+      - image: cimg/ruby:2.7
         environment:
           BUNDLE_VERSION: "~> 1.17"
 
@@ -17,7 +17,7 @@ executors:
   ruby_2_5:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.5
+      - image: cimg/ruby:2.5
         environment:
           BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
@@ -28,7 +28,7 @@ executors:
   ruby_2_6:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.6
+      - image: cimg/ruby:2.6
         environment:
           BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
@@ -39,7 +39,7 @@ executors:
   ruby_2_7:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.7
+      - image: cimg/ruby:2.7
         environment:
           BUNDLE_VERSION: "~> 1.17"
       - image: elastic/elasticsearch:6.8.2
@@ -166,7 +166,7 @@ workflows:
           <<: *master_only
       - gem/build:
           <<: *master_only
-          executor: ruby-2-6
+          executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
@@ -181,7 +181,7 @@ workflows:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
-          executor: ruby-2-6
+          executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
@@ -209,7 +209,7 @@ workflows:
           <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
-          executor: ruby-2-6
+          executor: ruby-latest
           name: gem-build
           requires:
             - build_2_5
