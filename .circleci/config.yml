@@ -127,7 +127,7 @@ workflows:
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_2_7
 
   pull-requests:
     jobs:
@@ -140,7 +140,7 @@ workflows:
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_2_7
       - pre-release-approval:
           <<: *pr_only
           type: approval
@@ -166,7 +166,7 @@ workflows:
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_2_7
       - gem/publish:
           <<: *version_tags_only
           name: gem-publish
