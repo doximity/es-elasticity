@@ -4,47 +4,35 @@ orbs:
   gem: doximity/gem-publisher@0
 
 executors:
-
   # used for building the gem
   ruby-latest:
     resource_class: small
     docker:
-      - image: cimg/ruby:2.7
+      - image: cimg/ruby:3.1
         environment:
-          BUNDLE_VERSION: "~> 1.17"
+          BUNDLE_VERSION: '~> 1.17'
 
   # used for testing the gem:
-  ruby_2_5:
-    resource_class: small
-    docker:
-      - image: cimg/ruby:2.5
-        environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-          - discovery.type=single-node
-          - xpack.security.enabled=false
-  ruby_2_6:
-    resource_class: small
-    docker:
-      - image: cimg/ruby:2.6
-        environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-          - discovery.type=single-node
-          - xpack.security.enabled=false
   ruby_2_7:
     resource_class: small
     docker:
       - image: cimg/ruby:2.7
         environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
+          BUNDLE_VERSION: '~> 1.17'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
         environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+          - discovery.type=single-node
+          - xpack.security.enabled=false
+  ruby_3_0:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:2.7
+        environment:
+          BUNDLE_VERSION: '~> 1.17'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+        environment:
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
           - discovery.type=single-node
           - xpack.security.enabled=false
 
