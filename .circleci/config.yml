@@ -57,62 +57,6 @@ version_tags_only: &version_tags_only
       only: /^v.*/
 
 jobs:
-  build_2_5:
-    executor: ruby_2_5
-    steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
-  build_2_6:
-    executor: ruby_2_6
-    steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
   build_2_7:
     executor: ruby_2_7
     steps:
@@ -141,17 +85,43 @@ jobs:
           root: .
           paths:
             - vendor/bundle
+  build_3_0:
+    executor: ruby_3_0
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
+      - restore_cache:
+          keys:
+            - v1-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: v1-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run:
+          name: Wait for ElasticSearch
+          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
 
 workflows:
   version: 2
   trunk:
     jobs:
-      - build_2_5:
-          <<: *master_only
-      - build_2_6:
-          <<: *master_only
       - build_2_7:
           <<: *master_only
+      - build_3_0:
+          <<: *pr_only
       - gem/build:
           <<: *master_only
           executor: ruby-latest
@@ -161,11 +131,9 @@ workflows:
 
   pull-requests:
     jobs:
-      - build_2_5:
-          <<: *pr_only
-      - build_2_6:
-          <<: *pr_only
       - build_2_7:
+          <<: *pr_only
+      - build_3_0:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
@@ -189,12 +157,10 @@ workflows:
 
   final-release:
     jobs:
-      - build_2_5:
-          <<: *version_tags_only
-      - build_2_6:
-          <<: *version_tags_only
       - build_2_7:
           <<: *version_tags_only
+      - build_3_0:
+          <<: *pr_only
       - gem/build:
           <<: *version_tags_only
           executor: ruby-latest
