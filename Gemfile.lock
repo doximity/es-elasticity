@@ -96,7 +96,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 2.1.4)
+  bundler (~> 2.3.4)
   byebug
   codeclimate-test-reporter
   es-elasticity!
@@ -110,4 +110,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   2.1.4
+   2.3.4
