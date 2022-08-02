@@ -52,7 +52,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       john.update
       mari.update
 
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search({})
       expect(results.total).to eq 2
@@ -62,7 +62,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       john.update
       mari.delete
 
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search({})
       expect(results.total).to eq 1
@@ -120,7 +120,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       john.update
       mari.update
 
-      subject.flush_index
+      subject.refresh_index
       results = subject.search({})
       expect(results.total).to eq 2
 
@@ -129,7 +129,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       john.update
       mari.delete
 
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search({})
       expect(results.total).to eq 1
@@ -157,7 +157,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       t.join
 
-      subject.flush_index
+      subject.refresh_index
       results = subject.search({})
       expect(results.total).to eq(2010)
     end
@@ -169,7 +169,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       john.update
       mari.update
 
-      subject.flush_index
+      subject.refresh_index
       results = subject.search({})
       expect(results.first.birthdate).to be
 
@@ -200,7 +200,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       end
 
       subject.remap!
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search({})
       expect(results.first.respond_to?(:birthdate)).to be false
@@ -227,7 +227,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       t.raise("Test Interrupt")
       expect { t.join }.to raise_error("Test Interrupt")
 
-      subject.flush_index
+      subject.refresh_index
       results = subject.search({})
       expect(results.total).to eq(2010)
     end
@@ -273,7 +273,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         build_some_docs(subject)
 
         subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
-        subject.flush_index
+        subject.refresh_index
         results = subject.search({})
         expect(results.total).to eq(20)
         remapped_index_name = subject.config.client.index_get_alias(index: "#{subject.ref_index_name}-*", name: subject.ref_index_name).keys.first
@@ -320,7 +320,7 @@ RSpec.describe "Persistence", elasticsearch: true do
       end
 
       subject.bulk_index(docs)
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 2000
@@ -330,14 +330,14 @@ RSpec.describe "Persistence", elasticsearch: true do
       end
 
       subject.bulk_update(docs)
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 2000
       expect(subject.search({ query: { match: { name: "Updated" } } } ).count).to eq(2000)
 
       subject.bulk_delete(results.documents.map(&:_id))
-      subject.flush_index
+      subject.refresh_index
 
       results = subject.search(from: 0, size: 3000)
       expect(results.total).to eq 0
