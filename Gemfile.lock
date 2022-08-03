@@ -88,7 +88,7 @@ GEM
       multi_json (~> 1.0)
       simplecov-html (~> 0.7.1)
     simplecov-html (0.7.1)
-    timecop (0.9.1)
+    timecop (0.9.5)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
 
