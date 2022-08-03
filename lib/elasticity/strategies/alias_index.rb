@@ -62,7 +62,7 @@ module Elasticity
             ]
           })
 
-          @client.index_flush(index: original_index)
+          @client.index_refresh(index: original_index)
           cursor = @client.search index: original_index, search_type: ScrollableSearch.search_type, scroll: '10m', size: 100
           loop do
             hits   = cursor['hits']['hits']
@@ -132,7 +132,7 @@ module Elasticity
             ]
           })
 
-          @client.index_flush(index: new_index)
+          @client.index_refresh(index: new_index)
           cursor = @client.search index: new_index, search_type: ScrollableSearch.search_type, scroll: '1m', size: 100
           loop do
             hits   = cursor['hits']['hits']
@@ -148,7 +148,7 @@ module Elasticity
             cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
           end
 
-          @client.index_flush(index: original_index)
+          @client.index_refresh(index: original_index)
           @client.index_update_aliases(body: {
             actions: [
               { remove: { index: new_index, alias: @main_alias } },
@@ -210,7 +210,7 @@ module Elasticity
       end
 
       def delete
-        @client.index_delete_alias(index: "#{@main_alias}-*", name: "_all")
+        # @client.index_delete_alias(index: "#{@main_alias}-*", name: "_all")
         main_indexes.each do |index|
           @client.index_delete(index: index)
         end
