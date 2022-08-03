@@ -210,6 +210,7 @@ module Elasticity
       end
 
       def delete
+        @client.index_delete_alias(index: "#{@main_alias}-*", name: "_all")
         main_indexes.each do |index|
           @client.index_delete(index: index)
         end
