@@ -99,7 +99,7 @@ module Elasticity
       end
 
       def mapping
-        @client.index_get_mapping(index: @index_name, type: @document_type).values.first
+        @client.index_get_mapping(index: @index_name, type: @document_type, include_type_name: @include_type_name_on_create).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
