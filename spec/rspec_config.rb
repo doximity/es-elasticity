@@ -1,8 +1,5 @@
 require "simplecov"
 require "oj"
-
-SimpleCov.start
-
 require "elasticity"
 require "pry"
 require "byebug"
