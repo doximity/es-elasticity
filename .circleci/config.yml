@@ -121,7 +121,7 @@ workflows:
       - build_2_7:
           <<: *master_only
       - build_3_0:
-          <<: *pr_only
+          <<: *master_only
       - gem/build:
           <<: *master_only
           executor: ruby-latest
@@ -160,7 +160,7 @@ workflows:
       - build_2_7:
           <<: *version_tags_only
       - build_3_0:
-          <<: *pr_only
+          <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
           executor: ruby-latest
