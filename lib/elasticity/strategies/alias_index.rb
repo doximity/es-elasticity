@@ -63,7 +63,7 @@ module Elasticity
           })
 
           @client.index_refresh(index: original_index)
-          cursor = @client.search index: original_index, search_type: ScrollableSearch.search_type, scroll: '10m', size: 100
+          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: '10m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?
@@ -133,7 +133,7 @@ module Elasticity
           })
 
           @client.index_refresh(index: new_index)
-          cursor = @client.search index: new_index, search_type: ScrollableSearch.search_type, scroll: '1m', size: 100
+          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: '1m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?
