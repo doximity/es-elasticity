@@ -24,7 +24,7 @@ module Elasticity
       end
 
       def missing?
-        not @client.index_exists(index: @index_name, ignore: 404)
+        not @client.index_exists(index: @index_name)
       end
 
       def create(index_def)
