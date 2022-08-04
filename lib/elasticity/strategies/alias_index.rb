@@ -11,14 +11,16 @@ module Elasticity
 
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_base_name, document_type, use_new_timestamp_format = false, include_type_name_on_create = true)
+      def initialize(client, index_base_name, document_type, use_new_timestamp_format = true, include_type_name_on_create = true)
         @client       = client
         @main_alias   = index_base_name
         @update_alias = "#{index_base_name}_update"
         @document_type = document_type
 
-        # included for compatibility with v7
+        # Deprecated: The use_new_timestamp_format option is no longer used and will be removed in the next version.
         @use_new_timestamp_format = use_new_timestamp_format
+
+        # included for compatibility with v7
         @include_type_name_on_create = include_type_name_on_create
       end
 
@@ -60,8 +62,8 @@ module Elasticity
             ]
           })
 
-          @client.index_flush(index: original_index)
-          cursor = @client.search index: original_index, search_type: ScrollableSearch.search_type, scroll: '10m', size: 100
+          @client.index_refresh(index: original_index)
+          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: '10m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?
@@ -130,8 +132,8 @@ module Elasticity
             ]
           })
 
-          @client.index_flush(index: new_index)
-          cursor = @client.search index: new_index, search_type: ScrollableSearch.search_type, scroll: '1m', size: 100
+          @client.index_refresh(index: new_index)
+          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: '1m', size: 100
           loop do
             hits   = cursor['hits']['hits']
             break if hits.empty?
@@ -146,7 +148,7 @@ module Elasticity
             cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
           end
 
-          @client.index_flush(index: original_index)
+          @client.index_refresh(index: original_index)
           @client.index_update_aliases(body: {
             actions: [
               { remove: { index: new_index, alias: @main_alias } },
@@ -281,7 +283,7 @@ module Elasticity
       end
 
       def mapping
-        @client.index_get_mapping(index: @main_alias, type: @document_type).values.first
+        @client.index_get_mapping(index: @main_alias, type: @document_type, include_type_name: @include_type_name_on_create).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
@@ -289,12 +291,7 @@ module Elasticity
       private
 
       def build_index_name
-        ts = String.new
-        if @use_new_timestamp_format == true
-          ts = Time.now.utc.strftime("%Y%m%d%H%M%S%6N")
-        else
-          ts = Time.now.utc.strftime("%Y-%m-%d_%H:%M:%S.%6N")
-        end
+        ts = Time.now.utc.strftime("%Y%m%d%H%M%S%6N")
         "#{@main_alias}-#{ts}"
       end
 

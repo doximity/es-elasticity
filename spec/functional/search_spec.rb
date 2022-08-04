@@ -48,7 +48,7 @@ RSpec.describe "Search", elasticsearch: true do
       cat.update
       dog.update
 
-      CatDoc.flush_index
+      CatDoc.refresh_index
     end
 
     describe "explain: true" do

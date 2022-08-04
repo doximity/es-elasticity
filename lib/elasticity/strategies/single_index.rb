@@ -3,7 +3,7 @@ module Elasticity
     class SingleIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_name, document_type, use_new_timestamp_format = false, include_type_name_on_create = true)
+      def initialize(client, index_name, document_type, use_new_timestamp_format = true, include_type_name_on_create = true)
         @client        = client
         @index_name    = index_name
         @document_type = document_type
@@ -11,7 +11,7 @@ module Elasticity
         # included for compatibility with v7
         @include_type_name_on_create = include_type_name_on_create
 
-        # not currently used. included for argument compatiblity with AliasStrategy
+        # Deprecated: The use_new_timestamp_format option is no longer used and will be removed in the next version.
         @use_new_timestamp_format = use_new_timestamp_format
       end
 
@@ -99,7 +99,7 @@ module Elasticity
       end
 
       def mapping
-        @client.index_get_mapping(index: @index_name, type: @document_type).values.first
+        @client.index_get_mapping(index: @index_name, type: @document_type, include_type_name: @include_type_name_on_create).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end

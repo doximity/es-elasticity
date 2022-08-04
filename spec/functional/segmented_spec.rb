@@ -47,13 +47,13 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
     expect(id).to be_kind_of(String)
     expect(success).to be true
 
-    seg.flush_index
+    seg.refresh_index
     results = seg.by_name("rodrigo").to_a.first
     expect(results.class).to eq rodrigo.class
     expect(results.name).to eq rodrigo.name
 
     rodrigo.delete
-    seg.flush_index
+    seg.refresh_index
 
     results = seg.by_name("rodrigo").to_a
     expect(results).to be_empty
@@ -72,8 +72,8 @@ RSpec.describe "Segmented indexes", elasticsearch: true do
     _, success = doc_b.update
     expect(success).to be true
 
-    seg_a.flush_index
-    seg_b.flush_index
+    seg_a.refresh_index
+    seg_b.refresh_index
 
     res_a = seg_a.by_name("doc").to_a.first
     expect(res_a.class).to eq doc_a.class
