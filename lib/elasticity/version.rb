@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "0.14.0.jhumphreys.1"
+  VERSION = "0.14.0"
 end
