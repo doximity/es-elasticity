@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class Document < BaseDocument
     IndexMapper.set_delegates(singleton_class, :mapper)

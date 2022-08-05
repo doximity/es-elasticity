@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class Bulk
     def initialize(client)

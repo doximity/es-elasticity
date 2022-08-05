@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 module Elasticity
   class IndexConfig
     class SubclassError < StandardError; end
 
-    SUBCLASSES_WARNING = "Indices created in Elasticsearch 6.0.0 or later may only contain a single mapping type. " +
+    SUBCLASSES_WARNING = "Indices created in Elasticsearch 6.0.0 or later may only contain a single mapping type. "\
       "Therefore, doument-type based inheritance has been disabled by Elasticity"
-    SUBCLASSES_ERROR = "Mapping types have been completely removed in Elasticsearch 7.0.0. " +
+    SUBCLASSES_ERROR = "Mapping types have been completely removed in Elasticsearch 7.0.0. "\
       "Therefore, doument-type based inheritance has been disabled by Elasticity"
-    VERSION_FOR_SUBCLASS_WARNING = "6.0.0".freeze
-    VERSION_FOR_SUBCLASS_ERROR = "7.0.0".freeze
+    VERSION_FOR_SUBCLASS_WARNING = "6.0.0"
+    VERSION_FOR_SUBCLASS_ERROR = "7.0.0"
     ATTRS = [
       :index_base_name, :document_type, :mapping, :strategy, :subclasses,
       :settings, :use_new_timestamp_format, :include_type_name_on_create

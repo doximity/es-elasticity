@@ -1,3 +1,6 @@
+
+# frozen_string_literal: true
+
 module Elasticity
   class MultiSearchResponseParser
     class UnknownError < StandardError; end

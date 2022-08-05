@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class IndexMapper
     def self.set_delegates(obj, to)
@@ -100,7 +102,7 @@ module Elasticity
     # Fetches one specific document from the index by ID.
     def get(id)
       doc = @strategy.get_document(document_type, id)
-      @document_klass.new(doc["_source"].merge(_id: doc['_id'])) if doc.present?
+      @document_klass.new(doc["_source"].merge(_id: doc["_id"])) if doc.present?
     end
 
     # Removes one specific document from the index.
@@ -156,7 +158,7 @@ module Elasticity
 
       if hit["highlight"]
         highlighted_attrs = hit["highlight"].each_with_object({}) do |(name, v), attrs|
-          name = name.gsub(/\..*\z/, '')
+          name = name.gsub(/\..*\z/, "")
 
           attrs[name] ||= v
         end

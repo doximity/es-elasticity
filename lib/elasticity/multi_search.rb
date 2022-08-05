@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class MultiSearch
     def initialize(msearch_args = {})

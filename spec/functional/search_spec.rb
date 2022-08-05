@@ -40,7 +40,7 @@ RSpec.describe "Search", elasticsearch: true do
       CatDoc.recreate_index
       DogDoc.recreate_index
 
-      @elastic_search_client.cluster.health wait_for_status: 'yellow'
+      @elastic_search_client.cluster.health wait_for_status: "yellow"
 
       cat = CatDoc.new(name: "felix the cat", age: 10, description: "I am an old cat")
       dog = DogDoc.new(name: "fido", age: 4, hungry: true, description: "I am a hungry dog")

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "elasticity/search"
 require "elasticity/multi_search"
 

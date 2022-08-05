@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe "Persistence", elasticsearch: true do
   def random_birthdate
     Time.at(0.0 + rand * (Time.now.to_f - 0.0.to_f))
@@ -7,7 +9,7 @@ RSpec.describe "Persistence", elasticsearch: true do
     subject do
       Class.new(Elasticity::Document) do
         def self.name
-          'SomeClass'
+          "SomeClass"
         end
 
         configure do |c|
@@ -33,7 +35,7 @@ RSpec.describe "Persistence", elasticsearch: true do
 
     before do
       subject.recreate_index
-      @elastic_search_client.cluster.health wait_for_status: 'yellow'
+      @elastic_search_client.cluster.health wait_for_status: "yellow"
     end
 
     after do
@@ -46,8 +48,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "successfully index, update, search, count and delete" do
-      john = subject.new(name: "John", birthdate: "1985-10-31", sort: ['john'])
-      mari = subject.new(name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
+      john = subject.new(name: "John", birthdate: "1985-10-31", sort: ["john"])
+      mari = subject.new(name: "Mari", birthdate: "1986-09-24", sort: ["mari"])
 
       john.update
       mari.update
@@ -114,8 +116,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "remaps to a different index transparently" do
-      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
-      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
+      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ["john"])
+      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ["mari"])
 
       john.update
       mari.update
@@ -163,8 +165,8 @@ RSpec.describe "Persistence", elasticsearch: true do
     end
 
     it "does not copy over fields not defined in the mapping" do
-      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ['john'])
-      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ['mari'])
+      john = subject.new(_id: 1, id: 1, name: "John", birthdate: "1985-10-31", sort: ["john"])
+      mari = subject.new(_id: 2, id: 2, name: "Mari", birthdate: "1986-09-24", sort: ["mari"])
 
       john.update
       mari.update
@@ -252,7 +254,11 @@ RSpec.describe "Persistence", elasticsearch: true do
 
     context "recovering from remap errors" do
       let(:recoverable_message) do
-        '[400] {"error":{"root_cause":[{"type":"remote_transport_exception","reason":"[your_cluster][cluster_id][indices:admin/delete]"}],"type":"illegal_argument_exception","reason":"Cannot delete indices that are being snapshotted: [[full_index_name_and_id]]. Try again after snapshot finishes or cancel the currently running snapshot."},"status":400}'
+        '[400] {"error":{"root_cause":[{"type":"remote_transport_exception",'\
+        '"reason":"[your_cluster][cluster_id][indices:admin/delete]"}],'\
+        '"type":"illegal_argument_exception","reason":"Cannot delete indices '\
+        'that are being snapshotted: [[full_index_name_and_id]]. Try again after '\
+        'snapshot finishes or cancel the currently running snapshot."},"status":400}'
       end
       after do
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_call_original

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
   subject do
     described_class.new(Elasticity.config.client, "test_index_name", "document")

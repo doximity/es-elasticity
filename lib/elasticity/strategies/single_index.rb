@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   module Strategies
     class SingleIndex
@@ -92,8 +94,8 @@ module Elasticity
 
       def mappings
         ActiveSupport::Deprecation.warn(
-          'Elasticity::Strategies::SingleIndex#mappings is deprecated, '\
-          'use mapping instead'
+          "Elasticity::Strategies::SingleIndex#mappings is deprecated, "\
+          "use mapping instead"
         )
         mapping
       end

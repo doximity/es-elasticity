@@ -1,4 +1,6 @@
-require 'elasticity/index_config'
+# frozen_string_literal: true
+
+require "elasticity/index_config"
 
 RSpec.describe Elasticity::IndexConfig do
   let(:elasticity_config) { double("config", client: double("client", versions: ["5.3.4"])) }
@@ -6,25 +8,25 @@ RSpec.describe Elasticity::IndexConfig do
 
     let(:defaults) do
       {
-        index_base_name: 'users',
-        document_type: 'user'
+        index_base_name: "users",
+        document_type: "user"
       }
     end
 
-  it 'accepts default configuration options' do
+  it "accepts default configuration options" do
     config = described_class.new(elasticity_config, defaults) {}
-    expect(config.index_base_name).to eql('users')
-    expect(config.document_type).to eql('user')
+    expect(config.index_base_name).to eql("users")
+    expect(config.document_type).to eql("user")
   end
 
-  it 'overrides defaults' do
+  it "overrides defaults" do
     config = described_class.new(elasticity_config, defaults) do |c|
-      c.index_base_name = 'user_documents'
-      c.document_type = 'users'
+      c.index_base_name = "user_documents"
+      c.document_type = "users"
     end
 
-    expect(config.index_base_name).to eql('user_documents')
-    expect(config.document_type).to eql('users')
+    expect(config.index_base_name).to eql("user_documents")
+    expect(config.document_type).to eql("users")
   end
 
   context "subclass warnings and exceptions" do
@@ -93,18 +95,18 @@ RSpec.describe Elasticity::IndexConfig do
     describe "passing the time_stamp option" do
       it "allows passing of a time_stamp_format option" do
         config = described_class.new(elasticity_config, defaults) {}
-        expect(config.index_base_name).to eql('users')
-        expect(config.document_type).to eql('user')
+        expect(config.index_base_name).to eql("users")
+        expect(config.document_type).to eql("user")
         expect(config.use_new_timestamp_format).to be_falsy
 
         config = described_class.new(elasticity_config, defaults) do |c|
-          c.index_base_name = 'user_documents'
-          c.document_type = 'users'
+          c.index_base_name = "user_documents"
+          c.document_type = "users"
           c.use_new_timestamp_format = true
         end
 
-        expect(config.index_base_name).to eql('user_documents')
-        expect(config.document_type).to eql('users')
+        expect(config.index_base_name).to eql("user_documents")
+        expect(config.document_type).to eql("users")
         expect(config.use_new_timestamp_format).to be_truthy
       end
     end
@@ -112,18 +114,18 @@ RSpec.describe Elasticity::IndexConfig do
     describe "passing the include_type_name option" do
       it "allows passing of a include_type_name_on_create option" do
         config = described_class.new(elasticity_config, defaults) {}
-        expect(config.index_base_name).to eql('users')
-        expect(config.document_type).to eql('user')
+        expect(config.index_base_name).to eql("users")
+        expect(config.document_type).to eql("user")
         expect(config.include_type_name_on_create).to be_falsy
 
         config = described_class.new(elasticity_config, defaults) do |c|
-          c.index_base_name = 'user_documents'
-          c.document_type = 'users'
+          c.index_base_name = "user_documents"
+          c.document_type = "users"
           c.include_type_name_on_create = true
         end
 
-        expect(config.index_base_name).to eql('user_documents')
-        expect(config.document_type).to eql('users')
+        expect(config.index_base_name).to eql("user_documents")
+        expect(config.document_type).to eql("users")
         expect(config.include_type_name_on_create).to be_truthy
       end
     end

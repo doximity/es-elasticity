@@ -1,5 +1,7 @@
 require "simplecov"
 require "oj"
+# frozen_string_literal: true
+
 require "elasticity"
 require "pry"
 require "byebug"

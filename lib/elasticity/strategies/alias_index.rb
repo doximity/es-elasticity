@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 module Elasticity
   module Strategies
     # This strategy keeps two aliases that might be mapped to the same index or different index, allowing
     # runtime changes by simply atomically updating the aliases. For example, look at the remap method
     # implementation.
     class AliasIndex
-      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted".freeze
+      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted"
       RETRYABLE_ERROR_SNIPPETS = [
         SNAPSHOT_ERROR_SNIPPET
       ].freeze
@@ -63,9 +65,9 @@ module Elasticity
           })
 
           @client.index_refresh(index: original_index)
-          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: '10m', size: 100
+          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: "10m", size: 100
           loop do
-            hits   = cursor['hits']['hits']
+            hits   = cursor["hits"]["hits"]
             break if hits.empty?
 
             # Fetch documents based on the ids that existed when the migration started, to make sure we only migrate
@@ -101,7 +103,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops) unless ops.empty?
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m', body: { scroll_id: cursor["_scroll_id"] })
+            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m", body: { scroll_id: cursor["_scroll_id"] })
           end
 
           # Update aliases to only point to the new index.
@@ -133,9 +135,9 @@ module Elasticity
           })
 
           @client.index_refresh(index: new_index)
-          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: '1m', size: 100
+          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: "1m", size: 100
           loop do
-            hits   = cursor['hits']['hits']
+            hits   = cursor["hits"]["hits"]
             break if hits.empty?
 
             # Move all the documents that exists on the new index back to the old index
@@ -145,7 +147,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops)
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
+            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m")
           end
 
           @client.index_refresh(index: original_index)
@@ -276,8 +278,8 @@ module Elasticity
 
       def mappings
         ActiveSupport::Deprecation.warn(
-          'Elasticity::Strategies::AliasIndex#mappings is deprecated, '\
-          'use mapping instead'
+          "Elasticity::Strategies::AliasIndex#mappings is deprecated, "\
+          "use mapping instead"
         )
         mapping
       end
