@@ -53,7 +53,7 @@ RSpec.describe Elasticity::Document do
     subject { klass.new _id: 1, name: "Foo", items: [{ name: "Item1" }] }
 
     it "stores the document in the strategy" do
-      expect(strategy).to receive(:index_document).with("class_name", 1, { name: "Foo", items: [{ name: "Item1" }] }).and_return("_id" => "1", "created" => true)
+      expect(strategy).to receive(:index_document).with(1, { name: "Foo", items: [{ name: "Item1" }] }).and_return("_id" => "1", "created" => true)
       subject.update
     end
 
