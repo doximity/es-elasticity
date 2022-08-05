@@ -1,7 +1,7 @@
-require "simplecov"
-require "oj"
 # frozen_string_literal: true
 
+require "simplecov"
+require "oj"
 require "elasticity"
 require "pry"
 require "byebug"
@@ -19,6 +19,8 @@ ActiveSupport::LogSubscriber.logger = logger
 Elasticity::LogSubscriber.attach_to(:elasticity)
 
 RSpec.configure do |c|
+  c.filter_run focus: true
+  c.run_all_when_everything_filtered = true
   c.disable_monkey_patching!
 
   c.before(:suite) do

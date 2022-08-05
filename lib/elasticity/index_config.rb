@@ -15,6 +15,7 @@ module Elasticity
       :settings, :use_new_timestamp_format, :include_type_name_on_create
     ].freeze
     VALIDATABLE_ATTRS = [:index_base_name, :document_type, :strategy].freeze
+    DEPRECATED_ATTRS = [:use_new_timestamp_format, :include_type_name_on_create].freeze
 
     attr_accessor(*ATTRS)
 
@@ -25,6 +26,7 @@ module Elasticity
       @elasticity_config = elasticity_config
       yield(self)
       subclasses_warning_or_exception
+      warn_deprecated_config
       validate!
     end
 
@@ -40,9 +42,10 @@ module Elasticity
 
     def definition
       return @definition if defined?(@definition)
+
       @definition = {
         settings: merge_settings,
-        mappings: { @document_type => @mapping.nil? ? {} : @mapping.deep_stringify_keys }
+        mappings: @mapping.nil? ? {} : @mapping.deep_stringify_keys
       }
       subclasses.each do |doc_type, subclass|
         @definition[:mappings][doc_type] = subclass.constantize.mapping
@@ -80,6 +83,15 @@ module Elasticity
 
     def merge_settings
       @elasticity_config.settings.merge(settings || {})
+    end
+
+    def warn_deprecated_config
+      DEPRECATED_ATTRS.each do |attr|
+        ActiveSupport::Deprecation.warn(
+          "#{attr} is deprecated and will be "\
+          "removed in the next major release."
+        ) if public_send(attr).present?
+      end
     end
 
     def subclasses_warning_or_exception

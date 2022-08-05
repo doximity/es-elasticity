@@ -8,7 +8,7 @@ module Elasticity
     end
 
     # Elasticity::Search::Definition is a struct that encapsulates all the data specific to one
-    # ElasticSearch search.
+    # Elasticsearch search.
     class Definition
       attr_accessor :index_name, :document_types, :body
 
@@ -24,20 +24,20 @@ module Elasticity
       end
 
       def to_count_args
-        { index: @index_name, type: @document_types}.tap do |args|
+        { index: @index_name }.tap do |args|
           body = @body.slice(:query)
           args[:body] = body if body.present?
         end
       end
 
       def to_search_args
-        @search_args.merge({ index: @index_name, type: @document_types, body: @body })
+        @search_args.merge({ index: @index_name, body: @body })
       end
 
       def to_msearch_args
         search_body = @search_args.merge(@body)
 
-        { index: @index_name, type: @document_types, search: search_body }
+        { index: @index_name, search: search_body }
       end
     end
 

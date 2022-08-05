@@ -7,16 +7,16 @@ module Elasticity
       @operations = []
     end
 
-    def index(index_name, type, id, attributes)
-      @operations << { index: { _index: index_name, _type: type, _id: id, data: attributes }}
+    def index(index_name, id, attributes)
+      @operations << { index: { _index: index_name, _id: id, data: attributes }}
     end
 
-    def update(index_name, type, id, attributes)
-      @operations << { update: { _index: index_name, _type: type, _id: id, data: attributes }}
+    def update(index_name, id, attributes)
+      @operations << { update: { _index: index_name, _id: id, data: attributes }}
     end
 
-    def delete(index_name, type, id)
-      @operations << { delete: { _index: index_name, _type: type, _id: id }}
+    def delete(index_name, id)
+      @operations << { delete: { _index: index_name, _id: id }}
     end
 
     def execute
@@ -29,16 +29,16 @@ module Elasticity
         @index_name = index_name
       end
 
-      def index(type, id, attributes)
-        super(@index_name, type, id, attributes)
+      def index(id, attributes)
+        super(@index_name, id, attributes)
       end
 
-      def update(type, id, attributes)
-        super(@index_name, type, id, attributes)
+      def update(id, attributes)
+        super(@index_name, id, attributes)
       end
 
-      def delete(type, id)
-        super(@index_name, type, id)
+      def delete(id)
+        super(@index_name, id)
       end
     end
 
@@ -49,17 +49,17 @@ module Elasticity
         @delete_indexes = delete_indexes
       end
 
-      def index(type, id, attributes)
-        super(@update_alias, type, id, attributes)
+      def index(id, attributes)
+        super(@update_alias, id, attributes)
       end
 
-      def update(type, id, attributes)
-        super(@update_alias, type, id, attributes)
+      def update(id, attributes)
+        super(@update_alias, id, attributes)
       end
 
-      def delete(type, id)
+      def delete(id)
         @delete_indexes.each do |index|
-          super(index, type, id)
+          super(index, id)
         end
       end
     end

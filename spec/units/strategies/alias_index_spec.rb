@@ -8,10 +8,8 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
   let :index_def do
     {
       "mappings" => {
-        "document" => {
-          "properties" => {
-            "name" => { "type" => "text" }
-          }
+        "properties" => {
+          "name" => { "type" => "text" }
         }
       }
     }
@@ -42,9 +40,9 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       time = Time.new(2019, 10, 11, 12, 13, 14, "+00:00")
       Timecop.freeze(time) do
         subject.create(index_def)
-        subject.index_document("document", 1, name: "test")
+        subject.index_document(1, name: "test")
 
-        doc = subject.get_document("document", 1)
+        doc = subject.get_document(1)
         expect(doc["_index"]).to eq("test_index_name-20191011121314000000")
       end
     end
@@ -56,24 +54,24 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
     end
 
     it "allows adding, getting and removing documents from the index" do
-      subject.index_document("document", 1, name: "test")
+      subject.index_document(1, name: "test")
 
-      doc = subject.get_document("document", 1)
+      doc = subject.get_document(1)
       expect(doc["_source"]["name"]).to eq("test")
 
-      subject.delete_document("document", 1)
-      expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      subject.delete_document(1)
+      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
     end
 
     it "allows batching index and delete actions" do
       results_a = subject.bulk do |b|
-        b.index "document", 1, name: "foo"
+        b.index(1, name: "foo")
       end
       expect(results_a["errors"]).to be_falsey
 
       results_b = subject.bulk do |b|
-        b.index  "document", 2, name: "bar"
-        b.delete "document", 1
+        b.index(2, name: "bar")
+        b.delete(1)
       end
 
       expect(results_b["errors"]).to be_falsey
@@ -81,25 +79,25 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       subject.flush
 
       expected = {
-        "_type"=>"document",
+        "_type"=>"_doc",
         "_id"=>"2",
         "_version"=>1,
         "found"=>true,
         "_source"=>{"name"=>"bar"}
       }
-      expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
-      expect(subject.get_document("document", 2)).to include(expected)
+      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      expect(subject.get_document(2)).to include(expected)
     end
 
     it "allows deleting by query" do
-      subject.index_document("document", 1, name: "foo")
-      subject.index_document("document", 2, name: "bar")
+      subject.index_document(1, name: "foo")
+      subject.index_document(2, name: "bar")
 
       subject.refresh
-      subject.delete_by_query("document", query: { term: { name: "foo" } })
+      subject.delete_by_query(query: { term: { name: "foo" } })
 
-      expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
-      expect { subject.get_document("document", 2) }.to_not raise_error
+      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      expect { subject.get_document(2) }.to_not raise_error
 
       subject.flush
     end
