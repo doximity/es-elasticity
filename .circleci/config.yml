@@ -24,6 +24,17 @@ executors:
           - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
           - discovery.type=single-node
           - xpack.security.enabled=false
+  ruby_2_7_es_8:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:2.7
+        environment:
+          BUNDLE_VERSION: '~> 2.3.4'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+        environment:
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+          - discovery.type=single-node
+          - xpack.security.enabled=false
   ruby_3_0:
     resource_class: small
     docker:
@@ -71,6 +82,34 @@ version_tags_only: &version_tags_only
 jobs:
   build_2_7:
     executor: ruby_2_7
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
+      - restore_cache:
+          keys:
+            - v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run:
+          name: Wait for ElasticSearch
+          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
+  build_2_7_es_8:
+    executor: ruby_2_7_es_8
     steps:
       - checkout
       - run:
@@ -161,6 +200,8 @@ workflows:
     jobs:
       - build_2_7:
           <<: *master_only
+      - build_2_7_es_8:
+          <<: *master_only
       - build_3_0:
           <<: *master_only
       - build_3_1:
@@ -175,6 +216,8 @@ workflows:
   pull-requests:
     jobs:
       - build_2_7:
+          <<: *pr_only
+      - build_2_7_es_8:
           <<: *pr_only
       - build_3_0:
           <<: *pr_only
@@ -203,6 +246,8 @@ workflows:
   final-release:
     jobs:
       - build_2_7:
+          <<: *version_tags_only
+      - build_2_7_es_8:
           <<: *version_tags_only
       - build_3_0:
           <<: *version_tags_only
