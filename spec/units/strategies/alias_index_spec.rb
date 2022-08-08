@@ -79,7 +79,6 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       subject.flush
 
       expected = {
-        "_type"=>"_doc",
         "_id"=>"2",
         "_version"=>1,
         "found"=>true,
