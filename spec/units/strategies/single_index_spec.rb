@@ -67,7 +67,6 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
 
       expected = {
         "_index"=>"test_index_name",
-        "_type"=>"_doc",
         "_id"=>"2",
         "_version"=>1,
         "found"=>true,
