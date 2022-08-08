@@ -29,9 +29,10 @@ Or install it yourself as:
 ## Usage
 
 ### Version Support
-This gem has [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) as a dependency.  In order to use different versions of elasticsearch you will need to match your version of elasticsearch-ruby to the version of elasticsearch you want to use ([see here](https://github.com/elastic/elasticsearch-ruby#compatibility).  Elasticity should work across all versions of elastisearch-ruby, although they have not all been tested so there are likely edge cases.
 
-Currently tests are run on CirlceCI against elasticsearch 6.8.2 with elasticsearch-ruby 7.2.0.
+This gem has [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) as a dependency. In order to use different versions of elasticsearch you will need to match your version of elasticsearch-ruby to the version of elasticsearch you want to use ([see here](https://github.com/elastic/elasticsearch-ruby#compatibility). Elasticity should work across all versions of elastisearch-ruby, although they have not all been tested so there are likely edge cases.
+
+Currently tests are run on CirlceCI against elasticsearch 7.17.3 with elasticsearch-ruby 7.17.1.
 
 ### Configuration
 
@@ -149,7 +150,6 @@ documents = [
 Search::User.bulk_update(documents)
 ```
 
-
 ### Searching
 
 Class methods have access to the `search` method, which returns a lazy evaluated search. That means that the search will only be performed when the data is necessary, not when the `search` method is called.
@@ -194,7 +194,8 @@ adults = adults.active_records(User)
 #### Search Args
 
 ##### explain: true
-For `search` definitions we support passing  `{ explain: true }` to the search as a second argument in order to surface the reason a search result was returned.
+
+For `search` definitions we support passing `{ explain: true }` to the search as a second argument in order to surface the reason a search result was returned.
 
 ```ruby
 # example in single search
@@ -211,6 +212,7 @@ multi = Elasticity::MultiSearch.new do |m|
   m.add(:c, search_c, documents: ::SearchDoc::C)
 end
 ```
+
 For more information about the `active_records` method, read [ActiveRecord integration](#activerecord-integration).
 
 ### Segmented Documents
@@ -324,15 +326,15 @@ When the mapping needs to change, a hot remapping can be performed by doing the 
 1. Create a new index with the new mapping;
 2. change the update alias to point to the new index, and change main alias to point to both indexes; at this point it will look something like this:
 
-  ```
-  |¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
-  |  MainAlias  |                        |  Old Index  |
-  |_____________|----------|             |_____________|
-                           |
-  |¯¯¯¯¯¯¯¯¯¯¯¯¯|          |-----------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
-  | UpdateAlias |----------------------> |  New Index  |
-  |_____________|                        |_____________|
-  ```
+```
+|¯¯¯¯¯¯¯¯¯¯¯¯¯|----------------------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
+|  MainAlias  |                        |  Old Index  |
+|_____________|----------|             |_____________|
+                         |
+|¯¯¯¯¯¯¯¯¯¯¯¯¯|          |-----------> |¯¯¯¯¯¯¯¯¯¯¯¯¯|
+| UpdateAlias |----------------------> |  New Index  |
+|_____________|                        |_____________|
+```
 
 3. iterate over all documents on the old index, copying them to the new index;
 4. change aliases to point only to the new index;
@@ -344,43 +346,43 @@ This is a simplified version, there are other things that happen to ensure consi
 
 ActiveRecord integration is mainly a set of conventions rather than implementation, with the exception of one method that allows mapping documents back to a relation. Here is the list of conventions:
 
-* have a class method on the document called `from_active_record` that creates a document object from the active record object;
-* have a class method on the Document for rebuilding the index from the records;
-* have an `after_save` and an `after_destroy` callbacks on the ActiveRecord model;
+- have a class method on the document called `from_active_record` that creates a document object from the active record object;
+- have a class method on the Document for rebuilding the index from the records;
+- have an `after_save` and an `after_destroy` callbacks on the ActiveRecord model;
 
 For example:
 
-  ```ruby
-  class User < ActiveRecord::Base
-    after_save    :update_index_document
-    after_destroy :delete_index_document
+```ruby
+class User < ActiveRecord::Base
+  after_save    :update_index_document
+  after_destroy :delete_index_document
 
-    def update_index_document
-      Search::User.from_active_record(self).update
-    end
-
-    def delete_index_document
-      Search::User.delete(self.id)
-    end
+  def update_index_document
+    Search::User.from_active_record(self).update
   end
 
-  class Search::User < Elasticity::Document
-    # ... configuration
+  def delete_index_document
+    Search::User.delete(self.id)
+  end
+end
 
-    def self.from_active_record(ar)
-      new(name: ar.name, birthdate: ar.birthdate)
-    end
+class Search::User < Elasticity::Document
+  # ... configuration
 
-    def self.rebuild_index
-      self.recreate_index
+  def self.from_active_record(ar)
+    new(name: ar.name, birthdate: ar.birthdate)
+  end
 
-      User.find_in_batches do |batch|
-        documents = batch.map { |record| from_active_record(record) }
-        self.bulk_index(documents)
-      end
+  def self.rebuild_index
+    self.recreate_index
+
+    User.find_in_batches do |batch|
+      documents = batch.map { |record| from_active_record(record) }
+      self.bulk_index(documents)
     end
   end
-  ```
+end
+```
 
 This makes the code very clear in intent, easier to see when and how things happen and under the developer control, keeping both parts very decoupled.
 
@@ -417,6 +419,7 @@ Search::User.adults.active_records(User.where(active: true))
 ```
 
 ## Upgrading from 0.7.0 to 0.8.0
+
 The default persistence strategy changed from SingleIndex to AliasIndex in version 0.8.0 Add the following to your Document configuration to maintain the legacy behaviour.
 
 ```ruby
@@ -424,6 +427,7 @@ The default persistence strategy changed from SingleIndex to AliasIndex in versi
 ```
 
 ## Roadmap
+
 - [ ] Define from_active_record interface
 - [ ] Write more detailed documentation section for:
   - [ ] Model definition
