@@ -79,12 +79,12 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+            - v3-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
           command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+          key: v3-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
       - run:
@@ -107,12 +107,12 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v2-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+            - v3-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
           command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: v2-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+          key: v3-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
       - run:
@@ -136,12 +136,12 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v2-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
+            - v3-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
           command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: v2-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
+          key: v3-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
       - run:
