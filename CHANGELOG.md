@@ -8,9 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.0.0] - 2022-08-09
 ### Changed
-- Consitently use quotations
+- Consistently use quotations
 - Update API to remove deprecation warnings for Elasticsearch 7.X.X in preparation for upgrade to 8.
-- Update copyright notice date
 - Freeze string literals
 - Remove `_type` from query/create/update/delete methods
 - Remove `use_new_timestamp_format` config
