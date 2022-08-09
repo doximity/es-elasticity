@@ -5,7 +5,7 @@ PATH
       activemodel (>= 5.2.0, < 7.1)
       activerecord (>= 5.2.0, < 7.1)
       activesupport (>= 5.2.0, < 7.1)
-      elasticsearch (>= 7.17, < 8)
+      elasticsearch (>= 7, < 8)
 
 GEM
   remote: https://artifacts.dox.support/repository/gems/
