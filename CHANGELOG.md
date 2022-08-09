@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [1.0.0.jhumphreys] - 2022-08-08
+## [1.0.0] - 2022-08-09
 ### Changed
 - Consitently use quotations
 - Update API to remove deprecation warnings for Elasticsearch 7.X.X in preparation for upgrade to 8.
@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Remove `_type` from query/create/update/delete methods
 - Remove `use_new_timestamp_format` config
 - Remove `include_type_name_on_create` config
+
+## [0.14.1] - 2022-08-09
+### Changed
+- Don't publish pre-release builds to RubyGems
 
 ## [0.14.0] - 2022-08-04
 ### Changed
