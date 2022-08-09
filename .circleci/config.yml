@@ -4,47 +4,47 @@ orbs:
   gem: doximity/gem-publisher@0
 
 executors:
-
   # used for building the gem
   ruby-latest:
     resource_class: small
     docker:
-      - image: circleci/ruby:latest
+      - image: cimg/ruby:3.1
         environment:
-          BUNDLE_VERSION: "~> 1.17"
+          BUNDLE_VERSION: '~> 2.3.4'
 
   # used for testing the gem:
-  ruby_2_5:
-    resource_class: small
-    docker:
-      - image: circleci/ruby:2.5
-        environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-          - discovery.type=single-node
-          - xpack.security.enabled=false
-  ruby_2_6:
-    resource_class: small
-    docker:
-      - image: circleci/ruby:2.6
-        environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
-        environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-          - discovery.type=single-node
-          - xpack.security.enabled=false
   ruby_2_7:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.7
+      - image: cimg/ruby:2.7
         environment:
-          BUNDLE_VERSION: "~> 1.17"
-      - image: elastic/elasticsearch:6.8.2
+          BUNDLE_VERSION: '~> 2.3.4'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
         environment:
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+          - discovery.type=single-node
+          - xpack.security.enabled=false
+  ruby_3_0:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:3.0
+        environment:
+          BUNDLE_VERSION: '~> 2.3.4'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+        environment:
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+          - discovery.type=single-node
+          - xpack.security.enabled=false
+
+  ruby_3_1:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:3.1
+        environment:
+          BUNDLE_VERSION: '~> 2.3.4'
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+        environment:
+          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
           - discovery.type=single-node
           - xpack.security.enabled=false
 
@@ -69,62 +69,6 @@ version_tags_only: &version_tags_only
       only: /^v.*/
 
 jobs:
-  build_2_5:
-    executor: ruby_2_5
-    steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v1-bundle-ruby_2_5-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
-  build_2_6:
-    executor: ruby_2_6
-    steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v1-bundle-ruby_2_6-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
   build_2_7:
     executor: ruby_2_7
     steps:
@@ -135,12 +79,69 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v1-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+            - v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
       - run:
           name: Install Ruby Dependencies
           command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
       - save_cache:
-          key: v1-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+          key: v2-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run:
+          name: Wait for ElasticSearch
+          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
+  build_3_0:
+    executor: ruby_3_0
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
+      - restore_cache:
+          keys:
+            - v2-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: v2-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run:
+          name: Wait for ElasticSearch
+          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor/bundle
+
+  build_3_1:
+    executor: ruby_3_1
+    steps:
+      - checkout
+      - run:
+          name: Install Bundler specific version
+          command: |
+            gem install bundler --version "${BUNDLE_VERSION}" --force
+      - restore_cache:
+          keys:
+            - v2-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install Ruby Dependencies
+          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+      - save_cache:
+          key: v2-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
       - run:
@@ -158,33 +159,33 @@ workflows:
   version: 2
   trunk:
     jobs:
-      - build_2_5:
-          <<: *master_only
-      - build_2_6:
-          <<: *master_only
       - build_2_7:
+          <<: *master_only
+      - build_3_0:
+          <<: *master_only
+      - build_3_1:
           <<: *master_only
       - gem/build:
           <<: *master_only
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_3_1
 
   pull-requests:
     jobs:
-      - build_2_5:
-          <<: *pr_only
-      - build_2_6:
-          <<: *pr_only
       - build_2_7:
+          <<: *pr_only
+      - build_3_0:
+          <<: *pr_only
+      - build_3_1:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_3_1
       - pre-release-approval:
           <<: *pr_only
           type: approval
@@ -201,18 +202,18 @@ workflows:
 
   final-release:
     jobs:
-      - build_2_5:
-          <<: *version_tags_only
-      - build_2_6:
-          <<: *version_tags_only
       - build_2_7:
+          <<: *version_tags_only
+      - build_3_0:
+          <<: *version_tags_only
+      - build_3_1:
           <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
           executor: ruby-latest
           name: gem-build
           requires:
-            - build_2_5
+            - build_3_1
       - gem/publish:
           <<: *version_tags_only
           name: gem-publish

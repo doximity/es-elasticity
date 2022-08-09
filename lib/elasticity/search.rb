@@ -186,7 +186,7 @@ module Elasticity
       def search
         return @search if defined?(@search)
         args    = @search_definition.to_search_args
-        args    = args.merge(search_type: ScrollableSearch.search_type, size: @size, scroll: @scroll)
+        args    = args.merge(search_type: :query_then_fetch, size: @size, scroll: @scroll)
         @search = @client.search(args)
       end
     end

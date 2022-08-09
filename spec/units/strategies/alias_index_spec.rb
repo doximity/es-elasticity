@@ -36,21 +36,9 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
   end
 
   context "naming a new index" do
-    it "will use the oirignal timestamp format by default" do
+    it "will use the new timestamp format by default" do
       time = Time.new(2019, 10, 11, 12, 13, 14, "+00:00")
       Timecop.freeze(time) do
-        subject.create(index_def)
-        subject.index_document("document", 1, name: "test")
-
-        doc = subject.get_document("document", 1)
-        expect(doc["_index"]).to eq("test_index_name-2019-10-11_12:13:14.000000")
-      end
-    end
-
-    it "will use the new timestamp format if direcrted" do
-      time = Time.new(2019, 10, 11, 12, 13, 14, "+00:00")
-      Timecop.freeze(time) do
-        subject = described_class.new(Elasticity.config.client, "test_index_name", "document", true)
         subject.create(index_def)
         subject.index_document("document", 1, name: "test")
 
@@ -105,7 +93,7 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       subject.index_document("document", 1, name: "foo")
       subject.index_document("document", 2, name: "bar")
 
-      subject.flush
+      subject.refresh
       subject.delete_by_query("document", query: { term: { name: "foo" } })
 
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)

@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "0.13.6.blackmon"
+  VERSION = "0.14.1.blackmon"
 end

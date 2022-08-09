@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.0] - 2022-08-04
+### Changed
+- Use `refresh` instead of `flush` where search is expected to be updated
+- Drop support for Ruby 2.5 and 2.6
+- Add support for Ruby 2.7 and 3.0, build against Ruby 3.1
+- Set `search_type` to `query_then_fetch` as we no longer support Elasticsearch version < 7.0
+- Set `include_type_name` when fetching the mapping. Will be removed in the next version to support ES version 8.
+- Index names automatically use the new timestamp format when creating an index.
 
 ## [0.13.5] - 2020-05-21
 ### Changed

@@ -81,7 +81,7 @@ RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
       subject.index_document("document", 1, name: "foo")
       subject.index_document("document", 2, name: "bar")
 
-      subject.flush
+      subject.refresh
       subject.delete_by_query("document", query: { term: { name: "foo" } })
 
       expect { subject.get_document("document", 1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
