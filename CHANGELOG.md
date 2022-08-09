@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.14.1.jhumphreys] - 2022-08-09
+### Changed
+- Don't publish pre-release builds to RubyGems
+
 ## [0.14.0] - 2022-08-04
 ### Changed
 - Use `refresh` instead of `flush` where search is expected to be updated
