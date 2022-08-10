@@ -1,18 +1,14 @@
+# frozen_string_literal: true
+
 module Elasticity
   module Strategies
     class SingleIndex
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_name, document_type, use_new_timestamp_format = true, include_type_name_on_create = true)
+      def initialize(client, index_name, document_type, use_new_timestamp_format = nil, include_type_name_on_create = nil)
         @client        = client
         @index_name    = index_name
         @document_type = document_type
-
-        # included for compatibility with v7
-        @include_type_name_on_create = include_type_name_on_create
-
-        # Deprecated: The use_new_timestamp_format option is no longer used and will be removed in the next version.
-        @use_new_timestamp_format = use_new_timestamp_format
       end
 
       def ref_index_name
@@ -29,7 +25,7 @@ module Elasticity
 
       def create(index_def)
         if missing?
-          @client.index_create(index: @index_name, body: index_def, include_type_name: @include_type_name_on_create)
+          @client.index_create(index: @index_name, body: index_def)
         else
           raise IndexError.new(@index_name, "index already exist")
         end
@@ -52,8 +48,8 @@ module Elasticity
         create(index_def)
       end
 
-      def index_document(type, id, attributes)
-        res = @client.index(index: @index_name, type: type, id: id, body: attributes)
+      def index_document(id, attributes)
+        res = @client.index(index: @index_name, id: id, body: attributes)
 
         if id = res["_id"]
           [id, res["created"]]
@@ -62,20 +58,20 @@ module Elasticity
         end
       end
 
-      def delete_document(type, id)
-        @client.delete(index: @index_name, type: type, id: id)
+      def delete_document(id)
+        @client.delete(index: @index_name, id: id)
       end
 
-      def get_document(type, id)
-        @client.get(index: @index_name, type: type, id: id)
+      def get_document(id)
+        @client.get(index: @index_name, id: id)
       end
 
       def search_index
         @index_name
       end
 
-      def delete_by_query(type, body)
-        @client.delete_by_query(index: @index_name, type: type, body: body)
+      def delete_by_query(body)
+        @client.delete_by_query(index: @index_name, body: body)
       end
 
       def bulk
@@ -85,21 +81,21 @@ module Elasticity
       end
 
       def settings
-        @client.index_get_settings(index: @index_name, type: @document_type).values.first
+        @client.index_get_settings(index: @index_name).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
 
       def mappings
         ActiveSupport::Deprecation.warn(
-          'Elasticity::Strategies::SingleIndex#mappings is deprecated, '\
-          'use mapping instead'
+          "Elasticity::Strategies::SingleIndex#mappings is deprecated, "\
+          "use mapping instead"
         )
         mapping
       end
 
       def mapping
-        @client.index_get_mapping(index: @index_name, type: @document_type, include_type_name: @include_type_name_on_create).values.first
+        @client.index_get_mapping(index: @index_name).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end

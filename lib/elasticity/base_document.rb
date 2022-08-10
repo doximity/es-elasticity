@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class BaseDocument
     include ::ActiveModel::Model
@@ -60,7 +62,7 @@ module Elasticity
     end
 
     def self.default_document_type
-      self.name.gsub('::', '_').underscore
+      self.name.gsub("::", "_").underscore
     end
 
     def self.default_index_base_name

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class IndexMapper
     def self.set_delegates(obj, to)
@@ -84,7 +86,7 @@ module Elasticity
 
     # Index the given document
     def index_document(id, document_hash)
-      @strategy.index_document(document_type, id, document_hash)
+      @strategy.index_document(id, document_hash)
     end
 
     # Searches the index using the parameters provided in the body hash, following the same
@@ -99,25 +101,25 @@ module Elasticity
 
     # Fetches one specific document from the index by ID.
     def get(id)
-      doc = @strategy.get_document(document_type, id)
-      @document_klass.new(doc["_source"].merge(_id: doc['_id'])) if doc.present?
+      doc = @strategy.get_document(id)
+      @document_klass.new(doc["_source"].merge(_id: doc["_id"])) if doc.present?
     end
 
     # Removes one specific document from the index.
     def delete(id)
-      @strategy.delete_document(document_type, id)
+      @strategy.delete_document(id)
     end
 
     # Removes entries based on a search
     def delete_by_search(search)
-      @strategy.delete_by_query(document_type, search.body)
+      @strategy.delete_by_query(search.body)
     end
 
     # Bulk index the provided documents
     def bulk_index(documents)
       @strategy.bulk do |b|
         documents.each do |doc|
-          b.index(document_type, doc._id, doc.to_document)
+          b.index(doc._id, doc.to_document)
         end
       end
     end
@@ -127,7 +129,6 @@ module Elasticity
       @strategy.bulk do |b|
         documents.each do |doc|
           b.update(
-            document_type,
             doc[:_id],
             { doc: { doc[:attr_name] => doc[:attr_value] } }
           )
@@ -139,7 +140,7 @@ module Elasticity
     def bulk_delete(ids)
       @strategy.bulk do |b|
         ids.each do |id|
-          b.delete(document_type, id)
+          b.delete(id)
         end
       end
     end
@@ -156,7 +157,7 @@ module Elasticity
 
       if hit["highlight"]
         highlighted_attrs = hit["highlight"].each_with_object({}) do |(name, v), attrs|
-          name = name.gsub(/\..*\z/, '')
+          name = name.gsub(/\..*\z/, "")
 
           attrs[name] ||= v
         end

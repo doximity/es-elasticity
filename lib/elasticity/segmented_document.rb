@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   class SegmentedDocument < BaseDocument
     # Creates a new segment which behaves almost the same as a Document class dynamically

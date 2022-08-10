@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "elasticity/multi_search_response_parser"
 
 RSpec.describe Elasticity::MultiSearchResponseParser do

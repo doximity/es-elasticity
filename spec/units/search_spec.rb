@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "elasticity/search"
 
 RSpec.describe "Search" do
@@ -90,7 +92,7 @@ RSpec.describe "Search" do
     end
 
     it "searches the index and return document models" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
+      expect(client).to receive(:search).with(index: index_name, body: body).and_return(full_response)
 
       docs = subject.documents(mapper)
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
@@ -109,7 +111,7 @@ RSpec.describe "Search" do
     end
 
     it "handles the v7 'total' response object" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response_v7)
+      expect(client).to receive(:search).with(index: index_name, body: body).and_return(full_response_v7)
 
       docs = subject.documents(mapper)
       expect(docs.total).to eq 2
@@ -130,14 +132,14 @@ RSpec.describe "Search" do
     end
 
     it "searches and the index returns aggregations" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response_with_aggregations)
+      expect(client).to receive(:search).with(index: index_name, body: body).and_return(full_response_with_aggregations)
 
       docs = subject.documents(mapper)
       expect(docs.aggregations).to eq aggregations
     end
 
     it "searches using scan&scroll" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body, search_type: :query_then_fetch, size: 100, scroll: "1m").and_return(scan_response)
+      expect(client).to receive(:search).with(index: index_name, body: body, search_type: :query_then_fetch, size: 100, scroll: "1m").and_return(scan_response)
       expect(client).to receive(:scroll).with(scroll_id: "abc123", scroll: "1m", body: { scroll_id: "abc123" }).and_return(scroll_response)
       expect(client).to receive(:scroll).with(scroll_id: "abc456", scroll: "1m", body: { scroll_id: "abc456" }).and_return(empty_response)
 
@@ -153,7 +155,7 @@ RSpec.describe "Search" do
     end
 
     it "searches the index and return active record models" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body.merge(_source: false)).and_return(ids_response)
+      expect(client).to receive(:search).with(index: index_name, body: body.merge(_source: false)).and_return(ids_response)
 
       relation = double(:relation,
         connection: double(:connection),
@@ -175,7 +177,7 @@ RSpec.describe "Search" do
   describe Elasticity::Search::LazySearch do
     it "provides defaul properties for pagination" do
       subject = Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new(index_name, document_type, body))
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
+      expect(client).to receive(:search).with(index: index_name, body: body).and_return(full_response)
       docs = subject.documents(mapper)
 
       expect(docs.per_page).to eq(10)
@@ -197,7 +199,6 @@ RSpec.describe "Search" do
       expect(client).to receive(:search).
         with(
           index: index_name,
-          type: document_type,
           body: { size: 15, from: 15, filter: {} }
         ).and_return({ "hits" => { "total" => 112, "hits" => [] } })
       docs = subject.documents(mapper)
@@ -218,7 +219,6 @@ RSpec.describe "Search" do
 
       expect(client).to receive(:search).with(
         index: index_name,
-        type: document_type,
         body: {},
         search_type: :dfs_query_and_fetch
       ).and_return(results)
@@ -236,7 +236,7 @@ RSpec.describe "Search" do
     end
 
     it "automatically maps the documents into the provided Document class" do
-      expect(client).to receive(:search).with(index: index_name, type: document_type, body: body).and_return(full_response)
+      expect(client).to receive(:search).with(index: index_name, body: body).and_return(full_response)
       expect(Array(subject)).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
     end
 

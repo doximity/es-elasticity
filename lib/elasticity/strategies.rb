@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Elasticity
   module Strategies
     class IndexError < StandardError

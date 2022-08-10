@@ -1,27 +1,23 @@
+# frozen_string_literal: true
+
 module Elasticity
   module Strategies
     # This strategy keeps two aliases that might be mapped to the same index or different index, allowing
     # runtime changes by simply atomically updating the aliases. For example, look at the remap method
     # implementation.
     class AliasIndex
-      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted".freeze
+      SNAPSHOT_ERROR_SNIPPET =  "Cannot delete indices that are being snapshotted"
       RETRYABLE_ERROR_SNIPPETS = [
         SNAPSHOT_ERROR_SNIPPET
       ].freeze
 
       STATUSES = [:missing, :ok]
 
-      def initialize(client, index_base_name, document_type, use_new_timestamp_format = true, include_type_name_on_create = true)
+      def initialize(client, index_base_name, document_type, use_new_timestamp_format = nil, include_type_name_on_create = nil)
         @client       = client
         @main_alias   = index_base_name
         @update_alias = "#{index_base_name}_update"
         @document_type = document_type
-
-        # Deprecated: The use_new_timestamp_format option is no longer used and will be removed in the next version.
-        @use_new_timestamp_format = use_new_timestamp_format
-
-        # included for compatibility with v7
-        @include_type_name_on_create = include_type_name_on_create
       end
 
       def ref_index_name
@@ -63,22 +59,22 @@ module Elasticity
           })
 
           @client.index_refresh(index: original_index)
-          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: '10m', size: 100
+          cursor = @client.search index: original_index, search_type: :query_then_fetch, scroll: "10m", size: 100
           loop do
-            hits   = cursor['hits']['hits']
+            hits   = cursor["hits"]["hits"]
             break if hits.empty?
 
             # Fetch documents based on the ids that existed when the migration started, to make sure we only migrate
             # documents that haven't been deleted.
             id_docs = hits.map do |hit|
-              { _index: original_index, _type: hit["_type"], _id: hit["_id"] }
+              { _index: original_index, _id: hit["_id"] }
             end
 
             docs = @client.mget(body: { docs: id_docs }, refresh: true)["docs"]
             break if docs.empty?
 
             # Modify document hashes to match the mapping definition so that legacy fields aren't added
-            defined_mapping_fields = index_def[:mappings][docs.first["_type"]]["properties"].keys
+            defined_mapping_fields = index_def[:mappings]["properties"].keys
 
             # Move only documents that still exists on the old index, into the new index.
             ops = []
@@ -86,7 +82,7 @@ module Elasticity
               if doc["found"]
                 legacy_fields = doc["_source"].keys - defined_mapping_fields
                 legacy_fields.each { |field| doc["_source"].delete(field) }
-                ops << { index: { _index: new_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } }
+                ops << { index: { _index: new_index, _id: doc["_id"], data: doc["_source"] } }
               end
             end
 
@@ -96,12 +92,12 @@ module Elasticity
             ops = []
             @client.mget(body: { docs: id_docs }, refresh: true)["docs"].each_with_index do |new_doc, idx|
               if docs[idx]["found"] && !new_doc["found"]
-                ops << { delete: { _index: new_index, _type: new_doc["_type"], _id: new_doc["_id"] } }
+                ops << { delete: { _index: new_index, _id: new_doc["_id"] } }
               end
             end
 
             @client.bulk(body: ops) unless ops.empty?
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m', body: { scroll_id: cursor["_scroll_id"] })
+            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m", body: { scroll_id: cursor["_scroll_id"] })
           end
 
           # Update aliases to only point to the new index.
@@ -133,19 +129,19 @@ module Elasticity
           })
 
           @client.index_refresh(index: new_index)
-          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: '1m', size: 100
+          cursor = @client.search index: new_index, search_type: :query_then_fetch, scroll: "1m", size: 100
           loop do
-            hits   = cursor['hits']['hits']
+            hits   = cursor["hits"]["hits"]
             break if hits.empty?
 
             # Move all the documents that exists on the new index back to the old index
             ops = []
             hits.each do |doc|
-              ops << { index: { _index: original_index, _type: doc["_type"], _id: doc["_id"], data: doc["_source"] } }
+              ops << { index: { _index: original_index, _id: doc["_id"], data: doc["_source"] } }
             end
 
             @client.bulk(body: ops)
-            cursor = @client.scroll(scroll_id: cursor['_scroll_id'], scroll: '1m')
+            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m")
           end
 
           @client.index_refresh(index: original_index)
@@ -224,8 +220,8 @@ module Elasticity
         create(index_def)
       end
 
-      def index_document(type, id, attributes)
-        res = @client.index(index: @update_alias, type: type, id: id, body: attributes)
+      def index_document(id, attributes)
+        res = @client.index(index: @update_alias, id: id, body: attributes)
 
         if id = res["_id"]
           [id, res["_shards"] && res["_shards"]["successful"].to_i > 0]
@@ -234,24 +230,24 @@ module Elasticity
         end
       end
 
-      def delete_document(type, id)
+      def delete_document(id)
         ops = (main_indexes | update_indexes).map do |index|
-          { delete: { _index: index, _type: type, _id: id } }
+          { delete: { _index: index, _id: id } }
         end
 
         @client.bulk(body: ops)
       end
 
-      def get_document(type, id)
-        @client.get(index: @main_alias, type: type, id: id)
+      def get_document(id)
+        @client.get(index: @main_alias, id: id)
       end
 
       def search_index
         @main_alias
       end
 
-      def delete_by_query(type, body)
-        @client.delete_by_query(index: @main_alias, type: type, body: body)
+      def delete_by_query(body)
+        @client.delete_by_query(index: @main_alias, body: body)
       end
 
       def bulk
@@ -269,21 +265,21 @@ module Elasticity
       end
 
       def settings
-        @client.index_get_settings(index: @main_alias, type: @document_type).values.first
+        @client.index_get_settings(index: @main_alias).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
 
       def mappings
         ActiveSupport::Deprecation.warn(
-          'Elasticity::Strategies::AliasIndex#mappings is deprecated, '\
-          'use mapping instead'
+          "Elasticity::Strategies::AliasIndex#mappings is deprecated, "\
+          "use mapping instead"
         )
         mapping
       end
 
       def mapping
-        @client.index_get_mapping(index: @main_alias, type: @document_type, include_type_name: @include_type_name_on_create).values.first
+        @client.index_get_mapping(index: @main_alias).values.first
       rescue Elasticsearch::Transport::Transport::Errors::NotFound
         nil
       end
@@ -297,7 +293,7 @@ module Elasticity
 
       def create_index(index_def)
         name = build_index_name
-        @client.index_create(index: name, body: index_def, include_type_name: @include_type_name_on_create)
+        @client.index_create(index: name, body: index_def)
         name
       end
 
