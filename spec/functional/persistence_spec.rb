@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.describe "Persistence", elasticsearch: true do
   def random_birthdate
     Time.at(0.0 + rand * (Time.now.to_f - 0.0.to_f))

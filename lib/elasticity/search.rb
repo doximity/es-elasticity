@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Elasticity
   module Search
     def self.build(client, index_name, document_types, body, search_args = {})

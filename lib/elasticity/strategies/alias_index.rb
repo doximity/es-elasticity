@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Elasticity
   module Strategies
     # This strategy keeps two aliases that might be mapped to the same index or different index, allowing

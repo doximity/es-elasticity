@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "elasticity/search"
 
 RSpec.describe "Search" do
