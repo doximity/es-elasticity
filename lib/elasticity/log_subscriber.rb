@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "active_support/subscriber"
 require "active_support/log_subscriber"
 

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 RSpec.describe Elasticity::Strategies::SingleIndex, elasticsearch: true do
   subject do
     described_class.new(Elasticity.config.client, "test_index_name", "document")

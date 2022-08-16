@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Elasticity
   class IndexConfig
     class SubclassError < StandardError; end

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Elasticity
   class IndexMapper
     def self.set_delegates(obj, to)

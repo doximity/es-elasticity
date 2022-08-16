@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Elasticity
   class InstrumentedClient
     INDICES_METHODS = %w(exists create delete get_settings get_mapping flush refresh get_alias get_aliases put_alias delete_alias exists_alias update_aliases)
