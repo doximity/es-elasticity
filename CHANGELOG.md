@@ -9,8 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [1.0.1] - 2022-08-16
 ### Changed
 - Revert the additional `frozen_string_literal` updates in 1.0.0 due to some issues with some classes. We'll update these 
-in a separate 
-release to isolate the problem.
+in a separate release to isolate the problem.
 
 ## [1.0.0] - 2022-08-09
 ### Changed
