@@ -1,4 +1,4 @@
-<img src="https://s3.amazonaws.com/doximity/logos/elasticity-logotype.svg" width="35%">
+<img src="https://dox-public-assets.s3.amazonaws.com/doximity/logos/elasticity-logotype.svg" width="35%">
 
 ---
 
