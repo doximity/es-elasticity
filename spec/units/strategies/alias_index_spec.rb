@@ -83,7 +83,7 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
         "_source"=>{"name"=>"bar"}
       }
       expect { subject.get_document(1) }.to raise_error(Elastic::Transport::Transport::Errors::NotFound)
-      expect(subject.get_document(2)).to include(expected)
+      expect(subject.get_document(2).body).to include(expected)
     end
 
     it "allows deleting by query" do
