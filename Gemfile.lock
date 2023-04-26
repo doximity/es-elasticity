@@ -5,6 +5,7 @@ PATH
       activemodel (>= 5.2.0, < 7.1)
       activerecord (>= 5.2.0, < 7.1)
       activesupport (>= 5.2.0, < 7.1)
+      elastic-transport (>= 8.0, < 8.7)
       elasticsearch (>= 7, < 8.7)
 
 GEM
