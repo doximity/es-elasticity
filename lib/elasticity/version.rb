@@ -1,3 +1,3 @@
 module Elasticity
-  VERSION = "1.1.0.vstoll"
+  VERSION = "1.1.0"
 end
