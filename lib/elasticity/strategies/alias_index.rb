@@ -108,7 +108,7 @@ module Elasticity
           waiting_duration = 0
           begin
             @client.index_delete(index: original_index)
-          rescue Elasticsearch::Transport::Transport::ServerError => e
+          rescue Elastic::Transport::Transport::ServerError => e
             if retryable_error?(e)  && retry_delete_on_recoverable_errors && waiting_duration < max_delay
               waiting_duration += retry_delay
               sleep(retry_delay)
@@ -174,13 +174,13 @@ module Elasticity
 
       def main_indexes
         @client.index_get_alias(index: "#{@main_alias}-*", name: @main_alias).keys
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         []
       end
 
       def update_indexes
         @client.index_get_alias(index: "#{@main_alias}-*", name: @update_alias).keys
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         []
       end
 
@@ -264,7 +264,7 @@ module Elasticity
 
       def settings
         @client.index_get_settings(index: @main_alias).values.first
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         nil
       end
 
@@ -278,7 +278,7 @@ module Elasticity
 
       def mapping
         @client.index_get_mapping(index: @main_alias).values.first
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         nil
       end
 

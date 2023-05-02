@@ -21,6 +21,7 @@ require "arel"
 require "active_support/core_ext"
 require "active_model"
 require "elasticsearch"
+require "elastic/transport"
 
 module Elasticity
   autoload :Bulk,                     "elasticity/bulk"

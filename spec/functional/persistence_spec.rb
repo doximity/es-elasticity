@@ -269,7 +269,7 @@ RSpec.describe "Persistence", elasticsearch: true do
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete) do
           call_count +=1
           if call_count < 3
-            raise Elasticsearch::Transport::Transport::Errors::BadRequest.new(recoverable_message)
+            raise Elastic::Transport::Transport::Errors::BadRequest.new(recoverable_message)
           else
             []
           end
@@ -286,35 +286,35 @@ RSpec.describe "Persistence", elasticsearch: true do
 
       it "will only retry for a set amount of time" do
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_raise(
-          Elasticsearch::Transport::Transport::Errors::BadRequest.new(recoverable_message)
+          Elastic::Transport::Transport::Errors::BadRequest.new(recoverable_message)
         )
         build_some_docs(subject)
         expect {
           subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
-        }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
+        }.to raise_error(Elastic::Transport::Transport::ServerError)
       end
 
       it "will not only retry if the arguments say not to" do
         original_index_name = subject.config.client.index_get_alias(index: "#{subject.ref_index_name}-*", name: subject.ref_index_name).keys.first
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).with(any_args).and_call_original
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).with(index: original_index_name).and_raise(
-          Elasticsearch::Transport::Transport::Errors::BadRequest.new(recoverable_message)
+          Elastic::Transport::Transport::Errors::BadRequest.new(recoverable_message)
         )
         build_some_docs(subject)
         expect {
           subject.remap!(retry_delete_on_recoverable_errors: false)
-        }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
+        }.to raise_error(Elastic::Transport::Transport::ServerError)
       end
 
       it "will not retry for 'non-recoverable' errors" do
         exception_message = '[404] {"error":"alias [some_index_name] missing","status":404}'
         allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_raise(
-          Elasticsearch::Transport::Transport::Errors::BadRequest.new(exception_message)
+          Elastic::Transport::Transport::Errors::BadRequest.new(exception_message)
         )
         build_some_docs(subject)
         expect {
           subject.remap!(retry_delete_on_recoverable_errors: true, retry_delay: 0.5, max_delay: 1)
-        }.to raise_error(Elasticsearch::Transport::Transport::ServerError)
+        }.to raise_error(Elastic::Transport::Transport::ServerError)
       end
     end
 

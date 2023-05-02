@@ -80,7 +80,7 @@ module Elasticity
 
       def settings
         @client.index_get_settings(index: @index_name).values.first
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         nil
       end
 
@@ -94,7 +94,7 @@ module Elasticity
 
       def mapping
         @client.index_get_mapping(index: @index_name).values.first
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound
+      rescue Elastic::Transport::Transport::Errors::NotFound
         nil
       end
 

@@ -66,7 +66,7 @@ RSpec.describe Elasticity::MultiSearchResponseParser do
 
       it "raises an error for the given status code" do
         expect { described_class.parse response, search }.to(
-          raise_error Elasticsearch::Transport::Transport::Errors::BadRequest,
+          raise_error Elastic::Transport::Transport::Errors::BadRequest,
                       response.to_json
         )
       end
@@ -89,7 +89,7 @@ RSpec.describe Elasticity::MultiSearchResponseParser do
 
       it "raises an error for the given status code" do
         expect { described_class.parse response, search }.to(
-          raise_error Elasticsearch::Transport::Transport::Errors::InternalServerError,
+          raise_error Elastic::Transport::Transport::Errors::InternalServerError,
                       response.to_json
         )
       end

@@ -152,7 +152,7 @@ RSpec.describe Elasticity::MultiSearch do
       subject.add(:third, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_third", "document_third", { search: :third })), documents: klass)
 
       expect(Array(subject[:first])).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
-      expect { subject[:third] }.to raise_error Elasticsearch::Transport::Transport::Errors::BadRequest, error.to_json
+      expect { subject[:third] }.to raise_error Elastic::Transport::Transport::Errors::BadRequest, error.to_json
     end
   end
 end

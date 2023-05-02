@@ -58,7 +58,7 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       expect(doc["_source"]["name"]).to eq("test")
 
       subject.delete_document(1)
-      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      expect { subject.get_document(1) }.to raise_error(Elastic::Transport::Transport::Errors::NotFound)
     end
 
     it "allows batching index and delete actions" do
@@ -82,8 +82,8 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
         "found"=>true,
         "_source"=>{"name"=>"bar"}
       }
-      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
-      expect(subject.get_document(2)).to include(expected)
+      expect { subject.get_document(1) }.to raise_error(Elastic::Transport::Transport::Errors::NotFound)
+      expect(subject.get_document(2).body).to include(expected)
     end
 
     it "allows deleting by query" do
@@ -93,7 +93,7 @@ RSpec.describe Elasticity::Strategies::AliasIndex, elasticsearch: true do
       subject.refresh
       subject.delete_by_query(query: { term: { name: "foo" } })
 
-      expect { subject.get_document(1) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
+      expect { subject.get_document(1) }.to raise_error(Elastic::Transport::Transport::Errors::NotFound)
       expect { subject.get_document(2) }.to_not raise_error
 
       subject.flush

@@ -16,7 +16,7 @@ module Elasticity
     private
 
     def self.error_for(status)
-      Elasticsearch::Transport::Transport::ERRORS[status] || UnknownError
+      Elastic::Transport::Transport::ERRORS[status] || UnknownError
     end
   end
 end
