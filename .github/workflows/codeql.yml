@@ -13,9 +13,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "brupm-testing-our-codeql" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "brupm-testing-our-codeql" ]
   schedule:
     - cron: '17 14 * * 0'
 
