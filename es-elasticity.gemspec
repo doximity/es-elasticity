@@ -21,21 +21,21 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 2.3.4"
+  spec.add_development_dependency "bundler", "~> 2.4.3"
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "codeclimate-test-reporter"
   spec.add_development_dependency "oj"
-  spec.add_development_dependency "pry"
+  spec.add_development_dependency "pry", "0.14.2"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "redis"
   spec.add_development_dependency "rspec", "~> 3.1.0"
   spec.add_development_dependency "rspec_junit_formatter"
-  spec.add_development_dependency "simplecov", "~> 0.7.1"
+  spec.add_development_dependency "simplecov", "~> 0.22.0"
   spec.add_development_dependency "timecop"
 
-  spec.add_dependency "activemodel",   ">= 5.2.0", "< 7.1"
-  spec.add_dependency "activerecord",   ">= 5.2.0", "< 7.1"
-  spec.add_dependency "activesupport", ">= 5.2.0", "< 7.1"
+  spec.add_dependency "activemodel",   ">= 5.2.0", "< 8.0"
+  spec.add_dependency "activerecord",   ">= 5.2.0", "< 8.0"
+  spec.add_dependency "activesupport", ">= 5.2.0", "< 8.0"
   spec.add_dependency "elasticsearch", ">= 7", "< 8.7"
   spec.add_dependency "elastic-transport", ">= 8.0", "< 8.7"
 end
