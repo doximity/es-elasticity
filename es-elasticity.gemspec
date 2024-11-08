@@ -28,14 +28,14 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "redis"
-  spec.add_development_dependency "rspec", "~> 3.1.0"
+  spec.add_development_dependency "rspec", "~> 3.13.0"
   spec.add_development_dependency "rspec_junit_formatter"
   spec.add_development_dependency "simplecov", "~> 0.7.1"
   spec.add_development_dependency "timecop"
 
-  spec.add_dependency "activemodel",   ">= 5.2.0", "< 7.1"
-  spec.add_dependency "activerecord",   ">= 5.2.0", "< 7.1"
-  spec.add_dependency "activesupport", ">= 5.2.0", "< 7.1"
+  spec.add_dependency "activemodel",   ">= 5.2.0", "<= 7.2"
+  spec.add_dependency "activerecord",   ">= 5.2.0", "<= 7.2"
+  spec.add_dependency "activesupport", ">= 5.2.0", "<= 7.2"
   spec.add_dependency "elasticsearch", ">= 7", "< 8.7"
   spec.add_dependency "elastic-transport", ">= 8.0", "< 8.7"
 end
