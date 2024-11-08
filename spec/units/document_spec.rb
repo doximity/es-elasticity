@@ -36,7 +36,7 @@ RSpec.describe Elasticity::Document do
   end
 
   let :strategy do
-    double(:strategy)
+    instance_double(Elasticity::Strategies::AliasIndex)
   end
 
   before :each do
