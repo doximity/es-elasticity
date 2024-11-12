@@ -192,8 +192,8 @@ commands:
   run_rspec_tests:
     parameters:
       test_pattern:
-        default: "{$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
-          | sed 's/,\\{2,\\}/,/g')}"
+        default: |
+          {$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g' | sed 's/,\\{2,\\}/,/g')}"
         type: string
         description: |
           A string that resolves to something like this:
@@ -204,8 +204,8 @@ commands:
             "spec/{controllers,models,system}/**/*_spec.rb"
           You can opt to pass in an empty string if you plan to provide an explicit list with test_files.
       test_files:
-        default: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci
-          tests split --split-by=timings)
+        default: |
+          $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci tests split --split-by=timings)
         type: string
         description: |
           A string that resolves to something like this: "spec/models/user_spec.rb spec/controllers/user_controller_spec.rb ..."
@@ -381,8 +381,7 @@ jobs:
         type: string
         default: base
       dependencies:
-        description: Steps to install/manage machine and project dependencies, executed
-          after project checkout.
+        description: Steps to install/manage machine and project dependencies, executed after project checkout.
         type: steps
         default: []
       pre-actions:
@@ -399,8 +398,7 @@ jobs:
                 echo "No actions provided for CI to perform! Please add desired CI task via pipefitter extension."
                 exit 1
       post-actions:
-        description: Any artifacting/reporting/cleanup that must occur after the main
-          actions.
+        description: Any artifacting/reporting/cleanup that must occur after the main actions.
         type: steps
         default: []
     executor: "<< parameters.executor >>"
@@ -428,17 +426,13 @@ jobs:
         type: string
         default: small
       cache-dependencies:
-        description: 'Determines whether or not to use a cache for gem dependencies.
-          Default is false.
-
-          '
+        description: |
+          Determines whether or not to use a cache for gem dependencies. Default is false.
         type: boolean
         default: false
       gem-version:
-        description: 'The name and version number (e.g. rails-7.0.3) you want installed,
-          specified to the patch version.
-
-          '
+        description: |
+          The name and version number (e.g. rails-7.0.3) you want installed, specified to the patch version.
         type: string
         default: ''
       ruby-version:
@@ -485,19 +479,9 @@ workflows:
                 port: "9200"
                 method: curl
           post-actions:
-            - save_cache:
-                key: cov-cache-v1-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{ .Revision
-                  }}
-                paths:
-                  - coverage
             - store_test_results:
                 path: tmp/test-results
           actions:
-            - run_rspec_tests:
-                test_pattern: "{$(ls -d spec/**/ | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
-                  | sort | uniq | tr '\\n' ',' | sed 's/,\\{2,\\}/,/g')}"
-                test_files: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" |
-                  circleci tests split --split-by=timings)
-          parallelism: 1
+            - run_rspec_tests
           <<: *ruby-version-matrix
           name: run_tests_ruby-ruby-<< matrix.ruby-version >>
