@@ -1,182 +1,557 @@
-version: 2.1
+version: '2.1'
+
+meta:
+  ruby-version-matrix: &ruby-version-matrix
+    matrix:
+      parameters:
+        ruby-version:
+          - '3.1'
+          - '3.2'
+          - '3.3'
+
+orbs:
+  ci-utils: doximity/ci-utils@2
 
 executors:
-  # used for building the gem
-  ruby-latest:
+  base:
     resource_class: small
     docker:
-      - image: cimg/ruby:3.1
-        environment:
-          BUNDLE_VERSION: '~> 2.3.4'
+      - image: cimg/base:current-22.04
 
-  # used for testing the gem:
-  ruby_2_7:
+  ruby:
+    parameters:
+      ruby-version:
+        type: string
+        default: '3.1'
     resource_class: small
     docker:
-      - image: cimg/ruby:2.7
+      - image: cimg/ruby:<< parameters.ruby-version >>
         environment:
-          BUNDLE_VERSION: '~> 2.3.4'
-      - image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
-        environment:
-          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-          - discovery.type=single-node
-          - xpack.security.enabled=false
-  ruby_3_0:
-    resource_class: small
-    docker:
-      - image: cimg/ruby:3.0
-        environment:
-          BUNDLE_VERSION: '~> 2.3.4'
+          BUNDLE_VERSION: 2.5.23
       - image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
         environment:
           - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
           - discovery.type=single-node
           - xpack.security.enabled=false
 
-  ruby_3_1:
-    resource_class: small
-    docker:
-      - image: cimg/ruby:3.1
-        environment:
-          BUNDLE_VERSION: '~> 2.3.4'
-      - image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
-        environment:
-          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-          - discovery.type=single-node
-          - xpack.security.enabled=false
+commands:
+  wait_for_service:
+    parameters:
+      port:
+        description: |
+          Port number to check for availability
+        type: string
+      method:
+        description: |
+          Specify method of determining sufficient availablity, options are curl or netcat
+        type: enum
+        enum: ["curl", "netcat"]
+        default: "netcat"
+    steps:
+      - run:
+          name: wait for service on port << parameters.port >>
+          command: |
+            echo "Using << parameters.method >> to check availability of service running on port << parameters.port >>..."
 
-# yaml anchor filters
-master_only: &master_only
-  filters:
-    branches:
-      only: master
-    tags:
-      ignore: /.*/
-pr_only: &pr_only
-  filters:
-    branches:
-      ignore: master
-    tags:
-      ignore: /.*/
-version_tags_only: &version_tags_only
-  filters:
-    branches:
-      ignore: /.*/
-    tags:
-      only: /^v.*/
+            port_num=<< parameters.port >>
+            method=<< parameters.method >>
+            max_attempts=7
+            timeout=1
+            attempt=0
+            exitCode=0
+
+            while [[ $attempt < $max_attempts ]]; do
+              if [ "$method" = "curl" ]; then
+                curl --no-progress-bar -XGET "127.0.0.1:$port_num" && exitCode=$? || exitCode=$?
+              else
+                nc -z 127.0.0.1 $port_num && exitCode=$? || exitCode=$?
+              fi
+
+              if [[ $exitCode == 0 ]]; then
+                break
+              fi
+
+              echo "Port $port_num unavailable, will retry in ${timeout}s: $*" 1>&2
+              sleep "$timeout"
+              attempt=$(( attempt + 1 ))
+              timeout=$(( timeout * 2 ))
+            done
+
+            if [[ $exitCode != 0 ]]; then
+              echo "Command failed, will not retry after ${max_attempts} attempts: $*" 1>&2
+            fi
+
+            exit $exitCode
+  post_checkout_steps:
+    steps:
+      - run: echo "Post Checkout Steps Hook"
+
+  bundle_install:
+    parameters:
+      cache-dependencies:
+        description: |
+          Determines whether or not to use a cache for gem dependencies. Default is false.
+        type: boolean
+        default: false
+      cache-salt:
+        description: |
+          Salt to change the cache name, so we can use it with different version (i.e. Ruby versions).
+          If you're only using a single Ruby version, it's recommended to leave it blank.
+        type: string
+        default: default
+      use-next-bundle:
+        description: |
+          Given a dual-boot configuration, do we want to install the `_NEXT` version of the bundle to test new dependency versions?
+        type: boolean
+        default: false
+    steps:
+      - run:
+          name: Install Bundler specific version
+          command: gem install bundler --version "$BUNDLE_VERSION" --force
+      - when:
+          condition: "<< parameters.use-next-bundle >>"
+          steps:
+            - run:
+                name: Set DOX_NEXT to true in BASH_ENV
+                command: 'echo "export DOX_NEXT=true" >> $BASH_ENV
+
+                  '
+            - install_bundle:
+                cache-dependencies: "<< parameters.cache-dependencies >>"
+                cache-salt: "<< parameters.cache-salt >>"
+                cache-path: vendor/cache-next
+                bundle-path: vendor/bundle-next
+                lockfile: Gemfile_next.lock
+                gemfile: Gemfile_next
+      - unless:
+          condition: "<< parameters.use-next-bundle >>"
+          steps:
+            - install_bundle:
+                cache-dependencies: "<< parameters.cache-dependencies >>"
+                cache-salt: "<< parameters.cache-salt >>"
+
+  install_bundle:
+    parameters:
+      cache-dependencies:
+        type: boolean
+        default: false
+      cache-salt:
+        type: string
+        default: default
+      cache-path:
+        type: string
+        default: vendor/cache
+      bundle-path:
+        type: string
+        default: vendor/bundle
+      lockfile:
+        type: string
+        default: Gemfile.lock
+      gemfile:
+        type: string
+        default: Gemfile
+    steps:
+      - when:
+          condition: "<< parameters.cache-dependencies >>"
+          steps:
+            - restore_cache:
+                keys:
+                  - << parameters.cache-salt >>-v2-<< parameters.gemfile >>-{{ checksum
+                    "<< parameters.lockfile >>" }}
+                  - "<< parameters.cache-salt >>-v2-<< parameters.gemfile >>-"
+      - run:
+          name: Configure Bundler
+          command: |
+            bundle config set --local cache_path '<< parameters.cache-path >>'
+            bundle config set --local path '<< parameters.bundle-path >>'
+            bundle config set --local gemfile '<< parameters.gemfile >>'
+            bundle config set --local jobs 4
+            bundle config set --local retry 3
+            bundle config set --local timeout 60
+            if [ -f "Gemfile.lock" ]; then
+              bundle config set --local frozen true
+            fi
+      - run:
+          name: Log bundle config
+          command: bundle config
+      - run:
+          name: Install Ruby Dependencies
+          command: |
+            if [ -d "<< parameters.cache-path >>" ]; then
+              bundle install --local --verbose
+            else
+              bundle install --verbose
+            fi
+      - when:
+          condition: "<< parameters.cache-dependencies >>"
+          steps:
+            - save_cache:
+                key: << parameters.cache-salt >>-v2-<< parameters.gemfile >>-{{ checksum
+                  "<< parameters.lockfile >>" }}
+                paths:
+                  - "<< parameters.bundle-path >>"
+
+  rubocop:
+    parameters:
+      use-cache:
+        description: Denotes whether or not to use rubocop's cache feature
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition: "<< parameters.use-cache >>"
+          steps:
+            - restore_cache:
+                keys:
+                  - default-v1-rubocop-{{ .Branch }}-{{ .Revision }}
+                  - default-v1-rubocop-{{ .Branch }}
+                  - default-v1-rubocop
+            - run:
+                name: Run Rubocop
+                command: RUBOCOP_CACHE_ROOT=tmp bundle exec rubocop --parallel --display-cop-names
+                  --extra-details --display-style-guide --debug
+            - save_cache:
+                key: default-v1-rubocop-{{ .Branch }}-{{ .Revision }}
+                paths:
+                  - tmp/rubocop_cache
+      - unless:
+          condition: "<< parameters.use-cache >>"
+          steps:
+            - run:
+                name: Run Rubocop
+                command: bundle exec rubocop --parallel --display-cop-names --extra-details
+                  --display-style-guide --debug --cache false
+
+  run_rspec_tests:
+    parameters:
+      test_pattern:
+        default: "{$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
+          | sed 's/,\\{2,\\}/,/g')}"
+        type: string
+        description: |
+          A string that resolves to something like this:
+            "{controllers,features,javascripts,lib,models,services,system,views}"
+          It must either be a VALID BASH string (assignable to a variable) or evaluate to that in a CI Bash environment.
+          You must escape bashslashes (`\`), e.g. "\\" if you want them to make it through Circle's Parameter evaluation step.
+          It is consumed (by default) by 'circelci tests glob' which aims for a string like this:
+            "spec/{controllers,models,system}/**/*_spec.rb"
+          You can opt to pass in an empty string if you plan to provide an explicit list with test_files.
+      test_files:
+        default: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci
+          tests split --split-by=timings)
+        type: string
+        description: |
+          A string that resolves to something like this: "spec/models/user_spec.rb spec/controllers/user_controller_spec.rb ..."
+          It must either be a VALID BASH string (assignable to a variable) or evaluate to that in a CI Bash environment.
+          You must escape bashslashes (`\`), e.g. "\\" if you want them to make it through Circle's Parameter evaluation step.
+          It is used directly as an argument to `bundle exec rspec $TESTFILES`.
+          If you provide a direct list of files, e.g.
+            "echo 'spec/one_spec.rb spec/two_spec.rb spec/red_spec.rb spec/blue_spec.rb'"
+           And you wish to maintain proper parallelism support, you can pipe it to "circleci tests split":
+            "$(echo 'spec/one_spec.rb \n spec/two_spec.rb \n spec/red_spec.rb \n spec/blu_spec.rb' | circleci tests split --split-by=timings)"
+          NOTE: 'circleci tests split' wants a newline separated list:
+              spec/seuss/one_spec.rb
+              spec/seuss/two_spec.rb
+              spec/seuss/red_spec.rb
+              spec/seuss/blu_spec.rb
+          Don't forget to use a subshell.
+      profile-specs:
+        description: |
+          State the number of specs you wish to evaluate for slowness using RSpec profiler. Default is 0.
+        type: integer
+        default: 0
+    steps:
+      - run:
+          name: Run RSpec Tests
+          environment:
+            OUT_PATH: tmp/test-results
+            PROFILE_COUNT: "<< parameters.profile-specs >>"
+          command: |
+            shopt -s globstar
+            mkdir -p $OUT_PATH
+            TEST_PATTERN=<< parameters.test_pattern >>
+            TEST_FILES=<< parameters.test_files >>
+            RSPEC_COMMAND="bundle exec rspec --profile $PROFILE_COUNT --format RspecJunitFormatter --out $OUT_PATH/results.xml --format progress --order defined $TEST_FILES"
+            printf "Executing specs with the following command:\n\n"
+            echo ${RSPEC_COMMAND}
+            printf "\n"
+            ${RSPEC_COMMAND}
+            echo "RSpec exited with code $?"
+      - run:
+          name: Double check RSpec Failures
+          environment:
+            OUT_PATH: tmp/test-results
+          command: |
+            FILE=$OUT_PATH/results.xml
+            if [ -f $FILE ]; then
+              FAIL_COUNT=$(ruby -r rexml/document -e 'include REXML; puts XPath.first(Document.new($stdin), "string(//testsuite/@failures)")' < $FILE )
+              if [ $FAIL_COUNT -gt 0 ]; then
+                printf "IF YOU ARE READING THIS, TESTS FAILED BUT \"rspec\" RETURNED A 0 EXIT CODE AND LOOKS GREEN!\n\n"
+                printf "PLEASE LOOK AT THE PREVIOUS STEP TITLED \"Run RSpec Tests\" TO SEE SPEC FAILURE INFO!\n\n"
+                printf "You may also look at the \"TESTS\" tab, which will show failing spec info.\n\n"
+                printf "Additionally, $FILE is available for download and inspection in the \"ARTIFACTS\" tab.\n\n"
+                exit 1
+              fi
+            else
+              echo "$FILE not found..."
+              exit 0
+            fi
+            echo "No uncaught RSpec failures detected!"
+
+  install_gem_version:
+    parameters:
+      gem-version:
+        description: |
+          The name and version number (e.g. rails-7.0.3) you want installed, specified to the patch version.
+        type: string
+        default: ''
+    steps:
+      - when:
+          condition: "<< parameters.gem-version >>"
+          steps:
+            - run:
+                name: Unfreeze Bundle
+                command: bundle config set --local frozen 'false'
+            - run:
+                name: Show prior gem version
+                command: |
+                  read -r target_gemname target_version \<<< $( echo "<< parameters.gem-version >>" | sed 's/\(.*\)-\([0-9]\{1,3\}\(\.[0-9]\{1,3\}\)*\)/\1 \2/g')
+                  version=$(bundle list | sed -n "s/[[:space:]]*\* $target_gemname (\(.*\))/\1/p")
+                  if [[ -z "$version" ]]; then
+                    echo "No prior version of ${target_gemname} found."
+                  else
+                    echo $version;
+                  fi
+            - run:
+                name: Set gem version to << parameters.gem-version >>
+                command: |
+                  cd
+                  read -r target_gemname target_version \<<< $( echo "<< parameters.gem-version >>" | sed 's/\(.*\)-\([0-9]\{1,3\}\(\.[0-9]\{1,3\}\)*\)/\1 \2/g')
+                  gem install $target_gemname -i /tmp/repo --no-document -v $target_version
+
+                  echo 'Delete any gems matching the newly installed ones from the existing cache'
+                  for line in $(ls /tmp/repo/cache | grep gem); do
+                    read -r gemname version \<<< $( echo $line | sed 's/\(.*\)-\([0-9]\{1,3\}\(\.[0-9]\{1,3\}\)*\)[^0-9\.]*.*.gem/\1 \2/g')
+                    if [ $gemname = 'bundler' ]; # skip bundler
+                      then continue
+                    fi
+                    rm -f ~/project/vendor/cache/$gemname*.gem
+                  done;
+
+                  echo 'The following gems will be copied into the project: '
+                  ls -l /tmp/repo/cache
+                  cp /tmp/repo/cache/*.gem ~/project/vendor/cache
+
+                  echo 'Showing gems in the project cache: ls -al ~/project/vendor/cache'
+                  ls -al ~/project/vendor/cache
+
+                  cd ~/project
+                  echo 'Removing Gemfile.lock'
+                  rm -f ./Gemfile.lock
+
+                  echo 'Fancy replacement. Set all gems in the gemspec to what we currently have in the vendor/cache.'
+                  for line in $(ls vendor/cache | grep gem); do
+                    # we don't care about the .gem, get rid of it
+                    trimmed_line=${line%%.gem}
+                    # version to include anything after the gem name so we can pick up prerelease versions
+                    read -r gemname version \<<< $( echo $trimmed_line | sed 's/\(.*\)-\([0-9]\{1,3\}\(\.[0-9]\{1,3\}\)*[^0-9\.]*.*\)/\1 \2/g' )
+
+                    # leave bundler alone
+                    if [ $gemname = 'bundler' ];
+                      then continue
+                    fi
+
+                    # strip out platform info from version, we just want the number plus any prerelease identifiers
+                    version=$(echo $version | cut -d "-" -f 1)
+
+                    sed -i "s/\(.*_dependency \"$gemname\"\)".*"/\1, \"~> $version\"/g" *.gemspec
+
+                    if [[ "$gemname" = "$target_gemname" ]]; then
+                      if [[ -z "$(sed -n "s/\(.*_dependency \"$gemname\"\).*\"/\1/p" *.gemspec)" ]];
+                      then
+                        echo 'No pre-existing version, adding version';
+                        replacement="spec\\.add_development_dependency \"$gemname\", \"~> $version\""
+                        sed -e "0,/add.*dependency/{/add.*dependency/a\  $replacement" -e "}" -i -- *.gemspec
+                      else
+                        echo 'nothing to do';
+                      fi;
+                    fi;
+                  done;
+
+                  echo 'cat *.gemspec'
+                  cat *.gemspec
+
+                  echo 'bundle install --local --no-cache'
+                  bundle install --local --no-cache
+            - run:
+                name: Gem version after upgrade
+                command: |
+                  read -r target_gemname target_version \<<< $( echo "<< parameters.gem-version >>" | sed 's/\(.*\)-\([0-9]\{1,3\}\(\.[0-9]\{1,3\}\)*\)/\1 \2/g')
+                  version=$(bundle list | sed -n "s/[[:space:]]*\* $target_gemname (\(.*\))/\1/p")
+                  if [[ -z "$version" ]]; then
+                    echo "${target_gemname} was somehow not installed."
+                    exit 1
+                  else
+                    echo $version;
+                  fi
 
 jobs:
-  build_2_7:
-    executor: ruby_2_7
+  circle_ci_job:
+    parameters:
+      executor:
+        type: string
+        default: base
+      resource_class:
+        type: string
+        default: small
+      parallelism:
+        type: integer
+        default: 1
+      checkout-depth:
+        type: string
+        default: '1'
+      checkout-cache-salt:
+        type: string
+        default: base
+      dependencies:
+        description: Steps to install/manage machine and project dependencies, executed
+          after project checkout.
+        type: steps
+        default: []
+      pre-actions:
+        description: Steps to perform any necessary setup after dependencies are installed.
+        type: steps
+        default: []
+      actions:
+        description: The actions that fulfill the primary purpose of the CI job (tests/checks/etc.)
+        type: steps
+        default:
+          - run:
+              name: No CI Actions Warning
+              command: |
+                echo "No actions provided for CI to perform! Please add desired CI task via pipefitter extension."
+                exit 1
+      post-actions:
+        description: Any artifacting/reporting/cleanup that must occur after the main
+          actions.
+        type: steps
+        default: []
+    executor: "<< parameters.executor >>"
+    resource_class: "<< parameters.resource_class >>"
+    parallelism: "<< parameters.parallelism >>"
     steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v3-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v3-bundle-ruby_2_7-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
-  build_3_0:
-    executor: ruby_3_0
-    steps:
-      - checkout
-      - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v3-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v3-bundle-ruby_3_0-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
+      - ci-utils/ci_checkout:
+          depth: "<< parameters.checkout-depth >>"
+          cache-salt: "<< parameters.checkout-cache-salt >>"
+      - post_checkout_steps
+      - steps: "<< parameters.dependencies >>"
+      - steps: "<< parameters.pre-actions >>"
+      - steps: "<< parameters.actions >>"
+      - steps: "<< parameters.post-actions >>"
+      - ci-utils/quietly_store_artifacts
 
-  build_3_1:
-    executor: ruby_3_1
+  run_tests_ruby:
+    parameters:
+      executor:
+        type: string
+        default: ruby
+      parallelism:
+        type: integer
+        default: 1
+      resource_class:
+        type: string
+        default: small
+      cache-dependencies:
+        description: 'Determines whether or not to use a cache for gem dependencies.
+          Default is false.
+
+          '
+        type: boolean
+        default: false
+      gem-version:
+        description: 'The name and version number (e.g. rails-7.0.3) you want installed,
+          specified to the patch version.
+
+          '
+        type: string
+        default: ''
+      ruby-version:
+        type: string
+        default: '3.1'
+      pre-actions:
+        description: Steps to perform any necessary setup after dependencies are installed.
+        type: steps
+        default: []
+      actions:
+        description: The actions that fulfill the primary purpose of the CI job (tests/checks/etc.)
+        type: steps
+        default: []
+      post-actions:
+        description: Any artifacting/reporting/cleanup that must occur after the main
+          actions.
+        type: steps
+        default: []
+    executor:
+      name: "<< parameters.executor >>"
+      ruby-version: "<< parameters.ruby-version >>"
+    resource_class: "<< parameters.resource_class >>"
+    parallelism: "<< parameters.parallelism >>"
     steps:
-      - checkout
+      - ci-utils/ci_checkout
+      - post_checkout_steps
+      - bundle_install:
+          cache-dependencies: "<< parameters.cache-dependencies >>"
+          cache-salt: "<< parameters.ruby-version >>"
+      - install_gem_version:
+          gem-version: "<< parameters.gem-version >>"
+      - steps: "<< parameters.pre-actions >>"
+      - steps: "<< parameters.actions >>"
+      - steps: "<< parameters.post-actions >>"
+      - ci-utils/quietly_store_artifacts
+
+  required_tests_pass:
+    executor: base
+    steps:
       - run:
-          name: Install Bundler specific version
-          command: |
-            gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v3-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
-      - save_cache:
-          key: v3-bundle-ruby_3_1-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run:
-          name: Wait for ElasticSearch
-          command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
-      - run:
-          name: Run Tests
-          command: bundle exec rspec
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vendor/bundle
+          name: Required Tests are Passing
+          command: echo "Required Tests are Passing"
 
 workflows:
-  version: 2
-  trunk:
+  main:
     jobs:
-      - build_2_7:
-          <<: *master_only
-      - build_3_0:
-          <<: *master_only
-      - build_3_1:
-          <<: *master_only
-
-  pull-requests:
-    jobs:
-      - build_2_7:
-          <<: *pr_only
-      - build_3_0:
-          <<: *pr_only
-      - build_3_1:
-          <<: *pr_only
-
-  final-release:
-    jobs:
-      - build_2_7:
-          <<: *version_tags_only
-      - build_3_0:
-          <<: *version_tags_only
-      - build_3_1:
-          <<: *version_tags_only
+      - circle_ci_job:
+          context: nexus_readonly
+          executor: ruby
+          dependencies:
+            - bundle_install
+          resource_class: medium
+          actions:
+            - rubocop
+          name: check_rubocop
+      - run_tests_ruby:
+          executor: ruby
+          context: nexus_readonly
+          pre-actions:
+            - wait_for_service:
+                port: "9200"
+                method: curl
+          post-actions:
+            - save_cache:
+                key: cov-cache-v1-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{ .Revision
+                  }}
+                paths:
+                  - coverage
+            - store_test_results:
+                path: tmp/test-results
+          actions:
+            - run_rspec_tests:
+                test_pattern: "{$(ls -d spec/**/ | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
+                  | sort | uniq | tr '\\n' ',' | sed 's/,\\{2,\\}/,/g')}"
+                test_files: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" |
+                  circleci tests split --split-by=timings)
+          parallelism: 1
+          <<: *ruby-version-matrix
+          name: run_tests_ruby-ruby-<< matrix.ruby-version >>
+      - required_tests_pass:
+          requires:
+            - run_tests_ruby
