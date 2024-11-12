@@ -28,11 +28,23 @@ executors:
       - image: cimg/ruby:<< parameters.ruby-version >>
         environment:
           BUNDLE_VERSION: 2.5.23
+
+  ruby-with-services:
+    parameters:
+      ruby-version:
+        type: string
+        default: '3.1'
+    resource_class: small
+    docker:
+      - image: cimg/ruby:<< parameters.ruby-version >>
+        environment:
+          BUNDLE_VERSION: 2.5.23
       - image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
         environment:
-          - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-          - discovery.type=single-node
-          - xpack.security.enabled=false
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          http.port: 9200
+          xpack.security.enabled: false
 
 commands:
   wait_for_service:
@@ -190,37 +202,6 @@ commands:
                   "<< parameters.lockfile >>" }}
                 paths:
                   - "<< parameters.bundle-path >>"
-
-  rubocop:
-    parameters:
-      use-cache:
-        description: Denotes whether or not to use rubocop's cache feature
-        type: boolean
-        default: false
-    steps:
-      - when:
-          condition: "<< parameters.use-cache >>"
-          steps:
-            - restore_cache:
-                keys:
-                  - default-v1-rubocop-{{ .Branch }}-{{ .Revision }}
-                  - default-v1-rubocop-{{ .Branch }}
-                  - default-v1-rubocop
-            - run:
-                name: Run Rubocop
-                command: RUBOCOP_CACHE_ROOT=tmp bundle exec rubocop --parallel --display-cop-names
-                  --extra-details --display-style-guide --debug
-            - save_cache:
-                key: default-v1-rubocop-{{ .Branch }}-{{ .Revision }}
-                paths:
-                  - tmp/rubocop_cache
-      - unless:
-          condition: "<< parameters.use-cache >>"
-          steps:
-            - run:
-                name: Run Rubocop
-                command: bundle exec rubocop --parallel --display-cop-names --extra-details
-                  --display-style-guide --debug --cache false
 
   run_rspec_tests:
     parameters:
@@ -519,15 +500,6 @@ jobs:
 workflows:
   main:
     jobs:
-      - circle_ci_job:
-          context: nexus_readonly
-          executor: ruby
-          dependencies:
-            - bundle_install
-          resource_class: medium
-          actions:
-            - rubocop
-          name: check_rubocop
       - run_tests_ruby:
           executor: ruby
           context: nexus_readonly

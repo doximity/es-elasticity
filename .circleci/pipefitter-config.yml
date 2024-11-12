@@ -1,1 +1,11 @@
 ruby-versions: ["supported-versions", "3.3"]
+cache-dependencies: true
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: '-Xms512m -Xmx512m'
+      http.port: 9200
+      xpack.security.enabled: false
