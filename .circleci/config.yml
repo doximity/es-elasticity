@@ -31,133 +31,16 @@ executors:
           xpack.security.enabled: false
 
 commands:
-  wait_for_service:
-    parameters:
-      port:
-        description: |
-          Port number to check for availability
-        type: string
-      method:
-        description: |
-          Specify method of determining sufficient availablity, options are curl or netcat
-        type: enum
-        enum: ["curl", "netcat"]
-        default: "netcat"
-    steps:
-      - run:
-          name: wait for service on port << parameters.port >>
-          command: |
-            echo "Using << parameters.method >> to check availability of service running on port << parameters.port >>..."
-
-            port_num=<< parameters.port >>
-            method=<< parameters.method >>
-            max_attempts=7
-            timeout=1
-            attempt=0
-            exitCode=0
-
-            while [[ $attempt < $max_attempts ]]; do
-              if [ "$method" = "curl" ]; then
-                curl --no-progress-bar -XGET "127.0.0.1:$port_num" && exitCode=$? || exitCode=$?
-              else
-                nc -z 127.0.0.1 $port_num && exitCode=$? || exitCode=$?
-              fi
-
-              if [[ $exitCode == 0 ]]; then
-                break
-              fi
-
-              echo "Port $port_num unavailable, will retry in ${timeout}s: $*" 1>&2
-              sleep "$timeout"
-              attempt=$(( attempt + 1 ))
-              timeout=$(( timeout * 2 ))
-            done
-
-            if [[ $exitCode != 0 ]]; then
-              echo "Command failed, will not retry after ${max_attempts} attempts: $*" 1>&2
-            fi
-
-            exit $exitCode
-
   bundle_install:
-    parameters:
-      cache-dependencies:
-        description: |
-          Determines whether or not to use a cache for gem dependencies. Default is false.
-        type: boolean
-        default: false
-      cache-salt:
-        description: |
-          Salt to change the cache name, so we can use it with different version (i.e. Ruby versions).
-          If you're only using a single Ruby version, it's recommended to leave it blank.
-        type: string
-        default: default
-      use-next-bundle:
-        description: |
-          Given a dual-boot configuration, do we want to install the `_NEXT` version of the bundle to test new dependency versions?
-        type: boolean
-        default: false
     steps:
       - run:
           name: Install Bundler specific version
           command: gem install bundler --version "$BUNDLE_VERSION" --force
-      - when:
-          condition: "<< parameters.use-next-bundle >>"
-          steps:
-            - run:
-                name: Set DOX_NEXT to true in BASH_ENV
-                command: 'echo "export DOX_NEXT=true" >> $BASH_ENV
-
-                  '
-            - install_bundle:
-                cache-dependencies: "<< parameters.cache-dependencies >>"
-                cache-salt: "<< parameters.cache-salt >>"
-                cache-path: vendor/cache-next
-                bundle-path: vendor/bundle-next
-                lockfile: Gemfile_next.lock
-                gemfile: Gemfile_next
-      - unless:
-          condition: "<< parameters.use-next-bundle >>"
-          steps:
-            - install_bundle:
-                cache-dependencies: "<< parameters.cache-dependencies >>"
-                cache-salt: "<< parameters.cache-salt >>"
-
-  install_bundle:
-    parameters:
-      cache-dependencies:
-        type: boolean
-        default: false
-      cache-salt:
-        type: string
-        default: default
-      cache-path:
-        type: string
-        default: vendor/cache
-      bundle-path:
-        type: string
-        default: vendor/bundle
-      lockfile:
-        type: string
-        default: Gemfile.lock
-      gemfile:
-        type: string
-        default: Gemfile
-    steps:
-      - when:
-          condition: "<< parameters.cache-dependencies >>"
-          steps:
-            - restore_cache:
-                keys:
-                  - << parameters.cache-salt >>-v2-<< parameters.gemfile >>-{{ checksum
-                    "<< parameters.lockfile >>" }}
-                  - "<< parameters.cache-salt >>-v2-<< parameters.gemfile >>-"
       - run:
           name: Configure Bundler
           command: |
-            bundle config set --local cache_path '<< parameters.cache-path >>'
-            bundle config set --local path '<< parameters.bundle-path >>'
-            bundle config set --local gemfile '<< parameters.gemfile >>'
+            bundle config set --local cache_path 'vendor/cache'
+            bundle config set --local path 'vendor/bundle'
             bundle config set --local jobs 4
             bundle config set --local retry 3
             bundle config set --local timeout 60
@@ -170,56 +53,21 @@ commands:
       - run:
           name: Install Ruby Dependencies
           command: |
-            if [ -d "<< parameters.cache-path >>" ]; then
+            if [ -d "vendor/cache" ]; then
               bundle install --local --verbose
             else
               bundle install --verbose
             fi
-      - when:
-          condition: "<< parameters.cache-dependencies >>"
-          steps:
-            - save_cache:
-                key: << parameters.cache-salt >>-v2-<< parameters.gemfile >>-{{ checksum
-                  "<< parameters.lockfile >>" }}
-                paths:
-                  - "<< parameters.bundle-path >>"
 
   run_rspec_tests:
     parameters:
       test_pattern:
-        default: "{$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
-          | sed 's/,\\{2,\\}/,/g')}"
+        default: "{$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g' | sed 's/,\\{2,\\}/,/g')}"
         type: string
-        description: |
-          A string that resolves to something like this:
-            "{controllers,features,javascripts,lib,models,services,system,views}"
-          It must either be a VALID BASH string (assignable to a variable) or evaluate to that in a CI Bash environment.
-          You must escape bashslashes (`\`), e.g. "\\" if you want them to make it through Circle's Parameter evaluation step.
-          It is consumed (by default) by 'circelci tests glob' which aims for a string like this:
-            "spec/{controllers,models,system}/**/*_spec.rb"
-          You can opt to pass in an empty string if you plan to provide an explicit list with test_files.
       test_files:
-        default: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci
-          tests split --split-by=timings)
+        default: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci tests split --split-by=timings)
         type: string
-        description: |
-          A string that resolves to something like this: "spec/models/user_spec.rb spec/controllers/user_controller_spec.rb ..."
-          It must either be a VALID BASH string (assignable to a variable) or evaluate to that in a CI Bash environment.
-          You must escape bashslashes (`\`), e.g. "\\" if you want them to make it through Circle's Parameter evaluation step.
-          It is used directly as an argument to `bundle exec rspec $TESTFILES`.
-          If you provide a direct list of files, e.g.
-            "echo 'spec/one_spec.rb spec/two_spec.rb spec/red_spec.rb spec/blue_spec.rb'"
-           And you wish to maintain proper parallelism support, you can pipe it to "circleci tests split":
-            "$(echo 'spec/one_spec.rb \n spec/two_spec.rb \n spec/red_spec.rb \n spec/blu_spec.rb' | circleci tests split --split-by=timings)"
-          NOTE: 'circleci tests split' wants a newline separated list:
-              spec/seuss/one_spec.rb
-              spec/seuss/two_spec.rb
-              spec/seuss/red_spec.rb
-              spec/seuss/blu_spec.rb
-          Don't forget to use a subshell.
       profile-specs:
-        description: |
-          State the number of specs you wish to evaluate for slowness using RSpec profiler. Default is 0.
         type: integer
         default: 0
     steps:
@@ -358,57 +206,6 @@ commands:
                   fi
 
 jobs:
-  circle_ci_job:
-    parameters:
-      executor:
-        type: string
-        default: base
-      resource_class:
-        type: string
-        default: small
-      parallelism:
-        type: integer
-        default: 1
-      checkout-depth:
-        type: string
-        default: '1'
-      checkout-cache-salt:
-        type: string
-        default: base
-      dependencies:
-        description: Steps to install/manage machine and project dependencies, executed after project checkout.
-        type: steps
-        default: []
-      pre-actions:
-        description: Steps to perform any necessary setup after dependencies are installed.
-        type: steps
-        default: []
-      actions:
-        description: The actions that fulfill the primary purpose of the CI job (tests/checks/etc.)
-        type: steps
-        default:
-          - run:
-              name: No CI Actions Warning
-              command: |
-                echo "No actions provided for CI to perform! Please add desired CI task via pipefitter extension."
-                exit 1
-      post-actions:
-        description: Any artifacting/reporting/cleanup that must occur after the main actions.
-        type: steps
-        default: []
-    executor: "<< parameters.executor >>"
-    resource_class: "<< parameters.resource_class >>"
-    parallelism: "<< parameters.parallelism >>"
-    steps:
-      - ci-utils/ci_checkout:
-          depth: "<< parameters.checkout-depth >>"
-          cache-salt: "<< parameters.checkout-cache-salt >>"
-      - steps: "<< parameters.dependencies >>"
-      - steps: "<< parameters.pre-actions >>"
-      - steps: "<< parameters.actions >>"
-      - steps: "<< parameters.post-actions >>"
-      - ci-utils/quietly_store_artifacts
-
   run_tests_ruby:
     parameters:
       executor:
@@ -420,11 +217,6 @@ jobs:
       resource_class:
         type: string
         default: small
-      cache-dependencies:
-        description: |
-          Determines whether or not to use a cache for gem dependencies. Default is false.
-        type: boolean
-        default: false
       gem-version:
         description: |
           The name and version number (e.g. rails-7.0.3) you want installed, specified to the patch version.
@@ -436,16 +228,22 @@ jobs:
       pre-actions:
         description: Steps to perform any necessary setup after dependencies are installed.
         type: steps
-        default: []
+        default:
+          - run:
+              name: Wait for ElasticSearch
+              command: dockerize -wait http://127.0.0.1:9200 -timeout 1m
       actions:
         description: The actions that fulfill the primary purpose of the CI job (tests/checks/etc.)
         type: steps
-        default: []
+        default:
+          - run_rspec_tests
       post-actions:
         description: Any artifacting/reporting/cleanup that must occur after the main
           actions.
         type: steps
-        default: []
+        default:
+          - store_test_results:
+              path: tmp/test-results
     executor:
       name: "<< parameters.executor >>"
       ruby-version: "<< parameters.ruby-version >>"
@@ -453,9 +251,7 @@ jobs:
     parallelism: "<< parameters.parallelism >>"
     steps:
       - ci-utils/ci_checkout
-      - bundle_install:
-          cache-dependencies: "<< parameters.cache-dependencies >>"
-          cache-salt: "<< parameters.ruby-version >>"
+      - bundle_install
       - install_gem_version:
           gem-version: "<< parameters.gem-version >>"
       - steps: "<< parameters.pre-actions >>"
@@ -469,14 +265,5 @@ workflows:
       - run_tests_ruby:
           executor: ruby
           context: nexus_readonly
-          pre-actions:
-            - wait_for_service:
-                port: "9200"
-                method: curl
-          post-actions:
-            - store_test_results:
-                path: tmp/test-results
-          actions:
-            - run_rspec_tests
           <<: *ruby-version-matrix
           name: run_tests_ruby-ruby-<< matrix.ruby-version >>
