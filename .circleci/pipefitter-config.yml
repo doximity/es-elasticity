@@ -1,5 +1,4 @@
 ruby-versions: ["supported-versions", "3.3"]
-cache-dependencies: true
 
 services:
   elasticsearch:

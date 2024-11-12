@@ -102,9 +102,9 @@ commands:
     parameters:
       cache-dependencies:
         description: |
-          Determines whether or not to use a cache for gem dependencies. Default is true.
+          Determines whether or not to use a cache for gem dependencies. Default is false.
         type: boolean
-        default: true
+        default: false
       cache-salt:
         description: |
           Salt to change the cache name, so we can use it with different version (i.e. Ruby versions).
