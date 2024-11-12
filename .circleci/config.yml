@@ -13,11 +13,6 @@ orbs:
   ci-utils: doximity/ci-utils@2
 
 executors:
-  base:
-    resource_class: small
-    docker:
-      - image: cimg/base:current-22.04
-
   ruby:
     parameters:
       ruby-version:
