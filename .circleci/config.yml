@@ -28,17 +28,6 @@ executors:
       - image: cimg/ruby:<< parameters.ruby-version >>
         environment:
           BUNDLE_VERSION: 2.5.23
-
-  ruby-with-services:
-    parameters:
-      ruby-version:
-        type: string
-        default: '3.1'
-    resource_class: small
-    docker:
-      - image: cimg/ruby:<< parameters.ruby-version >>
-        environment:
-          BUNDLE_VERSION: 2.5.23
       - image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
         environment:
           discovery.type: single-node
@@ -94,9 +83,6 @@ commands:
             fi
 
             exit $exitCode
-  post_checkout_steps:
-    steps:
-      - run: echo "Post Checkout Steps Hook"
 
   bundle_install:
     parameters:
@@ -424,7 +410,6 @@ jobs:
       - ci-utils/ci_checkout:
           depth: "<< parameters.checkout-depth >>"
           cache-salt: "<< parameters.checkout-cache-salt >>"
-      - post_checkout_steps
       - steps: "<< parameters.dependencies >>"
       - steps: "<< parameters.pre-actions >>"
       - steps: "<< parameters.actions >>"
@@ -479,7 +464,6 @@ jobs:
     parallelism: "<< parameters.parallelism >>"
     steps:
       - ci-utils/ci_checkout
-      - post_checkout_steps
       - bundle_install:
           cache-dependencies: "<< parameters.cache-dependencies >>"
           cache-salt: "<< parameters.ruby-version >>"
@@ -490,18 +474,11 @@ jobs:
       - steps: "<< parameters.post-actions >>"
       - ci-utils/quietly_store_artifacts
 
-  required_tests_pass:
-    executor: base
-    steps:
-      - run:
-          name: Required Tests are Passing
-          command: echo "Required Tests are Passing"
-
 workflows:
   main:
     jobs:
       - run_tests_ruby:
-          executor: ruby-with-services
+          executor: ruby
           context: nexus_readonly
           pre-actions:
             - wait_for_service:
@@ -524,6 +501,3 @@ workflows:
           parallelism: 1
           <<: *ruby-version-matrix
           name: run_tests_ruby-ruby-<< matrix.ruby-version >>
-      - required_tests_pass:
-          requires:
-            - run_tests_ruby
