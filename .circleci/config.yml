@@ -192,8 +192,8 @@ commands:
   run_rspec_tests:
     parameters:
       test_pattern:
-        default: |
-          {$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g' | sed 's/,\\{2,\\}/,/g')}"
+        default: "{$(ls -d spec/**/ | tr '\\n' ',' | sed -E 's/(spec\\/|factories|support|\\/|,$)//g'
+          | sed 's/,\\{2,\\}/,/g')}"
         type: string
         description: |
           A string that resolves to something like this:
@@ -204,8 +204,8 @@ commands:
             "spec/{controllers,models,system}/**/*_spec.rb"
           You can opt to pass in an empty string if you plan to provide an explicit list with test_files.
       test_files:
-        default: |
-          $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci tests split --split-by=timings)
+        default: $(circleci tests glob "spec/$TEST_PATTERN/**/*_spec.rb" | circleci
+          tests split --split-by=timings)
         type: string
         description: |
           A string that resolves to something like this: "spec/models/user_spec.rb spec/controllers/user_controller_spec.rb ..."
