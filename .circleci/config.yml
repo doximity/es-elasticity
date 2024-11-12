@@ -102,9 +102,9 @@ commands:
     parameters:
       cache-dependencies:
         description: |
-          Determines whether or not to use a cache for gem dependencies. Default is false.
+          Determines whether or not to use a cache for gem dependencies. Default is true.
         type: boolean
-        default: false
+        default: true
       cache-salt:
         description: |
           Salt to change the cache name, so we can use it with different version (i.e. Ruby versions).
@@ -501,7 +501,7 @@ workflows:
   main:
     jobs:
       - run_tests_ruby:
-          executor: ruby
+          executor: ruby-with-services
           context: nexus_readonly
           pre-actions:
             - wait_for_service:
