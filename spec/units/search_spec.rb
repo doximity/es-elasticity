@@ -1,7 +1,6 @@
 require "elasticity/search"
 
 RSpec.describe "Search" do
-  # let(:client)         { instance_double(Elasticity::InstrumentedClient) }
   let(:client)         { double(:client) }
   let(:index_name)     { "index_name" }
   let(:document_type)  { "document" }
