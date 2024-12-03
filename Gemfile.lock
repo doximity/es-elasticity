@@ -2,23 +2,24 @@ PATH
   remote: .
   specs:
     es-elasticity (1.2.0.dblackmon)
-      activemodel (>= 5.2.0, <= 7.2)
-      activerecord (>= 5.2.0, <= 7.2)
-      activesupport (>= 5.2.0, <= 7.2)
+      activemodel (>= 5.2.0, < 8)
+      activerecord (>= 5.2.0, < 8)
+      activesupport (>= 5.2.0, < 8)
       elastic-transport (>= 8.0, < 8.7)
       elasticsearch (>= 7, < 8.7)
 
 GEM
   remote: https://artifacts.dox.support/repository/gems/
   specs:
-    activemodel (7.2.0)
-      activesupport (= 7.2.0)
-    activerecord (7.2.0)
-      activemodel (= 7.2.0)
-      activesupport (= 7.2.0)
+    activemodel (7.2.2)
+      activesupport (= 7.2.2)
+    activerecord (7.2.2)
+      activemodel (= 7.2.2)
+      activesupport (= 7.2.2)
       timeout (>= 0.4.0)
-    activesupport (7.2.0)
+    activesupport (7.2.2)
       base64
+      benchmark (>= 0.3)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.3.1)
       connection_pool (>= 2.2.5)
@@ -29,6 +30,7 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
     base64 (0.2.0)
+    benchmark (0.4.0)
     bigdecimal (3.1.8)
     byebug (11.1.3)
     codeclimate-test-reporter (1.0.7)
