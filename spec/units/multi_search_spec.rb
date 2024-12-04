@@ -83,10 +83,15 @@ RSpec.describe Elasticity::MultiSearch do
     subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first, size: 2 })), documents: klass)
     subject.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
 
-    expect(Elasticity.config.client).to receive(:msearch).with(body: [
-      { index: "index_first", search: { search: :first, size: 2 } },
-      { index: "index_second", search: { search: :second } },
-    ]).and_return(response)
+    expect(Elasticity.config.client).to receive(:msearch).
+      with(
+        hash_including(
+          body: [
+            { index: "index_first", search: { search: :first, size: 2 } },
+            { index: "index_second", search: { search: :second } },
+          ]
+        )
+      ).and_return(response)
 
     expect(Array(subject[:first])).to eq [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]
     expect(Array(subject[:second])).to eq [klass.new(_id: 3, name: "baz")]
@@ -103,10 +108,15 @@ RSpec.describe Elasticity::MultiSearch do
     subject.add(:first, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_first", "document_first", { search: :first, size: 2 })), documents: klass)
     subject.add(:second, Elasticity::Search::Facade.new(client, Elasticity::Search::Definition.new("index_second", "document_second", { search: :second })), documents: klass)
 
-    expect(Elasticity.config.client).to receive(:msearch).with(search_type: :dfs_query_then_fetch, body: [
-      { index: "index_first", search: { search: :first, size: 2 } },
-      { index: "index_second", search: { search: :second } },
-    ]).and_return(response)
+    expect(Elasticity.config.client).to receive(:msearch).
+      with(
+        hash_including(
+          search_type: :dfs_query_then_fetch, body: [
+            { index: "index_first", search: { search: :first, size: 2 } },
+            { index: "index_second", search: { search: :second } },
+          ]
+        )
+      ).and_return(response)
 
     expect(Array(subject[:first])).to eq([klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")])
   end
@@ -139,11 +149,16 @@ RSpec.describe Elasticity::MultiSearch do
     end
 
     before do
-      expect(Elasticity.config.client).to receive(:msearch).with(body: [
-        { index: "index_first", search: { search: :first, size: 2 } },
-        { index: "index_second", search: { search: :second } },
-        { index: "index_third", search: { search: :third } },
-      ]).and_return(response)
+      expect(Elasticity.config.client).to receive(:msearch).
+        with(
+          hash_including(
+            body: [
+              { index: "index_first", search: { search: :first, size: 2 } },
+              { index: "index_second", search: { search: :second } },
+              { index: "index_third", search: { search: :third } },
+            ]
+          )
+        ).and_return(response)
     end
 
     it "raises an error while trying to access the query result" do

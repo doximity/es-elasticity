@@ -84,8 +84,9 @@ module Elasticity
     end
 
     def warn_deprecated_config
+      deprecation = ActiveSupport::Deprecation.new("next major release", "es-elasticity")
       DEPRECATED_ATTRS.each do |attr|
-        ActiveSupport::Deprecation.warn(
+        deprecation.warn(
           "#{attr} is deprecated and will be "\
           "removed in the next major release."
         ) if public_send(attr).present?
