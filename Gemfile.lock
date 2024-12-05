@@ -1,12 +1,12 @@
 PATH
   remote: .
   specs:
-    es-elasticity (1.2.1)
+    es-elasticity (1.3.0.dblackmon)
       activemodel (>= 5.2.0, < 8)
       activerecord (>= 5.2.0, < 8)
       activesupport (>= 5.2.0, < 8)
-      elastic-transport (>= 8.0, < 8.7)
-      elasticsearch (>= 7, < 8.7)
+      elastic-transport (>= 8.3, < 8.7)
+      elasticsearch (>= 7, <= 8.16)
 
 GEM
   remote: https://artifacts.dox.support/repository/gems/
@@ -41,13 +41,13 @@ GEM
     diff-lcs (1.5.1)
     docile (1.4.1)
     drb (2.2.1)
-    elastic-transport (8.2.1)
+    elastic-transport (8.3.5)
       faraday (< 3)
       multi_json
-    elasticsearch (8.6.0)
-      elastic-transport (~> 8)
-      elasticsearch-api (= 8.6.0)
-    elasticsearch-api (8.6.0)
+    elasticsearch (8.16.0)
+      elastic-transport (~> 8.3)
+      elasticsearch-api (= 8.16.0)
+    elasticsearch-api (8.16.0)
       multi_json
     faraday (2.7.4)
       faraday-net_http (>= 2.0, < 3.1)
