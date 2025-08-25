@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     es-elasticity (1.3.0)
-      activemodel (>= 5.2.0, < 8)
-      activerecord (>= 5.2.0, < 8)
-      activesupport (>= 5.2.0, < 8)
+      activemodel (>= 5.2.0, < 8.1)
+      activerecord (>= 5.2.0, < 8.1)
+      activesupport (>= 5.2.0, < 8.1)
       elastic-transport (>= 8.3, < 8.7)
       elasticsearch (>= 7, <= 8.16)
 
