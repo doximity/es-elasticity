@@ -204,7 +204,7 @@ module Elasticity
         end
       end
 
-      class Relation < ActiveSupport::ProxyObject
+      class Relation < ::BasicObject
 
         delegate :total, :per_page, :total_pages, :current_page, :next_page,
           :previous_page, :aggregations, to: :@results
@@ -291,7 +291,7 @@ module Elasticity
       end
     end
 
-    class Results < ActiveSupport::ProxyObject
+    class Results < ::BasicObject
       include ::Enumerable
 
       delegate :each, :size, :length, :[], :+, :-, :&, :|, to: :@documents
