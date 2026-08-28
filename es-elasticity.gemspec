@@ -38,5 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", ">= 5.2.0", "< 9"
   spec.add_dependency "elasticsearch", "~> 8.19.0"
   spec.add_dependency "elastic-transport", "~> 8.4"
-  spec.add_dependency "multi_json", "< 1.21"
+  spec.add_dependency "multi_json", "< 1.20"
 end
