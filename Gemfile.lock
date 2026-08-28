@@ -7,6 +7,7 @@ PATH
       activesupport (>= 5.2.0, < 9)
       elastic-transport (~> 8.4)
       elasticsearch (~> 8.19.0)
+      multi_json (< 1.21)
 
 GEM
   remote: https://artifacts.dox.support/repository/gems/
@@ -63,7 +64,7 @@ GEM
     logger (1.7.0)
     method_source (1.1.0)
     minitest (5.25.5)
-    multi_json (1.21.1)
+    multi_json (1.20.1)
     net-http (0.9.1)
       uri (>= 0.11.1)
     oj (3.16.7)
