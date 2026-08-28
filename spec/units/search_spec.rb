@@ -146,9 +146,9 @@ RSpec.describe "Search" do
       expect(client).to receive(:search).
         with(hash_including(index: index_name, body: body, search_type: :query_then_fetch, size: 100, scroll: "1m")).and_return(scan_response)
       expect(client).to receive(:scroll).
-        with(hash_including(scroll_id: "abc123", scroll: "1m", body: { scroll_id: "abc123" })).and_return(scroll_response)
+        with(scroll: "1m", body: { scroll_id: "abc123" }).and_return(scroll_response)
       expect(client).to receive(:scroll).
-        with(hash_including(scroll_id: "abc456", scroll: "1m", body: { scroll_id: "abc456" })).and_return(empty_response)
+        with(scroll: "1m", body: { scroll_id: "abc456" }).and_return(empty_response)
 
       docs = subject.scan_documents(mapper)
       expected = [klass.new(_id: 1, name: "foo"), klass.new(_id: 2, name: "bar")]

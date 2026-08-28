@@ -95,7 +95,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops) unless ops.empty?
-            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m", body: { scroll_id: cursor["_scroll_id"] })
+            cursor = @client.scroll(scroll: "1m", body: { scroll_id: cursor["_scroll_id"] })
           end
 
           # Update aliases to only point to the new index.
@@ -139,7 +139,7 @@ module Elasticity
             end
 
             @client.bulk(body: ops)
-            cursor = @client.scroll(scroll_id: cursor["_scroll_id"], scroll: "1m")
+            cursor = @client.scroll(scroll: "1m", body: { scroll_id: cursor["_scroll_id"] })
           end
 
           @client.index_refresh(index: original_index)
