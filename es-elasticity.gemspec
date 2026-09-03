@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Elasticity provides a higher level abstraction on top of [elasticsearch-ruby](https://github.com/elasticsearch/elasticsearch-ruby) gem}
   spec.homepage      = "https://github.com/doximity/es-elasticity"
   spec.license       = "MIT"
+  spec.required_ruby_version = ">= 3.2"
 
   spec.files         = `git ls-files -z`.split("\x0")
     spec.files = `git ls-files -z`.split("\x0").reject do |f|
@@ -38,5 +39,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", ">= 5.2.0", "< 9"
   spec.add_dependency "elasticsearch", "~> 8.19.0"
   spec.add_dependency "elastic-transport", "~> 8.4"
-  spec.add_dependency "multi_json", "< 1.20"
 end
