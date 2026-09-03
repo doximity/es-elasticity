@@ -30,9 +30,7 @@ Or install it yourself as:
 
 ### Version Support
 
-This gem has [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) as a dependency. In order to use different versions of elasticsearch you will need to match your version of elasticsearch-ruby to the version of elasticsearch you want to use ([see here](https://github.com/elastic/elasticsearch-ruby#compatibility). Elasticity should work across all versions of elastisearch-ruby, although they have not all been tested so there are likely edge cases.
-
-Currently tests are run on CirlceCI against elasticsearch 7.17.3 with elasticsearch-ruby 7.17.1.
+Elasticity 2.x requires Ruby 3.2 or newer and [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) 8.19. Tests run against Elasticsearch 8.19.20 and 9.5.2.
 
 ### Configuration
 
