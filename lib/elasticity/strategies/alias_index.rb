@@ -117,7 +117,8 @@ module Elasticity
               raise e
             end
           end
-        rescue
+        # Bare rescue skips Interrupt (Ctrl-C) and SIGTERM, leaving the aliases split across both indexes.
+        rescue StandardError, SignalException
           @client.index_update_aliases(body: {
             actions: [
               { add:    { index: original_index, alias: @main_alias } },
