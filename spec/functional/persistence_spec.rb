@@ -250,6 +250,27 @@ RSpec.describe "Persistence", elasticsearch: true do
       allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:index_delete).and_call_original
     end
 
+    it "rolls back aliases when remap is interrupted by a signal" do
+      client = subject.config.client
+      aliased = ->(name) { client.index_get_alias(index: "#{subject.ref_index_name}-*", name: name).keys }
+      original_index = aliased.(subject.ref_index_name)
+      build_some_docs(subject)
+
+      # Interrupt mid-copy (first bulk write), as a Ctrl-C would; let the rollback's bulk calls through.
+      interrupted = false
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:bulk).and_wrap_original do |m, *args, **kw|
+        next m.call(*args, **kw) if interrupted
+        interrupted = true
+        raise Interrupt
+      end
+
+      expect { subject.remap! }.to raise_error(Interrupt)
+      allow_any_instance_of(Elasticity::InstrumentedClient).to receive(:bulk).and_call_original
+
+      expect(aliased.(subject.ref_index_name)).to eq(original_index)
+      expect(aliased.("#{subject.ref_index_name}_update")).to eq(original_index)
+    end
+
     context "recovering from remap errors" do
       let(:recoverable_message) do
         '[400] {"error":{"root_cause":[{"type":"remote_transport_exception",'\
