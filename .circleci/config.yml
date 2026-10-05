@@ -9,7 +9,7 @@ meta:
           - '3.3'
         elasticsearch-version:
           - '8.19.20'
-          - '9.5.2'
+          - '9.5.4'
 
 orbs:
   ci-utils: doximity/ci-utils@2
