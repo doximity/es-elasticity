@@ -30,7 +30,7 @@ Or install it yourself as:
 
 ### Version Support
 
-Elasticity 2.x requires Ruby 3.2 or newer and [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) 8.19. Tests run against Elasticsearch 8.19.20 and 9.5.2.
+Elasticity 2.x requires Ruby 3.2 or newer and [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) 8.19. Tests run against Elasticsearch 8.19.20 and 9.5.4.
 
 ### Configuration
 
