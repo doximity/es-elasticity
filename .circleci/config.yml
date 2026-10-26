@@ -8,7 +8,7 @@ meta:
           - '3.2'
           - '3.3'
         elasticsearch-version:
-          - '8.19.20'
+          - '9.5.4'
 
 orbs:
   ci-utils: doximity/ci-utils@2
@@ -21,7 +21,7 @@ executors:
         default: '3.2'
       elasticsearch-version:
         type: string
-        default: '8.19.20'
+        default: '9.5.4'
     resource_class: small
     docker:
       - image: cimg/ruby:<< parameters.ruby-version >>
@@ -231,7 +231,7 @@ jobs:
         default: '3.2'
       elasticsearch-version:
         type: string
-        default: '8.19.20'
+        default: '9.5.4'
       pre-actions:
         description: Steps to perform any necessary setup after dependencies are installed.
         type: steps
